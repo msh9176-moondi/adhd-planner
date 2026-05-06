@@ -113,7 +113,7 @@ svg{position:absolute;width:178px;height:98px;bottom:2px}
 .todo.swiped .todo-content{transform:translateX(-140px)}
 .check{width:22px;height:22px;border-radius:50%;border:2px solid #C8B9EA;background:#fff;flex:0 0 auto;display:grid;place-items:center;color:#fff;font-size:13px;font-weight:900}
 .todo.done .check{background:var(--point);border-color:var(--point)}
-.todo.done .check::after{content:"✓"}
+.todo.done .check::after{content:"✓";margin-left:-1.5px}
 .todo.done strong{text-decoration:line-through;color:#aaa3b5}
 .todo-main{flex:1;min-width:0}
 .todo strong{display:block;font-size:15px;font-weight:760;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -123,8 +123,8 @@ svg{position:absolute;width:178px;height:98px;bottom:2px}
 .add-btn{margin-top:14px;width:100%;height:44px;border:1px dashed #E4DAF3;background:#FCFAFF;border-radius:16px;color:#725CA3;font-weight:850}
 .add-panel{display:none;margin-top:14px;padding:14px;border-radius:18px;background:#FBFAFD;border:1px solid var(--line)}
 .add-panel.open{display:block}
-.add-panel input,.add-panel select{width:100%;height:40px;border:1px solid #E8E1F2;border-radius:13px;background:#fff;padding:0 12px;margin-bottom:8px;color:#342c42;font-weight:700}
-.add-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.add-panel input:not(.time-picker-input):not(.time-picker-native),.add-panel select{width:100%;height:42px;border:1px solid #E8E1F2;border-radius:14px;background:#fff;padding:0 12px;margin-bottom:8px;color:#342c42;font-weight:750}
+.add-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
 .save-add{width:100%;height:40px;border:0;border-radius:14px;background:var(--point);color:#fff;font-weight:900}
 .bottom-nav{
   position:fixed;left:50%;bottom:18px;transform:translateX(-50%);
@@ -1163,7 +1163,7 @@ h2{
   font-weight:700;
 }
 
-.edit-modal input,
+.edit-modal input:not(.time-picker-input):not(.time-picker-native),
 .edit-modal select{
   width:100%;
   height:42px;
@@ -1191,7 +1191,7 @@ h2{
   font-weight:700;
 }
 
-.edit-time-grid input{
+.edit-time-grid > div{
   margin-bottom:10px;
 }
 
@@ -5637,8 +5637,32 @@ h2{
     <div class="add-panel" id="addPanel">
       <input id="newTodoTitle" placeholder="할 일을 입력해요">
       <div class="add-grid">
-        <input id="newTodoStart" type="time" value="09:00">
-        <input id="newTodoEnd" type="time" value="10:00">
+        <div>
+          <span class="time-picker-label">시작</span>
+          <div class="custom-time-picker" data-target="newTodoStart">
+            <button type="button" class="time-picker-ampm-toggle" data-value="AM">오전</button>
+            <div class="time-picker-inputs">
+              <input type="text" class="time-picker-input hour-input" value="09" maxlength="2">
+              <span class="time-picker-colon">:</span>
+              <input type="text" class="time-picker-input minute-input" value="00" maxlength="2">
+            </div>
+            <label class="time-picker-clock">🕐<input type="time" class="time-picker-native" value="09:00"></label>
+          </div>
+          <input id="newTodoStart" type="hidden" value="09:00">
+        </div>
+        <div>
+          <span class="time-picker-label">종료</span>
+          <div class="custom-time-picker" data-target="newTodoEnd">
+            <button type="button" class="time-picker-ampm-toggle" data-value="AM">오전</button>
+            <div class="time-picker-inputs">
+              <input type="text" class="time-picker-input hour-input" value="10" maxlength="2">
+              <span class="time-picker-colon">:</span>
+              <input type="text" class="time-picker-input minute-input" value="00" maxlength="2">
+            </div>
+            <label class="time-picker-clock">🕐<input type="time" class="time-picker-native" value="10:00"></label>
+          </div>
+          <input id="newTodoEnd" type="hidden" value="10:00">
+        </div>
       </div>
       <select id="newTodoPriority">
         <option value="p1">긴급하고 중요한 일</option>
@@ -6113,14 +6137,32 @@ h2{
     <input id="editTodoTitle" placeholder="할 일을 입력해요" />
 
     <div class="edit-time-grid">
-      <label>
-        <span>시작</span>
-        <input id="editTodoStart" type="time" />
-      </label>
-      <label>
-        <span>종료</span>
-        <input id="editTodoEnd" type="time" />
-      </label>
+      <div>
+        <span class="time-picker-label">시작</span>
+        <div class="custom-time-picker" data-target="editTodoStart">
+          <button type="button" class="time-picker-ampm-toggle" data-value="AM">오전</button>
+          <div class="time-picker-inputs">
+            <input type="text" class="time-picker-input hour-input" value="09" maxlength="2">
+            <span class="time-picker-colon">:</span>
+            <input type="text" class="time-picker-input minute-input" value="00" maxlength="2">
+          </div>
+          <label class="time-picker-clock">🕐<input type="time" class="time-picker-native" value="09:00"></label>
+        </div>
+        <input id="editTodoStart" type="hidden" value="09:00">
+      </div>
+      <div>
+        <span class="time-picker-label">종료</span>
+        <div class="custom-time-picker" data-target="editTodoEnd">
+          <button type="button" class="time-picker-ampm-toggle" data-value="AM">오전</button>
+          <div class="time-picker-inputs">
+            <input type="text" class="time-picker-input hour-input" value="10" maxlength="2">
+            <span class="time-picker-colon">:</span>
+            <input type="text" class="time-picker-input minute-input" value="00" maxlength="2">
+          </div>
+          <label class="time-picker-clock">🕐<input type="time" class="time-picker-native" value="10:00"></label>
+        </div>
+        <input id="editTodoEnd" type="hidden" value="10:00">
+      </div>
     </div>
 
     <input id="editTodoMemo" placeholder="메모를 입력해요" />
@@ -6381,8 +6423,8 @@ function openTodoEditModal(todoId){
 
   editingTodoId = todoId;
   document.getElementById("editTodoTitle").value = todo.title || "";
-  document.getElementById("editTodoStart").value = getStartTime(todo);
-  document.getElementById("editTodoEnd").value = getEndTime(todo) || getStartTime(todo);
+  setTimePickerValue("editTodoStart", getStartTime(todo) || "09:00");
+  setTimePickerValue("editTodoEnd", getEndTime(todo) || getStartTime(todo) || "10:00");
   document.getElementById("editTodoMemo").value = todo.memo || "";
   document.getElementById("editTodoPriority").value = todo.priority || "p3";
   document.getElementById("todoEditModal").classList.remove("hidden");
@@ -6577,6 +6619,10 @@ document.getElementById("addTodoBtn").addEventListener("click", ()=>{
   document.getElementById("newTodoTitle").focus();
 });
 
+document.getElementById("newTodoTitle").addEventListener("keydown", (e)=>{
+  if(e.key === "Enter"){ e.preventDefault(); document.getElementById("saveTodo").click(); }
+});
+
 document.getElementById("saveTodo").addEventListener("click", ()=>{
   const title = document.getElementById("newTodoTitle").value.trim();
   if(!title){ alert("할 일을 입력해줘."); return; }
@@ -6593,6 +6639,8 @@ document.getElementById("saveTodo").addEventListener("click", ()=>{
   });
   document.getElementById("newTodoTitle").value = "";
   document.getElementById("newTodoTag").value = "";
+  setTimePickerValue("newTodoStart", "09:00");
+  setTimePickerValue("newTodoEnd", "10:00");
   document.getElementById("addPanel").classList.remove("open");
   renderTodos();
 });
@@ -8415,7 +8463,7 @@ function initTimePickers() {
     hourInput.addEventListener('wheel', (e) => {
       e.preventDefault();
       let hour = parseInt(hourInput.value) || 12;
-      if (e.deltaY < 0) {
+      if (e.deltaY > 0) {
         hour = hour >= 12 ? 1 : hour + 1;
       } else {
         hour = hour <= 1 ? 12 : hour - 1;
@@ -8428,7 +8476,7 @@ function initTimePickers() {
     minuteInput.addEventListener('wheel', (e) => {
       e.preventDefault();
       let minute = parseInt(minuteInput.value) || 0;
-      if (e.deltaY < 0) {
+      if (e.deltaY > 0) {
         minute = minute >= 59 ? 0 : minute + 1;
       } else {
         minute = minute <= 0 ? 59 : minute - 1;
