@@ -1563,6 +1563,372 @@ h2{
   line-height:1.5;
 }
 
+/* 미루기 대처 모달 */
+.proc-modal{
+  max-width:420px;
+  max-height:85vh;
+  overflow-y:auto;
+}
+.proc-progress{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:0;
+  margin-bottom:16px;
+}
+.proc-dot{
+  width:28px;
+  height:28px;
+  border-radius:50%;
+  background:#E8E1F2;
+  color:#8F819C;
+  font-size:12px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition:all 0.2s;
+}
+.proc-dot.active{
+  background:var(--point);
+  color:#fff;
+}
+.proc-line{
+  width:24px;
+  height:2px;
+  background:#E8E1F2;
+}
+.proc-step{
+  display:none;
+}
+.proc-step.active{
+  display:block;
+}
+.proc-section{
+  background:#FCFAFF;
+  border:1px solid #E8E1F2;
+  border-radius:14px;
+  padding:14px;
+  margin-bottom:12px;
+}
+.proc-section.highlight{
+  background:linear-gradient(135deg, #F5F0FF 0%, #E8E1F2 100%);
+  border-color:#D4C4F0;
+}
+.proc-section-head{
+  font-size:14px;
+  font-weight:800;
+  color:#5A4A6D;
+  margin-bottom:8px;
+}
+.proc-desc{
+  font-size:12px;
+  color:#8F819C;
+  margin-bottom:10px;
+  line-height:1.4;
+}
+.proc-modal textarea,
+.proc-modal input[type="text"]{
+  width:100%;
+  min-height:60px;
+  border:1px solid #E8E1F2;
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:13px;
+  font-weight:600;
+  color:#342c42;
+  resize:none;
+  background:#fff;
+}
+.proc-modal input[type="text"]{
+  min-height:auto;
+  height:40px;
+}
+.proc-chips{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:8px;
+}
+.proc-chip{
+  padding:6px 12px;
+  border:1px solid #D4C4F0;
+  border-radius:20px;
+  background:#fff;
+  color:#725CA3;
+  font-size:12px;
+  font-weight:600;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.proc-chip:hover{
+  background:#F5F0FF;
+  border-color:#725CA3;
+}
+.proc-slider-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.proc-slider-wrap span{
+  font-size:12px;
+  color:#8F819C;
+  font-weight:600;
+}
+.proc-slider-wrap input[type="range"]{
+  flex:1;
+  height:6px;
+  -webkit-appearance:none;
+  background:linear-gradient(to right, #D4C4F0, #725CA3);
+  border-radius:3px;
+  outline:none;
+}
+.proc-slider-wrap input[type="range"]::-webkit-slider-thumb{
+  -webkit-appearance:none;
+  width:20px;
+  height:20px;
+  background:#fff;
+  border:2px solid var(--point);
+  border-radius:50%;
+  cursor:pointer;
+  box-shadow:0 2px 6px rgba(0,0,0,0.15);
+}
+.proc-slider-value{
+  text-align:center;
+  font-size:20px;
+  font-weight:800;
+  color:var(--point);
+  margin-top:6px;
+}
+.proc-yesno{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+.proc-yn-btn{
+  padding:12px;
+  border:2px solid #E8E1F2;
+  border-radius:12px;
+  background:#fff;
+  font-size:14px;
+  font-weight:700;
+  color:#5A4A6D;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.proc-yn-btn:hover{
+  border-color:#C8B9EA;
+}
+.proc-yn-btn.active{
+  border-color:var(--point);
+  background:#F5F0FF;
+  color:var(--point);
+}
+.proc-breakdown{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.breakdown-item{
+  background:#fff;
+  border:1px solid #E8E1F2;
+  border-radius:10px;
+  padding:10px 12px;
+}
+.breakdown-item.start{
+  border-color:var(--point);
+  background:#F5F0FF;
+}
+.breakdown-label{
+  display:block;
+  font-size:11px;
+  font-weight:700;
+  color:#8F819C;
+  margin-bottom:6px;
+}
+.breakdown-item.start .breakdown-label{
+  color:var(--point);
+}
+.proc-simple-inputs{
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.proc-simple-inputs label{
+  font-size:12px;
+  font-weight:700;
+  color:#8F819C;
+  margin-top:4px;
+}
+.proc-simple-inputs label.start-label{
+  color:var(--point);
+}
+.proc-simple-inputs input.start-input{
+  border-color:var(--point);
+  background:#F5F0FF;
+}
+.breakdown-arrow{
+  text-align:center;
+  color:#C8B9EA;
+  font-size:16px;
+}
+.proc-specifics{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.specific-item label{
+  display:block;
+  font-size:12px;
+  font-weight:700;
+  color:#8F819C;
+  margin-bottom:4px;
+}
+.proc-ifthen{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.ifthen-row{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+.ifthen-label{
+  min-width:50px;
+  font-size:13px;
+  font-weight:700;
+  color:var(--point);
+}
+.ifthen-row select,
+.ifthen-row input{
+  flex:1;
+}
+.proc-summary{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.summary-group{
+  background:#fff;
+  border:1px solid #E8E1F2;
+  border-radius:12px;
+  padding:12px;
+}
+.summary-group.reward{
+  background:linear-gradient(135deg, #F5F0FF 0%, #E8E1F2 100%);
+  border-color:#D4C4F0;
+}
+.summary-title{
+  font-size:12px;
+  font-weight:800;
+  color:#5A4A6D;
+  margin-bottom:8px;
+}
+.summary-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  font-size:12px;
+  margin-bottom:4px;
+}
+.summary-row span{
+  color:#8F819C;
+  font-weight:600;
+}
+.summary-row strong{
+  color:#342c42;
+  font-weight:700;
+  text-align:right;
+  max-width:60%;
+  word-break:break-word;
+}
+.summary-row.highlight strong{
+  color:var(--point);
+}
+.summary-row.reframe strong{
+  color:#9B7FC7;
+}
+.summary-reward{
+  font-size:16px;
+  font-weight:800;
+  color:var(--point);
+  text-align:center;
+}
+.proc-encourage{
+  margin-top:14px;
+  padding:14px;
+  background:linear-gradient(135deg, #F5F0FF 0%, #E8F5E8 100%);
+  border-radius:12px;
+  font-size:13px;
+  font-weight:700;
+  color:#5A4A6D;
+  text-align:center;
+  line-height:1.5;
+}
+
+/* 하루 마무리 - 미루기 대처 버튼 */
+.proc-trigger-section{
+  margin-top:12px;
+  padding:12px;
+  background:#F5F0FF;
+  border:1px solid #D4C4F0;
+  border-radius:12px;
+}
+.proc-trigger-task{
+  font-size:13px;
+  font-weight:700;
+  color:#5A4A6D;
+  margin-bottom:8px;
+}
+.proc-trigger-btn{
+  width:100%;
+  padding:10px;
+  border:none;
+  border-radius:10px;
+  background:var(--point);
+  color:#fff;
+  font-size:13px;
+  font-weight:700;
+  cursor:pointer;
+}
+.undone-item{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:8px 10px;
+  background:#fff;
+  border:1px solid #E8E1F2;
+  border-radius:8px;
+  margin-bottom:6px;
+  cursor:pointer;
+  transition:all 0.15s;
+}
+.undone-title{
+  font-size:13px;
+  font-weight:600;
+  color:#5A4A6D;
+}
+.undone-hint{
+  font-size:11px;
+  font-weight:500;
+  color:#C8B9EA;
+}
+.undone-item:hover{
+  border-color:#C8B9EA;
+  background:#FCFAFF;
+}
+.undone-item:hover .undone-hint{
+  color:var(--point);
+}
+.undone-item.selected{
+  border-color:var(--point);
+  background:#F5F0FF;
+}
+.undone-item.selected .undone-hint{
+  color:var(--point);
+}
+
 @media (min-width:768px){
   .daily-close-card{
     grid-column:1 / -1;
@@ -6263,7 +6629,7 @@ h2{
       </div>
       <div class="daily-list-box">
         <strong>오늘 못 끝낸 일</strong>
-        <p id="dailyModalUndone">남은 일이 없어요. 오늘 충분히 잘했어요.</p>
+        <div id="dailyModalUndone">남은 일이 없어요. 오늘 충분히 잘했어요.</div>
       </div>
       <p class="daily-link-text">이 요약은 오늘의 투두/일간 목표 완료 상태와 연결돼요.</p>
     </div>
@@ -6308,6 +6674,187 @@ h2{
   </div>
 </div>
 
+<!-- 미루기 대처 인지치료 모달 -->
+<div class="modal-backdrop hidden" id="procrastinationModal">
+  <div class="edit-modal proc-modal">
+    <div class="edit-modal-head">
+      <div>
+        <h2>💡 미루기 대처하기</h2>
+        <p class="sub" id="procTaskTitle">과제명</p>
+      </div>
+      <button class="modal-close" id="closeProcModal">×</button>
+    </div>
+
+    <div class="proc-progress">
+      <div class="proc-dot active" data-dot="1">1</div>
+      <div class="proc-line"></div>
+      <div class="proc-dot" data-dot="2">2</div>
+      <div class="proc-line"></div>
+      <div class="proc-dot" data-dot="3">3</div>
+      <div class="proc-line"></div>
+      <div class="proc-dot" data-dot="4">4</div>
+    </div>
+
+    <!-- Step 1: 생각/감정/수용/수정 -->
+    <div class="proc-step active" data-step="1">
+      <div class="proc-section">
+        <div class="proc-section-head">💭 생각</div>
+        <p class="proc-desc">이 과제를 미루게 만드는 생각이 뭐야?</p>
+        <textarea id="procThought" placeholder="예: '나중에 해도 될 것 같아', '완벽하게 못 하면 의미 없어'" maxlength="200"></textarea>
+        <div class="proc-chips">
+          <button type="button" class="proc-chip" data-target="procThought">나중에 해도 될 것 같아</button>
+          <button type="button" class="proc-chip" data-target="procThought">컨디션이 안 좋아</button>
+          <button type="button" class="proc-chip" data-target="procThought">완벽하게 못 하면 의미 없어</button>
+        </div>
+      </div>
+
+      <div class="proc-section">
+        <div class="proc-section-head">💔 감정</div>
+        <p class="proc-desc">이 과제가 얼마나 불편해?</p>
+        <div class="proc-slider-wrap">
+          <span>편안</span>
+          <input type="range" id="procDiscomfort" min="0" max="100" value="50">
+          <span>불편</span>
+        </div>
+        <div class="proc-slider-value" id="procDiscomfortValue">50</div>
+      </div>
+
+      <div class="proc-section">
+        <div class="proc-section-head">🤗 수용</div>
+        <p class="proc-desc">지금 느끼는 감정을 참을 수 있을 것 같아?</p>
+        <div class="proc-yesno">
+          <button type="button" class="proc-yn-btn" data-value="yes">👍 YES</button>
+          <button type="button" class="proc-yn-btn" data-value="no">👎 NO</button>
+        </div>
+      </div>
+
+      <div class="proc-section">
+        <div class="proc-section-head">✨ 수정</div>
+        <p class="proc-desc">이 과제를 긍정적으로 다시 생각해볼까?</p>
+        <textarea id="procReframe" placeholder="예: 조금만 해도 진전이야, 끝내면 마음이 편해질 거야" maxlength="200"></textarea>
+        <div class="proc-chips">
+          <button type="button" class="proc-chip" data-target="procReframe">조금만 해도 진전이야</button>
+          <button type="button" class="proc-chip" data-target="procReframe">끝내면 마음이 편해져</button>
+          <button type="button" class="proc-chip" data-target="procReframe">완벽하지 않아도 괜찮아</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 2: 과제 쪼개기 -->
+    <div class="proc-step" data-step="2">
+      <div class="proc-section">
+        <div class="proc-section-head">🎯 과제 쪼개기</div>
+        <p class="proc-desc">시작할 수 있을 때까지 작게 쪼개보자!</p>
+        <div class="proc-simple-inputs">
+          <label>🏁 목표 지점</label>
+          <input type="text" id="procGoalPoint" placeholder="최종 목표 (예: 보고서 완성)" maxlength="50">
+          <div class="breakdown-arrow">↓</div>
+          <label>📍 중간 지점</label>
+          <input type="text" id="procMidPoint" placeholder="중간 단계 (예: 개요 작성)" maxlength="50">
+          <div class="breakdown-arrow">↓</div>
+          <label class="start-label">🚀 시작 지점</label>
+          <input type="text" id="procStartPoint" class="start-input" placeholder="가장 작은 첫 단계 (예: 노트북 열기)" maxlength="50">
+        </div>
+      </div>
+
+      <div class="proc-section">
+        <div class="proc-section-head">📅 구체화</div>
+        <div class="proc-simple-inputs">
+          <label>⏰ 언제?</label>
+          <input type="text" id="procWhen" placeholder="예: 내일 오전 10시" maxlength="30">
+          <label>🏠 어디서?</label>
+          <input type="text" id="procWhere" placeholder="예: 카페, 책상 앞" maxlength="30">
+          <label>⏱️ 얼마나?</label>
+          <input type="text" id="procDuration" placeholder="예: 30분만" maxlength="30">
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: 방해 요소 대처 -->
+    <div class="proc-step" data-step="3">
+      <div class="proc-section">
+        <div class="proc-section-head">🛠️ 만일-그렇다면 계획</div>
+        <p class="proc-desc">방해 요소에 미리 대비해요</p>
+        <div class="proc-ifthen">
+          <div class="ifthen-row">
+            <span class="ifthen-label">만일</span>
+            <select id="procIfDistraction">
+              <option value="">방해 요소 선택</option>
+              <option value="핸드폰 알림이 오면">핸드폰 알림이 오면</option>
+              <option value="SNS가 보고 싶어지면">SNS가 보고 싶어지면</option>
+              <option value="피곤해지면">피곤해지면</option>
+              <option value="지루해지면">지루해지면</option>
+              <option value="배가 고파지면">배가 고파지면</option>
+              <option value="불안해지면">불안해지면</option>
+            </select>
+          </div>
+          <div class="ifthen-row">
+            <span class="ifthen-label">그렇다면</span>
+            <input type="text" id="procThenAction" placeholder="나는 이렇게 할 거야" maxlength="50">
+          </div>
+        </div>
+        <div class="proc-chips">
+          <button type="button" class="proc-chip" data-target="procThenAction">10분만 더 하고</button>
+          <button type="button" class="proc-chip" data-target="procThenAction">끝내고 보상으로</button>
+          <button type="button" class="proc-chip" data-target="procThenAction">무시하고 계속</button>
+        </div>
+      </div>
+
+      <div class="proc-section highlight">
+        <div class="proc-section-head">🎁 보상</div>
+        <p class="proc-desc">해낸 나에게 줄 작은 보상은?</p>
+        <input type="text" id="procReward" placeholder="예: 커피 한 잔, 유튜브 30분" maxlength="50">
+        <div class="proc-chips">
+          <button type="button" class="proc-chip" data-target="procReward">☕ 커피 한 잔</button>
+          <button type="button" class="proc-chip" data-target="procReward">🎬 유튜브 30분</button>
+          <button type="button" class="proc-chip" data-target="procReward">🍫 간식 먹기</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: 요약 -->
+    <div class="proc-step" data-step="4">
+      <div class="proc-section">
+        <div class="proc-section-head">📝 나의 대처 계획</div>
+        <p class="proc-desc">내일 다시 도전할 준비가 되었어요!</p>
+      </div>
+
+      <div class="proc-summary">
+        <div class="summary-group">
+          <div class="summary-title">💭 생각 수정</div>
+          <div class="summary-row"><span>회피 생각:</span><strong id="summaryThought">-</strong></div>
+          <div class="summary-row reframe"><span>✨ 재해석:</span><strong id="summaryReframe">-</strong></div>
+        </div>
+        <div class="summary-group">
+          <div class="summary-title">🎯 실행 계획</div>
+          <div class="summary-row highlight"><span>🚀 시작:</span><strong id="summaryStart">-</strong></div>
+          <div class="summary-row"><span>📅 언제:</span><strong id="summaryWhen">-</strong></div>
+          <div class="summary-row"><span>🏠 어디:</span><strong id="summaryWhere">-</strong></div>
+          <div class="summary-row"><span>⏱️ 얼마나:</span><strong id="summaryDuration">-</strong></div>
+        </div>
+        <div class="summary-group">
+          <div class="summary-title">🛠️ 방해 대비</div>
+          <div class="summary-row"><span>만일:</span><strong id="summaryIf">-</strong></div>
+          <div class="summary-row"><span>그렇다면:</span><strong id="summaryThen">-</strong></div>
+        </div>
+        <div class="summary-group reward">
+          <div class="summary-title">🎁 보상</div>
+          <div class="summary-reward" id="summaryReward">-</div>
+        </div>
+      </div>
+
+      <div class="proc-encourage">
+        💪 "나는 일을 시작할 충분한 에너지가 있고, 일단 시작하면 기분이 좋아진다"
+      </div>
+    </div>
+
+    <div class="daily-modal-actions">
+      <button class="modal-cancel" id="procPrev">이전</button>
+      <button class="modal-save" id="procNext">다음</button>
+    </div>
+  </div>
+</div>
+
 <nav class="bottom-nav">
   <button class="nav-item active" data-nav="home"><span>🏠</span>홈</button>
   <button class="nav-item" data-nav="goal"><span>🎯</span>목표</button>
@@ -6318,6 +6865,7 @@ h2{
 
 <script>
 const FLOCA_USER_KEY = "floca_user_profile";
+const FLOCA_GOALS_KEY = "floca_goals";
 
 function escapeHTML(value){
   return String(value || "").replace(/[&<>"']/g, char => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[char]));
@@ -6389,6 +6937,7 @@ function syncDayGoals(){
 
 function renderTodos(){
   syncDayGoals();
+  saveGoals();
   const list = document.getElementById("todoList");
   list.innerHTML = "";
   sortedTodos().forEach(todo=>{
@@ -6931,6 +7480,7 @@ function fillDailyCloseModal(){
 
 function openDailyCloseModal(){
   fillDailyCloseModal();
+  renderDailyUndone();
   setDailyCloseStep(1);
   document.getElementById("dailyCloseModal").classList.remove("hidden");
 }
@@ -7016,7 +7566,164 @@ function bindDailyCloseEvents(){
   });
 }
 
+/* 미루기 대처 인지치료 */
+let procStep = 1;
+let procTargetTask = null;
+let procAcceptance = null;
+let procRecords = JSON.parse(localStorage.getItem("floca_proc_records") || "[]");
 
+function saveProcRecords(){
+  localStorage.setItem("floca_proc_records", JSON.stringify(procRecords));
+}
+
+function openProcModal(taskTitle){
+  procStep = 1;
+  procTargetTask = taskTitle || "선택한 과제";
+  procAcceptance = null;
+  document.getElementById("procTaskTitle").textContent = procTargetTask;
+
+  // 초기화
+  document.getElementById("procThought").value = "";
+  document.getElementById("procReframe").value = "";
+  document.getElementById("procDiscomfort").value = 50;
+  document.getElementById("procDiscomfortValue").textContent = "50";
+  document.getElementById("procGoalPoint").value = "";
+  document.getElementById("procMidPoint").value = "";
+  document.getElementById("procStartPoint").value = "";
+  document.getElementById("procWhen").value = "";
+  document.getElementById("procWhere").value = "";
+  document.getElementById("procDuration").value = "";
+  document.getElementById("procIfDistraction").value = "";
+  document.getElementById("procThenAction").value = "";
+  document.getElementById("procReward").value = "";
+  document.querySelectorAll(".proc-yn-btn").forEach(b=>b.classList.remove("active"));
+
+  setProcStep(1);
+  document.getElementById("procrastinationModal").classList.remove("hidden");
+}
+
+function closeProcModal(){
+  document.getElementById("procrastinationModal").classList.add("hidden");
+}
+
+function setProcStep(step){
+  procStep = Math.max(1, Math.min(4, step));
+  document.querySelectorAll(".proc-step").forEach(el=>el.classList.toggle("active", Number(el.dataset.step) === procStep));
+  document.querySelectorAll(".proc-dot").forEach(el=>el.classList.toggle("active", Number(el.dataset.dot) <= procStep));
+
+  const prev = document.getElementById("procPrev");
+  const next = document.getElementById("procNext");
+  if(prev) prev.textContent = procStep === 1 ? "닫기" : "이전";
+  if(next) next.textContent = procStep === 4 ? "저장하기" : "다음";
+
+  if(procStep === 4) updateProcSummary();
+}
+
+function updateProcSummary(){
+  document.getElementById("summaryThought").textContent = document.getElementById("procThought").value || "-";
+  document.getElementById("summaryReframe").textContent = document.getElementById("procReframe").value || "-";
+  document.getElementById("summaryStart").textContent = document.getElementById("procStartPoint").value || "-";
+  document.getElementById("summaryWhen").textContent = document.getElementById("procWhen").value || "-";
+  document.getElementById("summaryWhere").textContent = document.getElementById("procWhere").value || "-";
+  document.getElementById("summaryDuration").textContent = document.getElementById("procDuration").value || "-";
+  document.getElementById("summaryIf").textContent = document.getElementById("procIfDistraction").value || "-";
+  document.getElementById("summaryThen").textContent = document.getElementById("procThenAction").value || "-";
+  document.getElementById("summaryReward").textContent = document.getElementById("procReward").value || "-";
+}
+
+function saveProcReflection(){
+  const record = {
+    date: new Date().toISOString(),
+    task: procTargetTask,
+    thought: document.getElementById("procThought").value,
+    discomfort: document.getElementById("procDiscomfort").value,
+    acceptance: procAcceptance,
+    reframe: document.getElementById("procReframe").value,
+    goalPoint: document.getElementById("procGoalPoint").value,
+    midPoint: document.getElementById("procMidPoint").value,
+    startPoint: document.getElementById("procStartPoint").value,
+    when: document.getElementById("procWhen").value,
+    where: document.getElementById("procWhere").value,
+    duration: document.getElementById("procDuration").value,
+    ifDistraction: document.getElementById("procIfDistraction").value,
+    thenAction: document.getElementById("procThenAction").value,
+    reward: document.getElementById("procReward").value
+  };
+
+  procRecords.push(record);
+  saveProcRecords();
+
+  // 포인트 보상
+  if(typeof addPoints === "function") addPoints(15, "미루기 대처 완료");
+
+  closeProcModal();
+  showPointToast("💡 미루기 대처 완료! +15P");
+}
+
+function bindProcEvents(){
+  const close = document.getElementById("closeProcModal");
+  const prev = document.getElementById("procPrev");
+  const next = document.getElementById("procNext");
+  const modal = document.getElementById("procrastinationModal");
+  const discomfort = document.getElementById("procDiscomfort");
+
+  if(close) close.addEventListener("click", closeProcModal);
+  if(prev) prev.addEventListener("click", ()=> procStep === 1 ? closeProcModal() : setProcStep(procStep - 1));
+  if(next) next.addEventListener("click", ()=> procStep === 4 ? saveProcReflection() : setProcStep(procStep + 1));
+  if(modal) modal.addEventListener("click", e=>{ if(e.target.id === "procrastinationModal") closeProcModal(); });
+
+  if(discomfort) discomfort.addEventListener("input", e=>{
+    document.getElementById("procDiscomfortValue").textContent = e.target.value;
+  });
+
+  // YES/NO 버튼
+  document.querySelectorAll(".proc-yn-btn").forEach(btn=>{
+    btn.addEventListener("click", ()=>{
+      procAcceptance = btn.dataset.value;
+      document.querySelectorAll(".proc-yn-btn").forEach(b=>b.classList.remove("active"));
+      btn.classList.add("active");
+    });
+  });
+
+  // 칩 버튼
+  document.querySelectorAll(".proc-chip").forEach(chip=>{
+    chip.addEventListener("click", ()=>{
+      const target = document.getElementById(chip.dataset.target);
+      if(target) target.value = chip.textContent.trim();
+    });
+  });
+}
+
+// 하루 마무리에서 미완료 항목 클릭 시 미루기 대처 열기
+let selectedUndoneTask = null;
+
+function renderDailyUndone(){
+  const container = document.getElementById("dailyModalUndone");
+  if(!container) return;
+
+  const undone = todos.filter(t=>!t.done);
+  if(undone.length === 0){
+    container.innerHTML = '<p class="no-undone">남은 일이 없어요. 오늘 충분히 잘했어요! 🎉</p>';
+    return;
+  }
+
+  let html = '<div class="undone-list">';
+  undone.forEach(t=>{
+    html += `<div class="undone-item" data-title="${escapeHTML(t.title)}"><span class="undone-title">${escapeHTML(t.title)}</span><span class="undone-hint">클릭해서 미루기 대처</span></div>`;
+  });
+  html += '</div>';
+
+  container.innerHTML = html;
+
+  // 미완료 항목 클릭 시 바로 미루기 대처 모달 열기
+  container.querySelectorAll(".undone-item").forEach(item=>{
+    item.addEventListener("click", ()=>{
+      const taskTitle = item.dataset.title;
+      closeDailyCloseModal();
+      setTimeout(()=> openProcModal(taskTitle), 200);
+    });
+  });
+}
 
 function showPointToast(message){
   const toast = document.getElementById("pointToast");
@@ -7721,6 +8428,7 @@ bindMypageEvents();
 bindRewardEvents();
 window.flocaDailyReady = true;
 bindDailyCloseEvents();
+bindProcEvents();
 
 /* Goals */
 const levelInfo = {
@@ -7768,13 +8476,29 @@ const priorityGoalText = {
   p4:"하면 좋은 일"
 };
 
-const goals = {
-  life:[],
-  year:[],
-  month:{},
-  week:{},
-  day:{}
-};
+function loadGoals(){
+  try{
+    const saved = JSON.parse(localStorage.getItem(FLOCA_GOALS_KEY) || "null");
+    if(saved && typeof saved === "object"){
+      return {
+        life: Array.isArray(saved.life) ? saved.life : [],
+        year: Array.isArray(saved.year) ? saved.year : [],
+        month: (saved.month && typeof saved.month === "object") ? saved.month : {},
+        week: (saved.week && typeof saved.week === "object") ? saved.week : {},
+        day: (saved.day && typeof saved.day === "object") ? saved.day : {}
+      };
+    }
+  }catch(e){}
+  return { life:[], year:[], month:{}, week:{}, day:{} };
+}
+
+function saveGoals(){
+  try{
+    localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(goals));
+  }catch(e){}
+}
+
+const goals = loadGoals();
 
 let currentGoalLevel = "month";
 let selectedMonth = new Date().getMonth() + 1;
@@ -8366,6 +9090,7 @@ function renderCurrentGoals(){
 }
 
 function renderGoalsSection(){
+  saveGoals();
   renderParentGoals();
   renderPeriod();
   renderCurrentGoals();
