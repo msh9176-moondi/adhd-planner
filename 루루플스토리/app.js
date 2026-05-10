@@ -1080,7 +1080,7 @@ function displayCategories() {
   grid.innerHTML = '';
 
   for (const [category, data] of Object.entries(CERT_CATEGORIES)) {
-    const count = analysisData.categoryCount[category];
+    const count = analysisData.categoryCount[category] || 0;
     const totalExp = count * data.exp;
     const card = document.createElement('div');
     card.className = `category-card ${category}`;
@@ -1116,12 +1116,12 @@ function displayPieChart() {
     medicine: '#f87171',
   };
 
-  // 총 인증 횟수
+  // 총 인증 횟수 (undefined 방어)
   const total = Object.values(analysisData.categoryCount).reduce(
-    (a, b) => a + b,
+    (a, b) => (a || 0) + (b || 0),
     0,
   );
-  pieTotal.textContent = total;
+  pieTotal.textContent = total || 0;
 
   if (total === 0) {
     pieChart.style.background = `conic-gradient(var(--border) 0deg 360deg)`;
@@ -1135,9 +1135,9 @@ function displayPieChart() {
   const categories = Object.entries(CERT_CATEGORIES);
 
   categories.forEach(([category, data]) => {
-    const count = analysisData.categoryCount[category];
-    const percent = (count / total) * 100;
-    const angle = (count / total) * 360;
+    const count = analysisData.categoryCount[category] || 0;
+    const percent = total > 0 ? (count / total) * 100 : 0;
+    const angle = total > 0 ? (count / total) * 360 : 0;
 
     if (count > 0) {
       const startAngle = currentAngle;
@@ -1586,7 +1586,7 @@ function exportToTxt() {
   content += '【 카테고리별 인증 현황 】\n';
   content += '────────────────────────────────────────\n';
   for (const [category, catData] of Object.entries(CERT_CATEGORIES)) {
-    const count = analysisData.categoryCount[category];
+    const count = analysisData.categoryCount[category] || 0;
     const totalExp = count * catData.exp;
     content += `${catData.emoji} ${catData.name}: ${count}회 (${totalExp} EXP)\n`;
   }
