@@ -124,8 +124,13 @@ async function loadData() {
   resultsSection.style.display = 'none';
 
   try {
-    const response = await fetch(API_URL);
-    if (!response.ok) throw new Error('데이터를 불러올 수 없습니다.');
+    // 캐시 방지를 위한 타임스탬프 추가
+    const url = `${API_URL}?t=${Date.now()}`;
+    const response = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+    });
+    if (!response.ok) throw new Error(`데이터를 불러올 수 없습니다. (${response.status})`);
 
     resultData = await response.json();
 
