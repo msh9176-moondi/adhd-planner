@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>루루플 인증 랭킹</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>루루플 인증 랭킹</h1>
+            <p class="subtitle">ADHD 실행력 향상을 위한 과학적 설계 기반</p>
+        </header>
+
+        <!-- 로딩 상태 -->
+        <section class="loading-section" id="loadingSection">
+            <div class="loading-spinner"></div>
+            <p>데이터를 불러오는 중...</p>
+        </section>
+
+        <!-- 에러 상태 -->
+        <section class="error-section" id="errorSection" style="display: none;">
+            <div class="error-icon">⚠️</div>
+            <p id="errorMessage">데이터를 불러올 수 없습니다.</p>
+            <button class="retry-btn" onclick="loadData()">다시 시도</button>
+        </section>
+
+        <!-- 결과 섹션 -->
+        <section class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <h2>분석 결과</h2>
+                <p class="last-updated" id="lastUpdated"></p>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card total">
+                    <h3>이번 달 인증</h3>
+                    <div class="big-number" id="totalCount">0</div>
+                </div>
+                <div class="summary-card level">
+                    <h3>1위 레벨</h3>
+                    <div class="level-badge" id="currentLevel">Lv.1</div>
+                    <div class="level-name" id="levelName">새싹</div>
+                </div>
+                <div class="summary-card progress">
+                    <h3>다음 레벨까지</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="progressText">0 / 0</span>
+                </div>
+            </div>
+
+            <!-- 주간 인증 경고 시스템 -->
+            <div class="weekly-alert-section" id="weeklyAlertSection">
+                <div class="alert-header">
+                    <h3>주간 인증 현황</h3>
+                    <div class="deadline-timer" id="deadlineTimer"></div>
+                </div>
+                <p class="section-desc">주 3회 이상 인증하지 않으면 강퇴됩니다</p>
+                <div class="alert-grid" id="alertGrid"></div>
+            </div>
+
+            <div class="weekly-section">
+                <h3>주간 정산</h3>
+                <p class="section-desc">매주 순위 변동을 확인하고 상장을 드립니다</p>
+                <div class="weekly-rankings" id="weeklyRankings"></div>
+            </div>
+
+            <div class="history-section">
+                <h3>월간 랭킹 추이</h3>
+                <div class="history-table-wrapper">
+                    <table class="history-table" id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>월</th>
+                                <th>1등</th>
+                                <th>2등</th>
+                                <th>3등</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="time-activity-section">
+                <h3>시간대별 인증 활동</h3>
+                <p class="section-desc">하루 중 언제 가장 활발하게 인증하는지 확인하세요</p>
+                <div class="time-chart-container">
+                    <div class="time-chart" id="timeChart"></div>
+                    <div class="time-labels" id="timeLabels"></div>
+                </div>
+                <div class="time-stats" id="timeStats"></div>
+            </div>
+
+            <div class="category-section">
+                <h3>카테고리별 인증 현황</h3>
+                <div class="category-content">
+                    <div class="pie-chart-container">
+                        <div class="pie-chart" id="pieChart"></div>
+                        <div class="pie-center">
+                            <span class="pie-total" id="pieTotal">0</span>
+                            <span class="pie-label">총 인증</span>
+                        </div>
+                    </div>
+                    <div class="pie-legend" id="pieLegend"></div>
+                </div>
+                <div class="category-grid" id="categoryGrid"></div>
+            </div>
+
+            <div class="leaderboard-section" id="leaderboardSection">
+                <h3>이번 달 랭킹</h3>
+                <div class="monthly-rewards">
+                    <div class="reward-card gold">
+                        <span class="reward-rank">1등</span>
+                        <span class="reward-prize">배민 쿠폰 2만원</span>
+                    </div>
+                    <div class="reward-card silver">
+                        <span class="reward-rank">2등</span>
+                        <span class="reward-prize">컴포즈 5천원</span>
+                    </div>
+                    <div class="reward-card bronze">
+                        <span class="reward-rank">3등</span>
+                        <span class="reward-prize">아메리카노</span>
+                    </div>
+                </div>
+                <div class="leaderboard" id="leaderboard"></div>
+            </div>
+        </section>
+
+        <footer>
+            <p>월간 랭킹 시스템 | 인증 안 하면 -1 EXP 페널티</p>
+            <p class="tip">"꾸준함이 실력이다. 매일 인증하고 1등을 노려보세요!"</p>
+        </footer>
+    </div>
+
+    <script src="result.js"></script>
+</body>
+</html>
