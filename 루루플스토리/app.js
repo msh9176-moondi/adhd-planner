@@ -524,6 +524,7 @@ function parseChat(content) {
       morning: 0,
       planning: 0,
       study: 0,
+      medicine: 0,
     },
   };
 
