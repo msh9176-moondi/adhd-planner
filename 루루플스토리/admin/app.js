@@ -28,7 +28,7 @@ const CERT_CATEGORIES = {
   planning: {
     name: '계획',
     emoji: '📋',
-    exp: 3,
+    exp: 6,
     dailyLimit: 1,
     tags: ['#계획', '#계획표', '#투두', '#todo', '#할일'],
   },
@@ -1116,12 +1116,12 @@ function displayPieChart() {
     medicine: '#f87171',
   };
 
-  // 총 인증 횟수 (undefined 방어)
+  // 총 인증 횟수
   const total = Object.values(analysisData.categoryCount).reduce(
-    (a, b) => (a || 0) + (b || 0),
+    (a, b) => a + b,
     0,
   );
-  pieTotal.textContent = total || 0;
+  pieTotal.textContent = total;
 
   if (total === 0) {
     pieChart.style.background = `conic-gradient(var(--border) 0deg 360deg)`;
@@ -1136,8 +1136,8 @@ function displayPieChart() {
 
   categories.forEach(([category, data]) => {
     const count = analysisData.categoryCount[category] || 0;
-    const percent = total > 0 ? (count / total) * 100 : 0;
-    const angle = total > 0 ? (count / total) * 360 : 0;
+    const percent = (count / total) * 100;
+    const angle = (count / total) * 360;
 
     if (count > 0) {
       const startAngle = currentAngle;
@@ -1603,7 +1603,7 @@ function exportToTxt() {
 
 // Google Apps Script 웹앱 URL (배포 후 여기에 입력)
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbwFWrkaFEBKoqE8Ll-Og-t9kWcSWT1SSeLw_BscLMV5aGYBoU5tFqbuenecSGBzybo/exec';
+  'https://script.google.com/macros/s/AKfycbwpoXQFMdlROUKD7s9uxWTBHBJGsLghi5XH_yIHexkGhn5b7CB5-hSb8eCQEKy7V7Yb/exec';
 
 // 관리자 비밀번호 (실제 배포 시 변경 필요)
 const ADMIN_PASSWORD = 'lurupl2024';
@@ -1648,8 +1648,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 });
 
-// Google Sheets에 결과 저장
-async function saveToGoogleSheets() {
+// Google Sheets에 결과 저장 (Form 방식)
+function saveToGoogleSheets() {
   if (!analysisData || analysisData.totalCount === 0) {
     alert('저장할 데이터가 없습니다. 먼저 파일을 분석해주세요.');
     return;
@@ -1670,39 +1670,46 @@ async function saveToGoogleSheets() {
     members: getMembersForSave(),
   };
 
-  try {
-    const saveBtn = document.getElementById('saveToSheetsBtn');
-    if (saveBtn) {
-      saveBtn.disabled = true;
-      saveBtn.textContent = '저장 중...';
-    }
-
-    const response = await fetch(API_URL, {
-      method: 'POST',
-      mode: 'no-cors', // CORS 우회
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(dataToSave),
-    });
-
-    // no-cors 모드에서는 응답을 읽을 수 없으므로 성공으로 간주
-    alert('데이터가 저장되었습니다!\n결과 페이지: result.html');
-
-    if (saveBtn) {
-      saveBtn.disabled = false;
-      saveBtn.textContent = '📤 결과 저장';
-    }
-  } catch (error) {
-    console.error('저장 오류:', error);
-    alert('저장에 실패했습니다. 콘솔을 확인해주세요.');
-
-    const saveBtn = document.getElementById('saveToSheetsBtn');
-    if (saveBtn) {
-      saveBtn.disabled = false;
-      saveBtn.textContent = '📤 결과 저장';
-    }
+  const saveBtn = document.getElementById('saveToSheetsBtn');
+  if (saveBtn) {
+    saveBtn.disabled = true;
+    saveBtn.textContent = '저장 중...';
   }
+
+  // 숨겨진 iframe 생성
+  let iframe = document.getElementById('saveFrame');
+  if (!iframe) {
+    iframe = document.createElement('iframe');
+    iframe.id = 'saveFrame';
+    iframe.name = 'saveFrame';
+    iframe.style.display = 'none';
+    document.body.appendChild(iframe);
+  }
+
+  // form 생성 및 제출
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = API_URL;
+  form.target = 'saveFrame';
+
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'data';
+  input.value = JSON.stringify(dataToSave);
+  form.appendChild(input);
+
+  document.body.appendChild(form);
+  form.submit();
+  document.body.removeChild(form);
+
+  // 저장 완료 처리 (약간의 딜레이 후)
+  setTimeout(() => {
+    alert('데이터가 저장되었습니다!\n결과 페이지에서 확인하세요.');
+    if (saveBtn) {
+      saveBtn.disabled = false;
+      saveBtn.textContent = '📤 결과 저장';
+    }
+  }, 2000);
 }
 
 // 시간대별 인증 횟수 계산
@@ -1763,8 +1770,6 @@ function getMembersForSave() {
 
   for (const [nickname, data] of Object.entries(analysisData.members)) {
     const monthly = data.monthly;
-    const weeklyCertCount = getWeeklyCertCount(data.records);
-
     members[nickname] = {
       netExp: monthly.netExp,
       monthlyExp: monthly.monthlyExp,
@@ -1773,7 +1778,6 @@ function getMembersForSave() {
       penalty: monthly.penalty,
       totalExp: data.totalExp,
       categoryCount: monthly.categoryCount,
-      weeklyCertCount: weeklyCertCount, // 주간 인증 횟수 추가
     };
   }
 

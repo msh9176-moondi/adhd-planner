@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>루루플 인증 레벨 시스템</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- 관리자 로그인 섹션 -->
+        <section class="admin-login-section" id="adminLoginSection">
+            <header>
+                <h1>루루플 관리자</h1>
+                <p class="subtitle">채팅 로그 분석 및 결과 업로드</p>
+            </header>
+            <div class="login-box">
+                <div class="login-icon">🔐</div>
+                <p>관리자 비밀번호를 입력하세요</p>
+                <input type="password" id="adminPassword" placeholder="비밀번호 입력" class="password-input">
+                <button class="login-btn" id="loginBtn">로그인</button>
+                <p class="hint">결과만 보려면 <a href="result.html">결과 페이지</a>로 이동하세요</p>
+            </div>
+        </section>
+
+        <!-- 메인 관리자 영역 (로그인 후 표시) -->
+        <div id="adminArea" style="display: none;">
+            <header>
+                <h1>루루플 인증 레벨 시스템</h1>
+                <p class="subtitle">ADHD 실행력 향상을 위한 과학적 설계 기반</p>
+            </header>
+
+            <section class="upload-section">
+            <div class="upload-box" id="uploadBox">
+                <div class="upload-icon">📁</div>
+                <p>카카오톡 채팅 파일을 드래그하거나 클릭하여 업로드</p>
+                <p class="hint">지원 형식: .txt (카카오톡 내보내기 파일)</p>
+                <input type="file" id="fileInput" accept=".txt" hidden>
+            </div>
+        </section>
+
+        <section class="science-info">
+            <h2>월간 랭킹 시스템</h2>
+            <div class="science-grid">
+                <div class="science-card">
+                    <span class="icon">📅</span>
+                    <h3>월간 리셋</h3>
+                    <p>매월 새로운 시작, 누구나 1등 가능</p>
+                </div>
+                <div class="science-card">
+                    <span class="icon">⚡</span>
+                    <h3>레벨 하락</h3>
+                    <p>인증 안 한 날 -1 EXP 페널티</p>
+                </div>
+                <div class="science-card">
+                    <span class="icon">🏆</span>
+                    <h3>공정한 경쟁</h3>
+                    <p>후발주자도 따라잡을 수 있는 구조</p>
+                </div>
+                <div class="science-card">
+                    <span class="icon">🔥</span>
+                    <h3>꾸준함이 핵심</h3>
+                    <p>매일 인증해야 레벨 유지</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="settings-section" id="settingsSection" style="display: none;">
+            <h2>멤버별 목표 기상 시간 설정</h2>
+            <p class="settings-desc">각 멤버의 목표 기상 시간을 설정하세요. 목표 시간 +-10분 이내 인증만 인정됩니다.</p>
+            <div class="member-settings" id="memberSettings"></div>
+            <button class="analyze-btn" id="analyzeBtn">분석 시작</button>
+        </section>
+
+        <section class="results-section" id="resultsSection" style="display: none;">
+            <div class="results-header">
+                <h2>분석 결과</h2>
+                <div class="export-buttons">
+                    <button class="export-btn primary" id="saveToSheetsBtn" title="결과를 저장하고 공유 링크 생성" onclick="saveToGoogleSheets()">
+                        <span>📤</span> 결과 저장
+                    </button>
+                    <button class="export-btn" id="exportAllPng" title="전체 결과를 이미지로 저장">
+                        <span>🖼️</span> 전체 PNG
+                    </button>
+                    <button class="export-btn" id="exportLeaderboardPng" title="랭킹만 이미지로 저장">
+                        <span>🏆</span> 랭킹 PNG
+                    </button>
+                    <button class="export-btn text" id="exportTxt" title="텍스트 파일로 저장">
+                        <span>📄</span> TXT
+                    </button>
+                </div>
+            </div>
+
+            <div class="summary-cards">
+                <div class="summary-card total">
+                    <h3>이번 달 인증</h3>
+                    <div class="big-number" id="totalCount">0</div>
+                </div>
+                <div class="summary-card level">
+                    <h3>1위 레벨</h3>
+                    <div class="level-badge" id="currentLevel">Lv.1</div>
+                    <div class="level-name" id="levelName">새싹</div>
+                </div>
+                <div class="summary-card progress">
+                    <h3>다음 레벨까지</h3>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="progressText">0 / 0</span>
+                </div>
+            </div>
+
+            <div class="weekly-section">
+                <h3>주간 정산</h3>
+                <p class="section-desc">매주 순위 변동을 확인하고 상장을 드립니다</p>
+                <div class="weekly-rankings" id="weeklyRankings"></div>
+            </div>
+
+            <div class="history-section">
+                <h3>월간 랭킹 추이</h3>
+                <div class="history-table-wrapper">
+                    <table class="history-table" id="historyTable">
+                        <thead>
+                            <tr>
+                                <th>월</th>
+                                <th>🥇 1등</th>
+                                <th>🥈 2등</th>
+                                <th>🥉 3등</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="time-activity-section">
+                <h3>시간대별 인증 활동</h3>
+                <p class="section-desc">하루 중 언제 가장 활발하게 인증하는지 확인하세요</p>
+                <div class="time-chart-container">
+                    <div class="time-chart" id="timeChart"></div>
+                    <div class="time-labels" id="timeLabels"></div>
+                </div>
+                <div class="time-stats" id="timeStats"></div>
+            </div>
+
+            <div class="category-section">
+                <h3>카테고리별 인증 현황</h3>
+                <div class="category-content">
+                    <div class="pie-chart-container">
+                        <div class="pie-chart" id="pieChart"></div>
+                        <div class="pie-center">
+                            <span class="pie-total" id="pieTotal">0</span>
+                            <span class="pie-label">총 인증</span>
+                        </div>
+                    </div>
+                    <div class="pie-legend" id="pieLegend"></div>
+                </div>
+                <div class="category-grid" id="categoryGrid"></div>
+            </div>
+
+            <div class="leaderboard-section" id="leaderboardSection">
+                <h3>이번 달 랭킹</h3>
+                <div class="monthly-rewards">
+                    <div class="reward-card gold">
+                        <span class="reward-rank">🥇 1등</span>
+                        <span class="reward-prize">배민 쿠폰 2만원</span>
+                    </div>
+                    <div class="reward-card silver">
+                        <span class="reward-rank">🥈 2등</span>
+                        <span class="reward-prize">컴포즈 5천원</span>
+                    </div>
+                    <div class="reward-card bronze">
+                        <span class="reward-rank">🥉 3등</span>
+                        <span class="reward-prize">아메리카노</span>
+                    </div>
+                </div>
+                <div class="leaderboard" id="leaderboard"></div>
+            </div>
+
+            <div class="warning-section" id="warningSection" style="display: none;">
+                <h3>이번 주 인증 부족</h3>
+                <p class="warning-desc">주간 최소 3회 인증을 채우지 못한 멤버입니다.</p>
+                <div class="warning-list" id="warningList"></div>
+            </div>
+
+            <div class="detail-section">
+                <h3>상세 인증 기록</h3>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">전체</button>
+                    <button class="filter-btn" data-filter="cleaning">🧹 청소</button>
+                    <button class="filter-btn" data-filter="exercise">🏃 운동</button>
+                    <button class="filter-btn" data-filter="morning">⏰ 기상</button>
+                    <button class="filter-btn" data-filter="planning">📋 계획</button>
+                    <button class="filter-btn" data-filter="study">📚 공부</button>
+                    <button class="filter-btn" data-filter="medicine">💊 약</button>
+                </div>
+                <div class="records-list" id="recordsList"></div>
+            </div>
+        </section>
+
+            <footer>
+                <p>월간 랭킹 시스템 | 인증 안 하면 -1 EXP 페널티</p>
+                <p class="tip">"꾸준함이 실력이다. 매일 인증하고 1등을 노려보세요!"</p>
+            </footer>
+        </div><!-- adminArea 끝 -->
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
