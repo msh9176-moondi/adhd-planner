@@ -10786,26 +10786,39 @@
 
       // 클라우드에서 데이터 복원 (다운로드)
       async function downloadFromCloud() {
+        console.log('downloadFromCloud 시작');
+
         if (!supabaseUser) {
+          console.log('로그인 안됨');
           if (typeof showToast === 'function') showToast('먼저 로그인해주세요.');
           return;
         }
-        if (isSyncing) return;
+        if (isSyncing) {
+          console.log('이미 동기화 중');
+          return;
+        }
 
         isSyncing = true;
         setButtonLoading('btnDownloadCloud', true);
         if (typeof showToast === 'function') showToast('클라우드에서 데이터를 가져오는 중...');
 
         try {
-          const { data, error } = await supabaseClient
+          console.log('Supabase 쿼리 시작, userId:', supabaseUser.id);
+
+          const response = await supabaseClient
             .from('user_app_data')
             .select('app_data, updated_at')
             .eq('user_id', supabaseUser.id)
             .limit(1);
 
+          console.log('Supabase 응답:', response);
+
+          const { data, error } = response;
+
           if (error) throw error;
 
           const userData = data && data.length > 0 ? data[0] : null;
+          console.log('userData:', userData ? '있음' : '없음');
 
           if (userData && userData.app_data) {
             restoreAllAppData(userData.app_data);
