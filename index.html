@@ -10828,14 +10828,21 @@
             .eq('user_id', supabaseUser.id)
             .limit(1);
 
-          console.log('Supabase 응답:', response);
-
           const { data, error } = response;
 
           if (error) throw error;
 
           const userData = data && data.length > 0 ? data[0] : null;
-          console.log('userData:', userData ? '있음' : '없음');
+
+          // 중요: 받은 데이터를 즉시 stringify해서 로그 (나중에 덮어써지기 전)
+          if (userData && userData.app_data && userData.app_data.goals) {
+            const todayKey = 'd-' + new Date().toISOString().slice(0, 10);
+            const todayTasks = userData.app_data.goals.day ? userData.app_data.goals.day[todayKey] : null;
+            console.log('=== 받은 데이터 (stringify) ===');
+            console.log('오늘 키:', todayKey);
+            console.log('오늘 할일 개수:', todayTasks ? todayTasks.length : 0);
+            console.log('오늘 할일:', JSON.stringify(todayTasks));
+          }
 
           if (userData && userData.app_data) {
             restoreAllAppData(userData.app_data);
