@@ -10697,7 +10697,7 @@
             console.log('메모리 goals 업데이트 완료');
           }
           if (typeof todos !== 'undefined') {
-            const todayKey = getDateKeyFromDate(new Date());
+            const todayKey = 'd-' + getDateKeyFromDate(new Date());
             console.log('오늘 키:', todayKey);
             if (appData.goals.day && appData.goals.day[todayKey]) {
               console.log('오늘 할일:', appData.goals.day[todayKey].length, '개');
