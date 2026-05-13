@@ -10829,20 +10829,23 @@
 
         try {
           console.log('Supabase 쿼리 시작...');
-          const result = await supabaseClient
+          const { data, error } = await supabaseClient
             .from('user_app_data')
             .select('app_data')
             .eq('user_id', supabaseUser.id)
-            .maybeSingle();
+            .limit(1);
 
-          console.log('syncFromSupabase 결과:', result);
+          console.log('syncFromSupabase 응답:', { data, error });
 
-          if (result.error) {
-            throw result.error;
+          if (error) {
+            throw error;
           }
 
-          if (result.data && result.data.app_data) {
-            restoreAllAppData(result.data.app_data);
+          // 배열에서 첫 번째 항목 추출
+          const userData = data && data.length > 0 ? data[0] : null;
+
+          if (userData && userData.app_data) {
+            restoreAllAppData(userData.app_data);
 
             // UI 새로고침 (isSyncing이 true인 동안에는 syncToSupabase가 호출되지 않도록)
             if (typeof setGreeting === 'function') setGreeting();
@@ -10867,7 +10870,7 @@
           console.log('초기 동기화 완료, 이제 저장 가능');
 
           // 신규 사용자인 경우 현재 로컬 데이터를 즉시 저장
-          if (!result.data || !result.data.app_data) {
+          if (!userData || !userData.app_data) {
             console.log('신규 사용자: 로컬 데이터를 Supabase에 저장');
             setTimeout(() => syncToSupabase(), 100);
           }
