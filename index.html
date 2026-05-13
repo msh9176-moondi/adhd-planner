@@ -9067,14 +9067,31 @@
                 <p class="setting-login-message" id="settingLoginMessage"></p>
               </div>
 
-              <div class="sync-status synced" id="syncStatus">
-                <span>✓</span> 모든 데이터가 동기화되었어요
+              <!-- 수동 동기화 버튼 -->
+              <div class="sync-buttons" style="display: flex; gap: 8px; margin-top: 16px;">
+                <button
+                  id="btnUploadCloud"
+                  onclick="uploadToCloud()"
+                  style="flex: 1; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #4CAF50, #45a049); color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                >
+                  <span>☁️</span> 클라우드에 백업
+                </button>
+                <button
+                  id="btnDownloadCloud"
+                  onclick="downloadFromCloud()"
+                  style="flex: 1; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #2196F3, #1976D2); color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                >
+                  <span>📥</span> 클라우드에서 복원
+                </button>
               </div>
+              <p style="font-size: 12px; color: #888; margin-top: 8px; text-align: center;">
+                다른 기기에서 사용하려면 먼저 백업 후, 그 기기에서 복원하세요
+              </p>
             </div>
 
             <p class="setting-note">
-              로그인하면 홈 화면 인사말이 설정한 이름으로 바뀌고, 모든 기기에서
-              데이터가 연동돼요.
+              로그인하면 홈 화면 인사말이 설정한 이름으로 바뀌고,<br>
+              동기화 버튼으로 다른 기기와 데이터를 주고받을 수 있어요.
             </p>
           </div>
 
@@ -10448,95 +10465,17 @@
 
       let supabaseUser = null;
       let isSyncing = false;
-      let isInitialSyncComplete = false;  // 첫 동기화 완료 전까지 저장 방지
 
-      // Supabase Realtime 구독 (다른 기기에서 변경 시 자동 동기화)
-      let realtimeChannel = null;
-
-      function subscribeToRealtime(userId) {
-        // 기존 구독 해제
-        if (realtimeChannel) {
-          supabaseClient.removeChannel(realtimeChannel);
-        }
-
-        realtimeChannel = supabaseClient
-          .channel('user_data_sync')
-          .on(
-            'postgres_changes',
-            {
-              event: 'UPDATE',
-              schema: 'public',
-              table: 'user_app_data',
-              filter: `user_id=eq.${userId}`
-            },
-            async (payload) => {
-              console.log('Realtime: 다른 기기에서 데이터 변경 감지', payload);
-
-              // 현재 저장 중이면 무시 (자기 자신의 변경)
-              if (isSyncing) return;
-
-              // 다른 기기에서 변경된 데이터 가져오기
-              if (payload.new && payload.new.app_data) {
-                isSyncing = true;
-                restoreAllAppData(payload.new.app_data);
-
-                // UI 새로고침
-                if (typeof setGreeting === 'function') setGreeting();
-                if (typeof renderTodos === 'function') renderTodos();
-                if (typeof renderGoalsSection === 'function') renderGoalsSection();
-                if (typeof renderRewardShop === 'function') renderRewardShop();
-                if (typeof loadMorningJournal === 'function') loadMorningJournal();
-
-                if (typeof showToast === 'function')
-                  showToast('다른 기기에서 변경된 내용이 동기화되었어요!');
-
-                isSyncing = false;
-              }
-            }
-          )
-          .subscribe((status) => {
-            console.log('Realtime 구독 상태:', status);
-          });
-      }
-
-      function unsubscribeFromRealtime() {
-        if (realtimeChannel) {
-          supabaseClient.removeChannel(realtimeChannel);
-          realtimeChannel = null;
-        }
-      }
-
-      // Supabase 인증 상태 리스너
-      let initialSessionHandled = false;
+      // Supabase 인증 상태 리스너 (수동 동기화 방식 - 자동 동기화 없음)
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         supabaseUser = session?.user || null;
         if (typeof updateAuthUI === 'function') updateAuthUI();
 
-        // INITIAL_SESSION: 페이지 로드 시 기존 세션 복원
-        // SIGNED_IN: 새로 로그인했을 때
-        if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && supabaseUser) {
-          // INITIAL_SESSION과 SIGNED_IN이 연속으로 올 수 있으므로 중복 방지
-          if (event === 'INITIAL_SESSION') {
-            initialSessionHandled = true;
-            if (typeof syncFromSupabase === 'function') await syncFromSupabase();
-            // Realtime 구독 시작
-            subscribeToRealtime(supabaseUser.id);
-          } else if (event === 'SIGNED_IN' && !initialSessionHandled) {
-            // 새 로그인 (INITIAL_SESSION 없이 바로 SIGNED_IN인 경우)
-            if (typeof syncFromSupabase === 'function') await syncFromSupabase();
-            subscribeToRealtime(supabaseUser.id);
-            if (typeof showToast === 'function')
-              showToast('로그인 성공! 데이터를 동기화했어요.');
-          } else if (event === 'SIGNED_IN' && initialSessionHandled) {
-            // 이미 INITIAL_SESSION에서 처리됨, 토스트만 표시
-            if (typeof showToast === 'function')
-              showToast('로그인 성공! 데이터를 동기화했어요.');
-          }
+        if (event === 'SIGNED_IN' && supabaseUser) {
+          if (typeof showToast === 'function')
+            showToast('로그인 성공! 동기화 버튼으로 데이터를 백업/복원하세요.');
         } else if (event === 'SIGNED_OUT') {
-          initialSessionHandled = false;
-          unsubscribeFromRealtime();
-          isInitialSyncComplete = false;
           if (typeof showToast === 'function') showToast('로그아웃되었어요.');
         }
       });
@@ -10818,148 +10757,112 @@
         }
       }
 
-      // Supabase에서 모든 데이터 가져오기 (로그인 시)
-      async function syncFromSupabase() {
-        if (!supabaseUser || isSyncing) return;
-        isSyncing = true;
-        if (typeof updateSyncStatus === 'function')
-          updateSyncStatus('syncing', '동기화 중...');
+      // ═══════════════════════════════════════════════════════════════════════════════
+      // 수동 동기화 함수 (사용자가 버튼 클릭 시에만 실행)
+      // ═══════════════════════════════════════════════════════════════════════════════
 
-        console.log('syncFromSupabase 시작, userId:', supabaseUser.id);
+      // 클라우드에서 데이터 복원 (다운로드)
+      async function downloadFromCloud() {
+        if (!supabaseUser) {
+          if (typeof showToast === 'function') showToast('먼저 로그인해주세요.');
+          return;
+        }
+        if (isSyncing) return;
+
+        isSyncing = true;
+        if (typeof showToast === 'function') showToast('클라우드에서 데이터를 가져오는 중...');
 
         try {
-          console.log('Supabase 쿼리 시작...');
           const { data, error } = await supabaseClient
             .from('user_app_data')
-            .select('app_data')
+            .select('app_data, updated_at')
             .eq('user_id', supabaseUser.id)
             .limit(1);
 
-          console.log('syncFromSupabase 응답:', { data, error });
+          if (error) throw error;
 
-          if (error) {
-            throw error;
-          }
-
-          // 배열에서 첫 번째 항목 추출
           const userData = data && data.length > 0 ? data[0] : null;
 
           if (userData && userData.app_data) {
             restoreAllAppData(userData.app_data);
 
-            // UI 새로고침 (isSyncing이 true인 동안에는 syncToSupabase가 호출되지 않도록)
+            // UI 새로고침
             if (typeof setGreeting === 'function') setGreeting();
             if (typeof renderTodos === 'function') renderTodos();
-            if (typeof renderGoalsSection === 'function')
-              renderGoalsSection();
+            if (typeof renderGoalsSection === 'function') renderGoalsSection();
             if (typeof renderRewardShop === 'function') renderRewardShop();
-            if (typeof loadMorningJournal === 'function')
-              loadMorningJournal();
+            if (typeof loadMorningJournal === 'function') loadMorningJournal();
 
-            console.log('All data synced from Supabase');
+            const lastSync = new Date(userData.updated_at).toLocaleString('ko-KR');
+            if (typeof showToast === 'function')
+              showToast(`클라우드 데이터 복원 완료! (${lastSync})`);
           } else {
-            console.log('Supabase에 저장된 데이터 없음 (신규 사용자)');
-            // 신규 사용자: 현재 로컬 데이터를 Supabase에 저장해야 함
-          }
-
-          if (typeof updateSyncStatus === 'function')
-            updateSyncStatus('synced', '동기화 완료');
-
-          // 첫 동기화 완료 - 이제부터 저장 허용 (신규 사용자 포함)
-          isInitialSyncComplete = true;
-          console.log('초기 동기화 완료, 이제 저장 가능');
-
-          // 신규 사용자인 경우 현재 로컬 데이터를 즉시 저장
-          if (!userData || !userData.app_data) {
-            console.log('신규 사용자: 로컬 데이터를 Supabase에 저장');
-            setTimeout(() => syncToSupabase(), 100);
+            if (typeof showToast === 'function')
+              showToast('클라우드에 저장된 데이터가 없어요.');
           }
         } catch (error) {
-          console.error('Sync from Supabase failed:', error);
-          if (typeof updateSyncStatus === 'function')
-            updateSyncStatus('error', '동기화 실패');
-          // 에러 시에도 저장은 허용 (로컬 데이터라도 보존)
-          isInitialSyncComplete = true;
+          console.error('클라우드 복원 실패:', error);
+          if (typeof showToast === 'function')
+            showToast('복원 실패: ' + error.message);
         } finally {
           isSyncing = false;
         }
       }
 
-      // Supabase에 모든 데이터 저장하기
-      let syncTimeout = null;
-      async function syncToSupabase() {
-        // 로그인 안됨, 동기화 중, 또는 첫 동기화 미완료 시 저장하지 않음
-        if (!supabaseUser || isSyncing || !isInitialSyncComplete) {
-          console.log('syncToSupabase 스킵:', { supabaseUser: !!supabaseUser, isSyncing, isInitialSyncComplete });
+      // 클라우드에 데이터 백업 (업로드)
+      async function uploadToCloud() {
+        if (!supabaseUser) {
+          if (typeof showToast === 'function') showToast('먼저 로그인해주세요.');
           return;
         }
+        if (isSyncing) return;
 
-        if (syncTimeout) clearTimeout(syncTimeout);
+        isSyncing = true;
+        if (typeof showToast === 'function') showToast('클라우드에 백업하는 중...');
 
-        const userId = supabaseUser.id;
+        try {
+          const appData = collectAllAppData();
 
-        syncTimeout = setTimeout(async () => {
-          // 타임아웃 실행 시점에도 다시 체크
-          if (!supabaseUser || isSyncing || !isInitialSyncComplete) return;
+          const { error } = await supabaseClient
+            .from('user_app_data')
+            .upsert(
+              {
+                user_id: supabaseUser.id,
+                app_data: appData,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: 'user_id' }
+            );
 
-          try {
-            if (typeof updateSyncStatus === 'function') {
-              updateSyncStatus('syncing', '저장 중...');
-            }
+          if (error) throw error;
 
-            const appData = collectAllAppData();
-
-            const { data, error } = await supabaseClient
-              .from('user_app_data')
-              .upsert(
-                {
-                  user_id: userId,
-                  app_data: appData,
-                  updated_at: new Date().toISOString(),
-                },
-                { onConflict: 'user_id' },
-              )
-              .select();
-
-            if (error) throw error;
-
-            console.log('Supabase 저장 성공:', data);
-
-            if (typeof updateSyncStatus === 'function') {
-              updateSyncStatus('synced', '클라우드에 저장 완료');
-            }
-          } catch (error) {
-            console.error('Supabase 저장 실패:', error);
-
-            if (typeof updateSyncStatus === 'function') {
-              updateSyncStatus('error', '저장 실패: ' + error.message);
-            }
-          }
-        }, 1000);
+          if (typeof showToast === 'function')
+            showToast('클라우드 백업 완료!');
+        } catch (error) {
+          console.error('클라우드 백업 실패:', error);
+          if (typeof showToast === 'function')
+            showToast('백업 실패: ' + error.message);
+        } finally {
+          isSyncing = false;
+        }
       }
 
-      // 기존 함수들을 통합 동기화로 연결 (하위 호환성)
-      function syncTodoToSupabase() {
-        syncToSupabase();
+      // 기존 함수들 호환성 유지 (자동 호출되어도 아무것도 안 함)
+      function syncToSupabase() {
+        // 수동 동기화 방식이므로 자동 호출 무시
       }
-      function deleteTodoFromSupabase() {
-        syncToSupabase();
+      function syncFromSupabase() {
+        // 수동 동기화 방식이므로 자동 호출 무시
       }
-      function syncDailyLogToSupabase() {
-        syncToSupabase();
-      }
-      function syncMorningJournalToSupabase() {
-        syncToSupabase();
-      }
-      function syncRewardsToSupabase() {
-        syncToSupabase();
-      }
-      function syncGoalsToSupabase() {
-        syncToSupabase();
-      }
-      function syncNicknameToSupabase() {
-        syncToSupabase();
-      }
+
+      // 기존 함수들 하위 호환성 유지 (자동 호출되어도 아무것도 안 함)
+      function syncTodoToSupabase() {}
+      function deleteTodoFromSupabase() {}
+      function syncDailyLogToSupabase() {}
+      function syncMorningJournalToSupabase() {}
+      function syncRewardsToSupabase() {}
+      function syncGoalsToSupabase() {}
+      function syncNicknameToSupabase() {}
 
       // 동기화 상태 표시
       function updateSyncStatus(status, message) {
