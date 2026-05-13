@@ -1797,6 +1797,12 @@
         }
       }
 
+      @keyframes spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+
       .edit-modal-head {
         display: flex;
         justify-content: space-between;
@@ -10761,6 +10767,23 @@
       // 수동 동기화 함수 (사용자가 버튼 클릭 시에만 실행)
       // ═══════════════════════════════════════════════════════════════════════════════
 
+      // 버튼 로딩 상태 표시
+      function setButtonLoading(btnId, isLoading, originalText) {
+        const btn = document.getElementById(btnId);
+        if (!btn) return;
+
+        if (isLoading) {
+          btn.disabled = true;
+          btn.dataset.originalText = btn.innerHTML;
+          btn.innerHTML = '<span class="spinner" style="display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.8s linear infinite;"></span> 처리 중...';
+          btn.style.opacity = '0.7';
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = btn.dataset.originalText || originalText;
+          btn.style.opacity = '1';
+        }
+      }
+
       // 클라우드에서 데이터 복원 (다운로드)
       async function downloadFromCloud() {
         if (!supabaseUser) {
@@ -10770,6 +10793,7 @@
         if (isSyncing) return;
 
         isSyncing = true;
+        setButtonLoading('btnDownloadCloud', true);
         if (typeof showToast === 'function') showToast('클라우드에서 데이터를 가져오는 중...');
 
         try {
@@ -10795,7 +10819,7 @@
 
             const lastSync = new Date(userData.updated_at).toLocaleString('ko-KR');
             if (typeof showToast === 'function')
-              showToast(`클라우드 데이터 복원 완료! (${lastSync})`);
+              showToast(`✅ 복원 완료! (${lastSync})`);
           } else {
             if (typeof showToast === 'function')
               showToast('클라우드에 저장된 데이터가 없어요.');
@@ -10803,9 +10827,10 @@
         } catch (error) {
           console.error('클라우드 복원 실패:', error);
           if (typeof showToast === 'function')
-            showToast('복원 실패: ' + error.message);
+            showToast('❌ 복원 실패: ' + error.message);
         } finally {
           isSyncing = false;
+          setButtonLoading('btnDownloadCloud', false, '<span>📥</span> 클라우드에서 복원');
         }
       }
 
@@ -10818,6 +10843,7 @@
         if (isSyncing) return;
 
         isSyncing = true;
+        setButtonLoading('btnUploadCloud', true);
         if (typeof showToast === 'function') showToast('클라우드에 백업하는 중...');
 
         try {
@@ -10837,13 +10863,14 @@
           if (error) throw error;
 
           if (typeof showToast === 'function')
-            showToast('클라우드 백업 완료!');
+            showToast('✅ 클라우드 백업 완료!');
         } catch (error) {
           console.error('클라우드 백업 실패:', error);
           if (typeof showToast === 'function')
-            showToast('백업 실패: ' + error.message);
+            showToast('❌ 백업 실패: ' + error.message);
         } finally {
           isSyncing = false;
+          setButtonLoading('btnUploadCloud', false, '<span>☁️</span> 클라우드에 백업');
         }
       }
 
