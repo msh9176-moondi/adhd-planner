@@ -10855,14 +10855,21 @@
             console.log('All data synced from Supabase');
           } else {
             console.log('Supabase에 저장된 데이터 없음 (신규 사용자)');
+            // 신규 사용자: 현재 로컬 데이터를 Supabase에 저장해야 함
           }
 
           if (typeof updateSyncStatus === 'function')
             updateSyncStatus('synced', '동기화 완료');
 
-          // 첫 동기화 완료 - 이제부터 저장 허용
+          // 첫 동기화 완료 - 이제부터 저장 허용 (신규 사용자 포함)
           isInitialSyncComplete = true;
           console.log('초기 동기화 완료, 이제 저장 가능');
+
+          // 신규 사용자인 경우 현재 로컬 데이터를 즉시 저장
+          if (!result.data || !result.data.app_data) {
+            console.log('신규 사용자: 로컬 데이터를 Supabase에 저장');
+            setTimeout(() => syncToSupabase(), 100);
+          }
         } catch (error) {
           console.error('Sync from Supabase failed:', error);
           if (typeof updateSyncStatus === 'function')
