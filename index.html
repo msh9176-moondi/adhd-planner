@@ -10448,6 +10448,7 @@
 
       let supabaseUser = null;
       let isSyncing = false;
+      let isInitialSyncComplete = false;  // 첫 동기화 완료 전까지 저장 방지
 
       // Supabase 인증 상태 리스너
       let initialSessionHandled = false;
@@ -10797,10 +10798,16 @@
 
           if (typeof updateSyncStatus === 'function')
             updateSyncStatus('synced', '동기화 완료');
+
+          // 첫 동기화 완료 - 이제부터 저장 허용
+          isInitialSyncComplete = true;
+          console.log('초기 동기화 완료, 이제 저장 가능');
         } catch (error) {
           console.error('Sync from Supabase failed:', error);
           if (typeof updateSyncStatus === 'function')
             updateSyncStatus('error', '동기화 실패');
+          // 에러 시에도 저장은 허용 (로컬 데이터라도 보존)
+          isInitialSyncComplete = true;
         } finally {
           isSyncing = false;
         }
@@ -10809,8 +10816,11 @@
       // Supabase에 모든 데이터 저장하기
       let syncTimeout = null;
       async function syncToSupabase() {
-        // 로그인 안됨 또는 동기화 중(syncFromSupabase 진행 중)이면 저장하지 않음
-        if (!supabaseUser || isSyncing) return;
+        // 로그인 안됨, 동기화 중, 또는 첫 동기화 미완료 시 저장하지 않음
+        if (!supabaseUser || isSyncing || !isInitialSyncComplete) {
+          console.log('syncToSupabase 스킵:', { supabaseUser: !!supabaseUser, isSyncing, isInitialSyncComplete });
+          return;
+        }
 
         if (syncTimeout) clearTimeout(syncTimeout);
 
@@ -10818,7 +10828,7 @@
 
         syncTimeout = setTimeout(async () => {
           // 타임아웃 실행 시점에도 다시 체크
-          if (!supabaseUser || isSyncing) return;
+          if (!supabaseUser || isSyncing || !isInitialSyncComplete) return;
 
           try {
             if (typeof updateSyncStatus === 'function') {
