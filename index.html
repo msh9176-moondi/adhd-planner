@@ -10450,6 +10450,62 @@
       let isSyncing = false;
       let isInitialSyncComplete = false;  // 첫 동기화 완료 전까지 저장 방지
 
+      // Supabase Realtime 구독 (다른 기기에서 변경 시 자동 동기화)
+      let realtimeChannel = null;
+
+      function subscribeToRealtime(userId) {
+        // 기존 구독 해제
+        if (realtimeChannel) {
+          supabaseClient.removeChannel(realtimeChannel);
+        }
+
+        realtimeChannel = supabaseClient
+          .channel('user_data_sync')
+          .on(
+            'postgres_changes',
+            {
+              event: 'UPDATE',
+              schema: 'public',
+              table: 'user_app_data',
+              filter: `user_id=eq.${userId}`
+            },
+            async (payload) => {
+              console.log('Realtime: 다른 기기에서 데이터 변경 감지', payload);
+
+              // 현재 저장 중이면 무시 (자기 자신의 변경)
+              if (isSyncing) return;
+
+              // 다른 기기에서 변경된 데이터 가져오기
+              if (payload.new && payload.new.app_data) {
+                isSyncing = true;
+                restoreAllAppData(payload.new.app_data);
+
+                // UI 새로고침
+                if (typeof setGreeting === 'function') setGreeting();
+                if (typeof renderTodos === 'function') renderTodos();
+                if (typeof renderGoalsSection === 'function') renderGoalsSection();
+                if (typeof renderRewardShop === 'function') renderRewardShop();
+                if (typeof loadMorningJournal === 'function') loadMorningJournal();
+
+                if (typeof showToast === 'function')
+                  showToast('다른 기기에서 변경된 내용이 동기화되었어요!');
+
+                isSyncing = false;
+              }
+            }
+          )
+          .subscribe((status) => {
+            console.log('Realtime 구독 상태:', status);
+          });
+      }
+
+      function unsubscribeFromRealtime() {
+        if (realtimeChannel) {
+          supabaseClient.removeChannel(realtimeChannel);
+          realtimeChannel = null;
+        }
+      }
+
       // Supabase 인증 상태 리스너
       let initialSessionHandled = false;
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
@@ -10464,9 +10520,12 @@
           if (event === 'INITIAL_SESSION') {
             initialSessionHandled = true;
             if (typeof syncFromSupabase === 'function') await syncFromSupabase();
+            // Realtime 구독 시작
+            subscribeToRealtime(supabaseUser.id);
           } else if (event === 'SIGNED_IN' && !initialSessionHandled) {
             // 새 로그인 (INITIAL_SESSION 없이 바로 SIGNED_IN인 경우)
             if (typeof syncFromSupabase === 'function') await syncFromSupabase();
+            subscribeToRealtime(supabaseUser.id);
             if (typeof showToast === 'function')
               showToast('로그인 성공! 데이터를 동기화했어요.');
           } else if (event === 'SIGNED_IN' && initialSessionHandled) {
@@ -10476,6 +10535,8 @@
           }
         } else if (event === 'SIGNED_OUT') {
           initialSessionHandled = false;
+          unsubscribeFromRealtime();
+          isInitialSyncComplete = false;
           if (typeof showToast === 'function') showToast('로그아웃되었어요.');
         }
       });
