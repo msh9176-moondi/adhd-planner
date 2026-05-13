@@ -10450,17 +10450,31 @@
       let isSyncing = false;
 
       // Supabase 인증 상태 리스너
+      let initialSessionHandled = false;
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         supabaseUser = session?.user || null;
         if (typeof updateAuthUI === 'function') updateAuthUI();
 
-        if (event === 'SIGNED_IN' && supabaseUser) {
-          // 로그인 성공 시 데이터 동기화
-          if (typeof syncFromSupabase === 'function') await syncFromSupabase();
-          if (typeof showToast === 'function')
-            showToast('로그인 성공! 데이터를 동기화했어요.');
+        // INITIAL_SESSION: 페이지 로드 시 기존 세션 복원
+        // SIGNED_IN: 새로 로그인했을 때
+        if ((event === 'INITIAL_SESSION' || event === 'SIGNED_IN') && supabaseUser) {
+          // INITIAL_SESSION과 SIGNED_IN이 연속으로 올 수 있으므로 중복 방지
+          if (event === 'INITIAL_SESSION') {
+            initialSessionHandled = true;
+            if (typeof syncFromSupabase === 'function') await syncFromSupabase();
+          } else if (event === 'SIGNED_IN' && !initialSessionHandled) {
+            // 새 로그인 (INITIAL_SESSION 없이 바로 SIGNED_IN인 경우)
+            if (typeof syncFromSupabase === 'function') await syncFromSupabase();
+            if (typeof showToast === 'function')
+              showToast('로그인 성공! 데이터를 동기화했어요.');
+          } else if (event === 'SIGNED_IN' && initialSessionHandled) {
+            // 이미 INITIAL_SESSION에서 처리됨, 토스트만 표시
+            if (typeof showToast === 'function')
+              showToast('로그인 성공! 데이터를 동기화했어요.');
+          }
         } else if (event === 'SIGNED_OUT') {
+          initialSessionHandled = false;
           if (typeof showToast === 'function') showToast('로그아웃되었어요.');
         }
       });
@@ -10657,11 +10671,17 @@
 
         if (appData.goals) {
           localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(appData.goals));
-          if (typeof goals !== 'undefined') Object.assign(goals, appData.goals);
+          if (typeof goals !== 'undefined') {
+            // 기존 키 모두 삭제 후 새 데이터로 교체 (중첩 객체 완전 교체)
+            Object.keys(goals).forEach(k => delete goals[k]);
+            Object.assign(goals, appData.goals);
+          }
           if (typeof todos !== 'undefined') {
             const todayKey = getDateKeyFromDate(new Date());
             if (appData.goals.day && appData.goals.day[todayKey]) {
-              todos = appData.goals.day[todayKey];
+              // todos 배열 내용을 완전히 교체
+              todos.length = 0;
+              todos.push(...appData.goals.day[todayKey]);
             }
           }
         }
@@ -10671,8 +10691,10 @@
             'floca_daily_close_records',
             JSON.stringify(appData.dailyCloseRecords),
           );
-          if (typeof dailyCloseRecords !== 'undefined')
+          if (typeof dailyCloseRecords !== 'undefined') {
+            Object.keys(dailyCloseRecords).forEach(k => delete dailyCloseRecords[k]);
             Object.assign(dailyCloseRecords, appData.dailyCloseRecords);
+          }
         }
 
         if (appData.morningJournal) {
@@ -10707,8 +10729,10 @@
             'floca_reward_state',
             JSON.stringify(appData.rewardState),
           );
-          if (typeof rewardState !== 'undefined')
+          if (typeof rewardState !== 'undefined') {
+            Object.keys(rewardState).forEach(k => delete rewardState[k]);
             Object.assign(rewardState, appData.rewardState);
+          }
         }
 
         if (appData.brainDump) {
@@ -10733,7 +10757,7 @@
       }
 
       // Supabase에서 모든 데이터 가져오기 (로그인 시)
-      function syncFromSupabase() {
+      async function syncFromSupabase() {
         if (!supabaseUser || isSyncing) return;
         isSyncing = true;
         if (typeof updateSyncStatus === 'function')
@@ -10741,58 +10765,61 @@
 
         console.log('syncFromSupabase 시작');
 
-        supabaseClient
-          .from('user_app_data')
-          .select('app_data')
-          .eq('user_id', supabaseUser.id)
-          .maybeSingle()
-          .then(function (result) {
-            console.log('syncFromSupabase 결과:', result);
+        try {
+          const result = await supabaseClient
+            .from('user_app_data')
+            .select('app_data')
+            .eq('user_id', supabaseUser.id)
+            .maybeSingle();
 
-            if (result.error) {
-              throw result.error;
-            }
+          console.log('syncFromSupabase 결과:', result);
 
-            if (result.data && result.data.app_data) {
-              restoreAllAppData(result.data.app_data);
+          if (result.error) {
+            throw result.error;
+          }
 
-              // UI 새로고침
-              if (typeof setGreeting === 'function') setGreeting();
-              if (typeof renderTodos === 'function') renderTodos();
-              if (typeof renderGoalsSection === 'function')
-                renderGoalsSection();
-              if (typeof renderRewardShop === 'function') renderRewardShop();
-              if (typeof loadMorningJournal === 'function')
-                loadMorningJournal();
+          if (result.data && result.data.app_data) {
+            restoreAllAppData(result.data.app_data);
 
-              console.log('All data synced from Supabase');
-            } else {
-              console.log('Supabase에 저장된 데이터 없음 (신규 사용자)');
-            }
+            // UI 새로고침 (isSyncing이 true인 동안에는 syncToSupabase가 호출되지 않도록)
+            if (typeof setGreeting === 'function') setGreeting();
+            if (typeof renderTodos === 'function') renderTodos();
+            if (typeof renderGoalsSection === 'function')
+              renderGoalsSection();
+            if (typeof renderRewardShop === 'function') renderRewardShop();
+            if (typeof loadMorningJournal === 'function')
+              loadMorningJournal();
 
-            if (typeof updateSyncStatus === 'function')
-              updateSyncStatus('synced', '동기화 완료');
-          })
-          .catch(function (error) {
-            console.error('Sync from Supabase failed:', error);
-            if (typeof updateSyncStatus === 'function')
-              updateSyncStatus('error', '동기화 실패');
-          })
-          .finally(function () {
-            isSyncing = false;
-          });
+            console.log('All data synced from Supabase');
+          } else {
+            console.log('Supabase에 저장된 데이터 없음 (신규 사용자)');
+          }
+
+          if (typeof updateSyncStatus === 'function')
+            updateSyncStatus('synced', '동기화 완료');
+        } catch (error) {
+          console.error('Sync from Supabase failed:', error);
+          if (typeof updateSyncStatus === 'function')
+            updateSyncStatus('error', '동기화 실패');
+        } finally {
+          isSyncing = false;
+        }
       }
 
       // Supabase에 모든 데이터 저장하기
       let syncTimeout = null;
       async function syncToSupabase() {
-        if (!supabaseUser) return;
+        // 로그인 안됨 또는 동기화 중(syncFromSupabase 진행 중)이면 저장하지 않음
+        if (!supabaseUser || isSyncing) return;
 
         if (syncTimeout) clearTimeout(syncTimeout);
 
         const userId = supabaseUser.id;
 
         syncTimeout = setTimeout(async () => {
+          // 타임아웃 실행 시점에도 다시 체크
+          if (!supabaseUser || isSyncing) return;
+
           try {
             if (typeof updateSyncStatus === 'function') {
               updateSyncStatus('syncing', '저장 중...');
@@ -14940,14 +14967,11 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
               : '회원가입';
           });
 
-        // 초기 인증 상태 확인
+        // 초기 인증 상태 확인 (onAuthStateChange에서 동기화 처리하므로 여기서는 UI만 업데이트)
         supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
           supabaseUser = session?.user || null;
           updateAuthUI();
-
-          if (supabaseUser && typeof syncFromSupabase === 'function') {
-            await syncFromSupabase();
-          }
+          // syncFromSupabase는 onAuthStateChange의 INITIAL_SESSION 또는 SIGNED_IN에서 처리됨
         });
       }
 
