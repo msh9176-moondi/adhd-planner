@@ -10825,9 +10825,10 @@
         if (typeof updateSyncStatus === 'function')
           updateSyncStatus('syncing', '동기화 중...');
 
-        console.log('syncFromSupabase 시작');
+        console.log('syncFromSupabase 시작, userId:', supabaseUser.id);
 
         try {
+          console.log('Supabase 쿼리 시작...');
           const result = await supabaseClient
             .from('user_app_data')
             .select('app_data')
