@@ -10668,27 +10668,44 @@
 
       // 모든 앱 데이터를 localStorage에 복원
       function restoreAllAppData(appData) {
-        if (!appData) return;
+        console.log('restoreAllAppData 시작:', appData);
+        if (!appData) {
+          console.log('appData가 없음');
+          return;
+        }
 
         // localStorage에 먼저 저장 (변수가 나중에 정의되어도 localStorage에서 읽어옴)
         if (appData.user) {
+          console.log('user 복원:', appData.user);
           localStorage.setItem(FLOCA_USER_KEY, JSON.stringify(appData.user));
           if (typeof currentUser !== 'undefined') currentUser = appData.user;
         }
 
         if (appData.goals) {
+          console.log('goals 복원:', appData.goals);
+          console.log('goals.day 키들:', Object.keys(appData.goals.day || {}));
           localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(appData.goals));
+
+          // localStorage에 저장됐는지 확인
+          const saved = localStorage.getItem(FLOCA_GOALS_KEY);
+          console.log('localStorage에 저장된 goals:', saved ? '있음 (길이: ' + saved.length + ')' : '없음');
+
           if (typeof goals !== 'undefined') {
             // 기존 키 모두 삭제 후 새 데이터로 교체 (중첩 객체 완전 교체)
             Object.keys(goals).forEach(k => delete goals[k]);
             Object.assign(goals, appData.goals);
+            console.log('메모리 goals 업데이트 완료');
           }
           if (typeof todos !== 'undefined') {
             const todayKey = getDateKeyFromDate(new Date());
+            console.log('오늘 키:', todayKey);
             if (appData.goals.day && appData.goals.day[todayKey]) {
+              console.log('오늘 할일:', appData.goals.day[todayKey].length, '개');
               // todos 배열 내용을 완전히 교체
               todos.length = 0;
               todos.push(...appData.goals.day[todayKey]);
+            } else {
+              console.log('오늘 할일 데이터 없음');
             }
           }
         }
