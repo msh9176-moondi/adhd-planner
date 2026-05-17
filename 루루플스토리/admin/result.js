@@ -865,6 +865,9 @@ function displayCategories() {
   const pieLegend = document.getElementById('pieLegend');
   const pieTotal = document.getElementById('pieTotal');
 
+  console.log('[DEBUG] displayCategories 호출됨');
+  console.log('[DEBUG] CERT_CATEGORIES:', Object.keys(CERT_CATEGORIES));
+
   grid.innerHTML = '';
   pieLegend.innerHTML = '';
 
@@ -898,6 +901,8 @@ function displayCategories() {
   for (const [category, data] of Object.entries(CERT_CATEGORIES)) {
     const count = categoryCount[category] || 0;
     const totalExp = count * data.exp;
+
+    console.log(`[DEBUG] 카테고리 카드 생성: ${category} (${data.name})`);
 
     const card = document.createElement('div');
     card.className = `category-card ${category}`;
