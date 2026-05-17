@@ -1345,9 +1345,9 @@ function displayPieChart() {
     diary: '#fb923c',
   };
 
-  // 총 인증 횟수
+  // 총 인증 횟수 (undefined/NaN 방지)
   const total = Object.values(analysisData.categoryCount).reduce(
-    (a, b) => a + b,
+    (a, b) => a + (b || 0),
     0,
   );
   pieTotal.textContent = total;

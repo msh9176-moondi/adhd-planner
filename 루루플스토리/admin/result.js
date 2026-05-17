@@ -868,7 +868,17 @@ function displayCategories() {
   grid.innerHTML = '';
   pieLegend.innerHTML = '';
 
-  const categoryCount = resultData.categoryCount || {};
+  const rawCategoryCount = resultData.categoryCount || {};
+  // 모든 카테고리에 대해 기본값 0 보장
+  const categoryCount = {
+    cleaning: rawCategoryCount.cleaning || 0,
+    exercise: rawCategoryCount.exercise || 0,
+    morning: rawCategoryCount.morning || 0,
+    planning: rawCategoryCount.planning || 0,
+    study: rawCategoryCount.study || 0,
+    medicine: rawCategoryCount.medicine || 0,
+    diary: rawCategoryCount.diary || 0,
+  };
   const colors = {
     cleaning: '#f472b6',
     exercise: '#22d3ee',
@@ -879,7 +889,7 @@ function displayCategories() {
     diary: '#fb923c',
   };
 
-  const total = Object.values(categoryCount).reduce((a, b) => a + b, 0);
+  const total = Object.values(categoryCount).reduce((a, b) => a + (b || 0), 0);
   pieTotal.textContent = total;
 
   let gradientParts = [];
