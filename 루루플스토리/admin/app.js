@@ -49,7 +49,7 @@ const CERT_CATEGORIES = {
   diary: {
     name: '일기',
     emoji: '📝',
-    exp: 2,
+    exp: 1,
     dailyLimit: 1,
     tags: ['#일기', '#감사일기', '#하루기록', '#오늘하루', '#일상'],
   },

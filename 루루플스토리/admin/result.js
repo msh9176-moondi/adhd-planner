@@ -16,7 +16,7 @@ const CERT_CATEGORIES = {
   planning: { name: '계획', emoji: '📋', exp: 6 },
   study: { name: '공부', emoji: '📚', exp: 2 },
   medicine: { name: '약', emoji: '💊', exp: 1 },
-  diary: { name: '일기', emoji: '📝', exp: 2 },
+  diary: { name: '일기', emoji: '📝', exp: 1 },
 };
 
 const EXP_PER_LEVEL = 5;
