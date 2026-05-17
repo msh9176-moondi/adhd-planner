@@ -485,6 +485,7 @@ let analysisData = {
     planning: 0,
     study: 0,
     medicine: 0,
+    diary: 0,
   },
 };
 
@@ -706,6 +707,7 @@ function parseChat(content) {
       planning: 0,
       study: 0,
       medicine: 0,
+      diary: 0,
     },
   };
 
@@ -835,6 +837,7 @@ function parseChat(content) {
           planning: 0,
           study: 0,
           medicine: 0,
+          diary: 0,
         },
       };
     }
