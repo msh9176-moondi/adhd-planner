@@ -16,9 +16,53 @@ const CERT_CATEGORIES = {
   planning: { name: '계획', emoji: '📋', exp: 6 },
   study: { name: '공부', emoji: '📚', exp: 2 },
   medicine: { name: '약', emoji: '💊', exp: 1 },
+  diary: { name: '일기', emoji: '📝', exp: 2 },
 };
 
 const EXP_PER_LEVEL = 5;
+
+// ========== 이벤트 히스토리 ==========
+const EVENT_HISTORY_STORAGE_KEY = 'lurupl_event_history';
+
+// 로컬 시간대 기준 날짜 문자열 (YYYY-MM-DD)
+function toLocalDateStr(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// 저장된 이벤트 히스토리 불러오기
+function loadEventHistory() {
+  try {
+    const saved = localStorage.getItem(EVENT_HISTORY_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('이벤트 히스토리 불러오기 실패:', e);
+    return [];
+  }
+}
+
+// 현재 진행 중인 이벤트 가져오기
+function getActiveEvents() {
+  const events = loadEventHistory();
+  const today = toLocalDateStr(new Date());
+  return events.filter(e => e.enabled && e.startDate <= today && e.endDate >= today);
+}
+
+// 예정된 이벤트 가져오기
+function getUpcomingEvents() {
+  const events = loadEventHistory();
+  const today = toLocalDateStr(new Date());
+  return events.filter(e => e.enabled && e.startDate > today);
+}
+
+// 모든 활성 이벤트 (진행중 + 예정)
+function getAllActiveEvents() {
+  const events = loadEventHistory();
+  const today = toLocalDateStr(new Date());
+  return events.filter(e => e.enabled && e.endDate >= today);
+}
 
 const LEVEL_TITLES = [
   '새싹',
@@ -44,6 +88,69 @@ const ACCUMULATED_TITLES = [
   { minExp: 1200, title: '마스터', icon: '🔥' },
   { minExp: 2000, title: '그랜드마스터', icon: '⚡' },
   { minExp: 3000, title: '레전드', icon: '🏆' },
+];
+
+// ========== 시즌 설정 ==========
+const SEASON_CONFIG = {
+  name: '작은 씨앗 시즌',
+  emoji: '🌱',
+  startDate: '2025-06-01',
+  endDate: '2025-08-31',
+  concept: '작은 실행이 모여 숲이 된다',
+};
+
+// 시즌 EXP 지급 규칙
+const SEASON_EXP_RULES = {
+  baseCert: 5,           // 일반 인증 1회
+  firstDaily: 3,         // 오늘 첫 인증
+  newCategory: 10,       // 새로운 카테고리 첫 인증
+  streak3: 15,           // 3일 연속
+  streak7: 30,           // 7일 연속
+  cheer: 2,              // 응원 1회 (1일 3회 제한)
+  cheerReceived: 1,      // 응원 받음
+};
+
+// 복귀 보너스
+const RETURN_BONUS = [
+  { days: 7, exp: 20, badge: '돌아왔다!' },
+  { days: 14, exp: 35, badge: '다시 시작' },
+  { days: 30, exp: 50, badge: '불사조' },
+];
+
+// 시즌 레벨표
+const SEASON_LEVELS = [
+  { level: 1, minExp: 0, emoji: '🌰', title: '씨앗', desc: '시작이 반이다' },
+  { level: 2, minExp: 50, emoji: '🌱', title: '새싹', desc: '땅을 뚫고 나왔어요' },
+  { level: 3, minExp: 120, emoji: '🌿', title: '풀잎', desc: '조금씩 자라는 중' },
+  { level: 4, minExp: 220, emoji: '🪴', title: '화분', desc: '뿌리가 생겼어요' },
+  { level: 5, minExp: 350, emoji: '🌳', title: '묘목', desc: '나무가 되어가는 중' },
+  { level: 6, minExp: 500, emoji: '🌲', title: '나무', desc: '단단해졌어요' },
+  { level: 7, minExp: 700, emoji: '🌸', title: '꽃나무', desc: '꽃이 피었어요' },
+  { level: 8, minExp: 950, emoji: '🍎', title: '열매나무', desc: '결실을 맺었어요' },
+  { level: 9, minExp: 1250, emoji: '🌳🌳', title: '작은 숲', desc: '혼자가 아니에요' },
+  { level: 10, minExp: 1600, emoji: '🏕️', title: '쉼터가 된 숲', desc: '다른 사람의 쉼터가 됨' },
+];
+
+// 시즌 퀘스트
+const SEASON_QUESTS = {
+  daily: [
+    { id: 'd1', title: '오늘 인증 1회', desc: '아무 카테고리나 1회 인증', exp: 5, check: (data) => data.todayCertCount >= 1 },
+    { id: 'd2', title: '응원 1회', desc: '다른 사람에게 응원 남기기', exp: 3, check: (data) => data.todayCheerCount >= 1 },
+  ],
+  weekly: [
+    { id: 'w1', title: '주간 인증 3회', desc: '이번 주 3회 이상 인증', exp: 20, check: (data) => data.weeklyCertCount >= 3 },
+    { id: 'w2', title: '카테고리 2개 도전', desc: '서로 다른 카테고리 2개 인증', exp: 15, check: (data) => data.weeklyCategories >= 2 },
+    { id: 'w3', title: '주말 인증', desc: '주말에도 인증 1회', exp: 10, check: (data) => data.weekendCert >= 1 },
+  ],
+};
+
+// 시즌 배지
+const SEASON_BADGES = [
+  { id: 'returner', name: '돌아왔다!', emoji: '🌸', condition: 'return7' },
+  { id: 'explorer', name: '탐험가', emoji: '🧭', condition: 'categories5' },
+  { id: 'warm', name: '따뜻한 사람', emoji: '💖', condition: 'cheer50' },
+  { id: 'steady', name: '꾸준한 발걸음', emoji: '👣', condition: 'streak7' },
+  { id: 'phoenix', name: '불사조', emoji: '🔥', condition: 'return30' },
 ];
 
 // 저장된 데이터
@@ -111,6 +218,215 @@ function getAccumulatedTitle(totalExp) {
     }
   }
   return result;
+}
+
+// ========== 시즌 유틸리티 함수 ==========
+function getSeasonLevel(seasonExp) {
+  let result = SEASON_LEVELS[0];
+  for (const level of SEASON_LEVELS) {
+    if (seasonExp >= level.minExp) {
+      result = level;
+    } else {
+      break;
+    }
+  }
+  return result;
+}
+
+function getNextSeasonLevel(seasonExp) {
+  for (const level of SEASON_LEVELS) {
+    if (seasonExp < level.minExp) {
+      return level;
+    }
+  }
+  return null; // 최고 레벨 도달
+}
+
+function getSeasonDaysLeft() {
+  const endDate = new Date(SEASON_CONFIG.endDate);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  endDate.setHours(0, 0, 0, 0);
+  const diffTime = endDate - today;
+  const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  return Math.max(0, diffDays);
+}
+
+function isSeasonActive() {
+  const today = new Date();
+  const start = new Date(SEASON_CONFIG.startDate);
+  const end = new Date(SEASON_CONFIG.endDate);
+  return today >= start && today <= end;
+}
+
+function formatSeasonPeriod() {
+  const start = new Date(SEASON_CONFIG.startDate);
+  const end = new Date(SEASON_CONFIG.endDate);
+  const format = (d) => `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+  return `${format(start)} ~ ${format(end)}`;
+}
+
+// ========== 시즌 표시 함수 ==========
+function displaySeasonSection() {
+  const section = document.getElementById('seasonSection');
+  if (!section || !resultData) return;
+
+  // 시즌 기본 정보
+  document.getElementById('seasonName').textContent = SEASON_CONFIG.name;
+  document.getElementById('seasonPeriod').textContent = formatSeasonPeriod();
+
+  const daysLeft = getSeasonDaysLeft();
+  document.getElementById('seasonDaysLeft').textContent = daysLeft > 0 ? `D-${daysLeft}` : '종료됨';
+
+  // 시즌 데이터 계산 (임시 - 실제로는 서버에서 받아야 함)
+  displaySeasonMyStatus();
+  displaySeasonQuests();
+  displaySeasonLevelTrack();
+  displaySeasonTop10();
+}
+
+function displaySeasonMyStatus() {
+  // 모든 멤버의 시즌 EXP 계산 (임시로 월간 데이터 기반으로 시뮬레이션)
+  const members = Object.entries(resultData.members || {});
+  if (members.length === 0) return;
+
+  // 첫 번째 멤버 기준으로 표시 (실제로는 현재 사용자 기준)
+  // 실제 구현 시에는 로그인된 사용자 또는 선택된 사용자 기준
+  const [topName, topData] = members.sort((a, b) => (b[1].netExp || 0) - (a[1].netExp || 0))[0];
+
+  // 시즌 EXP 시뮬레이션 (실제로는 별도 저장)
+  const simulatedSeasonExp = Math.floor((topData.totalExp || 0) * 0.3);
+
+  const currentLevel = getSeasonLevel(simulatedSeasonExp);
+  const nextLevel = getNextSeasonLevel(simulatedSeasonExp);
+
+  document.getElementById('seasonLevelEmoji').textContent = currentLevel.emoji;
+  document.getElementById('seasonLevelName').textContent = `Lv.${currentLevel.level} ${currentLevel.title}`;
+  document.getElementById('seasonLevelDesc').textContent = currentLevel.desc;
+  document.getElementById('seasonExpValue').textContent = simulatedSeasonExp;
+
+  if (nextLevel) {
+    const progress = ((simulatedSeasonExp - currentLevel.minExp) / (nextLevel.minExp - currentLevel.minExp)) * 100;
+    document.getElementById('seasonProgressFill').style.width = `${Math.max(0, Math.min(100, progress))}%`;
+    document.getElementById('seasonExpCurrent').textContent = `${simulatedSeasonExp} / ${nextLevel.minExp} EXP`;
+    document.getElementById('seasonNextLevel').textContent = `다음: Lv.${nextLevel.level} ${nextLevel.title}`;
+  } else {
+    document.getElementById('seasonProgressFill').style.width = '100%';
+    document.getElementById('seasonExpCurrent').textContent = `${simulatedSeasonExp} EXP (MAX)`;
+    document.getElementById('seasonNextLevel').textContent = '최고 레벨 달성!';
+  }
+
+  // 배지 표시
+  displaySeasonBadges(topData);
+}
+
+function displaySeasonBadges(memberData) {
+  const container = document.getElementById('seasonBadges');
+  if (!container) return;
+
+  const earnedBadges = [];
+
+  // 연속 인증 배지
+  if ((memberData.maxStreak || 0) >= 7) {
+    earnedBadges.push({ emoji: '👣', name: '꾸준한 발걸음' });
+  }
+
+  // 카테고리 탐험가 (5개 이상)
+  const categories = Object.keys(memberData.categoryCount || {}).filter(k => memberData.categoryCount[k] > 0);
+  if (categories.length >= 5) {
+    earnedBadges.push({ emoji: '🧭', name: '탐험가' });
+  }
+
+  container.innerHTML = earnedBadges.length > 0
+    ? earnedBadges.map(b => `<span class="season-badge earned">${b.emoji} ${b.name}</span>`).join('')
+    : '<span class="season-badge locked">🔒 아직 획득한 배지가 없어요</span>';
+}
+
+function displaySeasonQuests() {
+  const container = document.getElementById('seasonQuestList');
+  if (!container) return;
+
+  // 주간 퀘스트 표시
+  const quests = SEASON_QUESTS.weekly;
+
+  // 임시 데이터 (실제로는 서버에서)
+  const mockData = {
+    weeklyCertCount: 2,
+    weeklyCategories: 1,
+    weekendCert: 0,
+  };
+
+  container.innerHTML = quests.map(quest => {
+    const completed = quest.check(mockData);
+    return `
+      <div class="quest-item ${completed ? 'completed' : ''}">
+        <div class="quest-check">${completed ? '✓' : ''}</div>
+        <div class="quest-content">
+          <div class="quest-title">${quest.title}</div>
+          <div class="quest-desc">${quest.desc}</div>
+        </div>
+        <div class="quest-reward">+${quest.exp} EXP</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function displaySeasonLevelTrack() {
+  const container = document.getElementById('seasonLevelTrack');
+  if (!container) return;
+
+  // 현재 레벨 계산
+  const members = Object.entries(resultData.members || {});
+  let currentSeasonExp = 0;
+  if (members.length > 0) {
+    const [, topData] = members.sort((a, b) => (b[1].netExp || 0) - (a[1].netExp || 0))[0];
+    currentSeasonExp = Math.floor((topData.totalExp || 0) * 0.3);
+  }
+  const currentLevel = getSeasonLevel(currentSeasonExp);
+
+  container.innerHTML = SEASON_LEVELS.map(level => {
+    let stateClass = 'locked';
+    if (currentSeasonExp >= level.minExp) {
+      stateClass = level.level === currentLevel.level ? 'current' : 'achieved';
+    }
+    return `
+      <div class="level-node ${stateClass}">
+        <div class="emoji">${level.emoji}</div>
+        <div class="lv">Lv.${level.level}</div>
+        <div class="exp">${level.minExp}</div>
+      </div>
+    `;
+  }).join('');
+}
+
+function displaySeasonTop10() {
+  const container = document.getElementById('seasonTop10');
+  if (!container || !resultData.members) return;
+
+  // 시즌 EXP 기준 정렬 (임시로 총 EXP의 30%로 시뮬레이션)
+  const members = Object.entries(resultData.members)
+    .map(([name, data]) => ({
+      name,
+      seasonExp: Math.floor((data.totalExp || 0) * 0.3),
+      data,
+    }))
+    .sort((a, b) => b.seasonExp - a.seasonExp)
+    .slice(0, 10);
+
+  container.innerHTML = members.map((member, idx) => {
+    const level = getSeasonLevel(member.seasonExp);
+    const rankClass = idx === 0 ? 'gold' : idx === 1 ? 'silver' : idx === 2 ? 'bronze' : '';
+    return `
+      <div class="top10-item">
+        <div class="rank ${rankClass}">${idx + 1}</div>
+        <div class="info">
+          <div class="name">${member.name}</div>
+          <div class="level">${level.emoji} ${level.title}</div>
+        </div>
+        <div class="exp">${member.seasonExp}</div>
+      </div>
+    `;
+  }).join('');
 }
 
 // ========== 데이터 로드 ==========
@@ -322,12 +638,86 @@ function displayResults() {
       `${topNetExp} / ${nextLevel.minExp} EXP`;
   }
 
+  displayEventBanners(); // 이벤트 배너 표시
+  displaySeasonSection(); // 시즌 섹션 표시
   displayWeeklyAlerts(); // 주간 경고 먼저 표시
   displayWeeklyRankings();
   displayTimeActivity();
   displayCategories();
   displayLeaderboard();
   displayRankingHistory();
+}
+
+// ========== 이벤트 배너 표시 ==========
+function displayEventBanners() {
+  const container = document.getElementById('eventBanners');
+  if (!container) return;
+
+  const activeEvents = getActiveEvents();
+  const upcomingEvents = getUpcomingEvents();
+
+  container.innerHTML = '';
+
+  // 진행 중인 이벤트
+  activeEvents.forEach(event => {
+    const daysLeft = Math.ceil((new Date(event.endDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+    let categoryText = '전체 카테고리';
+    if (event.categories && event.categories.length > 0) {
+      categoryText = event.categories.map(c => {
+        const cat = CERT_CATEGORIES[c];
+        return cat ? `${cat.emoji} ${cat.name}` : c;
+      }).join(', ');
+    }
+
+    const banner = document.createElement('div');
+    banner.className = 'event-banner active';
+    banner.innerHTML = `
+      <div class="event-emoji">${event.emoji || '🎉'}</div>
+      <div class="event-info">
+        <div class="event-name">${event.name}</div>
+        <div class="event-details">
+          <span class="event-period">📅 ${event.startDate} ~ ${event.endDate}</span>
+          <span class="event-categories">| 대상: ${categoryText}</span>
+        </div>
+      </div>
+      <div class="event-right">
+        <div class="event-multiplier">x${event.expMultiplier}</div>
+        <div class="event-days-left">D-${daysLeft}</div>
+      </div>
+    `;
+    container.appendChild(banner);
+  });
+
+  // 예정된 이벤트 (1개만 표시)
+  if (upcomingEvents.length > 0) {
+    const event = upcomingEvents[0];
+    const daysUntil = Math.ceil((new Date(event.startDate) - new Date()) / (1000 * 60 * 60 * 24));
+
+    const banner = document.createElement('div');
+    banner.className = 'event-banner upcoming';
+    banner.innerHTML = `
+      <div class="event-emoji">📢</div>
+      <div class="event-info">
+        <div class="event-name">예정: ${event.name}</div>
+        <div class="event-details">
+          <span class="event-period">📅 ${event.startDate} 시작</span>
+          <span class="event-multiplier-text">경험치 ${event.expMultiplier}배</span>
+        </div>
+      </div>
+      <div class="event-right">
+        <div class="event-countdown">${daysUntil}일 후 시작</div>
+      </div>
+    `;
+    container.appendChild(banner);
+  }
+
+  // 이벤트가 없으면 숨김
+  if (activeEvents.length === 0 && upcomingEvents.length === 0) {
+    container.style.display = 'none';
+  } else {
+    container.style.display = 'block';
+  }
 }
 
 // ========== 주간 랭킹 ==========
@@ -413,6 +803,7 @@ function displayTimeActivity() {
     planning: '#a78bfa',
     study: '#4ade80',
     medicine: '#f87171',
+    diary: '#fb923c',
   };
 
   for (let hour = 0; hour < 24; hour++) {
@@ -485,6 +876,7 @@ function displayCategories() {
     planning: '#a78bfa',
     study: '#4ade80',
     medicine: '#f87171',
+    diary: '#fb923c',
   };
 
   const total = Object.values(categoryCount).reduce((a, b) => a + b, 0);
@@ -560,9 +952,6 @@ function displayLeaderboard() {
             ? 'bronze'
             : '';
 
-    const penaltyText =
-      data.penalty > 0 ? `<span class="penalty">-${data.penalty}</span>` : '';
-
     const item = document.createElement('div');
     item.className = 'leaderboard-item';
     item.innerHTML = `
@@ -579,7 +968,7 @@ function displayLeaderboard() {
                 </div>
             </div>
             <div class="member-stats">
-                <div class="member-count">${netExp} EXP ${penaltyText}</div>
+                <div class="member-count">${netExp} EXP</div>
                 <div class="member-categories">${data.monthlyCount || 0}회 (${data.certDays || 0}일)</div>
                 <div class="member-total">누적 ${totalExp} EXP</div>
             </div>

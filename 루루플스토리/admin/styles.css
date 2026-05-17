@@ -23,6 +23,7 @@
     --planning: #a78bfa;
     --study: #4ade80;
     --medicine: #f87171;
+    --diary: #fb923c;
 }
 
 body {
@@ -165,6 +166,361 @@ header h1 {
     font-size: 0.9rem;
 }
 
+/* 이벤트 설정 */
+.event-settings-box {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.1), rgba(236, 72, 153, 0.1));
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.event-settings-box h2 {
+    margin: 0;
+    font-size: 1.2rem;
+}
+
+.event-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin-bottom: 1rem;
+}
+
+.add-event-btn {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.add-event-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+}
+
+/* 이벤트 목록 */
+.event-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.event-list:empty::after {
+    content: '등록된 이벤트가 없습니다. "새 이벤트" 버튼을 눌러 추가하세요.';
+    color: var(--text-muted);
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.9rem;
+}
+
+.event-card {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: border-color 0.2s;
+}
+
+.event-card.active {
+    border-color: #7c3aed;
+    box-shadow: 0 0 0 1px rgba(124, 58, 237, 0.3);
+}
+
+.event-card.expired {
+    opacity: 0.6;
+}
+
+.event-card-toggle {
+    flex-shrink: 0;
+}
+
+.event-card-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.event-card-name {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.event-card-name .multiplier {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    color: white;
+    padding: 0.15rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+}
+
+.event-card-period {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.event-card-categories {
+    font-size: 0.8rem;
+    color: var(--primary);
+    margin-top: 0.25rem;
+}
+
+.event-card-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.event-card-actions button {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.event-card-actions button:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.event-card-actions button.delete:hover {
+    border-color: var(--danger);
+    color: var(--danger);
+}
+
+/* 이벤트 폼 */
+.event-form {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+    border: 2px solid var(--primary);
+}
+
+.event-form h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: var(--primary);
+}
+
+.event-form-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1rem;
+}
+
+.btn-cancel {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+}
+
+.btn-cancel:hover {
+    border-color: var(--text-muted);
+}
+
+.btn-save {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    border: none;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-save:hover {
+    opacity: 0.9;
+}
+
+.event-status-badge {
+    font-size: 0.7rem;
+    padding: 0.15rem 0.4rem;
+    border-radius: 4px;
+    font-weight: 500;
+}
+
+.event-status-badge.ongoing {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success);
+}
+
+.event-status-badge.upcoming {
+    background: rgba(59, 130, 246, 0.2);
+    color: #3b82f6;
+}
+
+.event-status-badge.ended {
+    background: rgba(107, 114, 128, 0.2);
+    color: #6b7280;
+}
+
+.event-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 50px;
+    height: 26px;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--border);
+    border-radius: 26px;
+    transition: 0.3s;
+}
+
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 20px;
+    width: 20px;
+    left: 3px;
+    bottom: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.3s;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+}
+
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(24px);
+}
+
+.toggle-label {
+    font-weight: 600;
+}
+
+.event-config {
+    background: var(--bg);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+.event-row {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.event-row:last-child {
+    margin-bottom: 0;
+}
+
+.event-field {
+    flex: 1;
+}
+
+.event-field.full {
+    flex: 100%;
+}
+
+.event-field label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+
+.event-field input,
+.event-field select {
+    width: 100%;
+    padding: 0.6rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text);
+    font-size: 0.9rem;
+}
+
+.event-field input:focus,
+.event-field select:focus {
+    outline: none;
+    border-color: var(--primary);
+}
+
+.category-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.category-checkboxes label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.category-checkboxes input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: var(--primary);
+}
+
+.event-preview {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--primary);
+}
+
+.event-preview:empty {
+    display: none;
+}
+
 .member-settings {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -215,6 +571,15 @@ header h1 {
 .time-input-group input[type="time"]:focus {
     outline: none;
     border-color: var(--primary);
+}
+
+.saved-badge {
+    background: rgba(34, 197, 94, 0.2);
+    color: var(--success);
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: 600;
 }
 
 .analyze-btn {
@@ -1268,6 +1633,56 @@ header h1 {
 .status-badge.fail {
     background: rgba(239, 68, 68, 0.2);
     color: var(--danger);
+}
+
+.status-badge.event {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(249, 115, 22, 0.3));
+    color: #fbbf24;
+    animation: eventPulse 2s ease-in-out infinite;
+}
+
+@keyframes eventPulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+
+/* 이벤트 배너 */
+.event-banner {
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+}
+
+.event-banner .event-emoji {
+    font-size: 2rem;
+}
+
+.event-banner .event-info {
+    flex: 1;
+}
+
+.event-banner .event-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.event-banner .event-period {
+    font-size: 0.85rem;
+    opacity: 0.9;
+}
+
+.event-banner .event-multiplier {
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 1.2rem;
 }
 
 footer {

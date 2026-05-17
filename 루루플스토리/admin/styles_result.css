@@ -23,6 +23,7 @@
     --planning: #a78bfa;
     --study: #4ade80;
     --medicine: #f87171;
+    --diary: #fb923c;
 }
 
 body {
@@ -610,6 +611,7 @@ header h1 {
 .category-card.planning::before { background: var(--planning); }
 .category-card.study::before { background: var(--study); }
 .category-card.medicine::before { background: var(--medicine); }
+.category-card.diary::before { background: var(--diary); }
 
 .category-card .emoji {
     font-size: 2rem;
@@ -657,6 +659,7 @@ header h1 {
 .category-card.planning .count { color: var(--planning); }
 .category-card.study .count { color: var(--study); }
 .category-card.medicine .count { color: var(--medicine); }
+.category-card.diary .count { color: var(--diary); }
 
 .leaderboard-section {
     margin-bottom: 2rem;
@@ -817,12 +820,6 @@ header h1 {
     font-size: 1.25rem;
     font-weight: 700;
     color: var(--primary);
-}
-
-.member-count .penalty {
-    font-size: 0.85rem;
-    color: var(--danger);
-    margin-left: 0.25rem;
 }
 
 .member-categories {
@@ -1688,5 +1685,635 @@ footer .tip {
         padding: 0.5rem;
         background: var(--bg);
         border-radius: 8px;
+    }
+}
+
+/* ========== 시즌 경험치 시스템 ========== */
+:root {
+    --season-primary: #22c55e;
+    --season-secondary: #86efac;
+    --season-bg: rgba(34, 197, 94, 0.1);
+}
+
+.season-section {
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, var(--season-bg), rgba(134, 239, 172, 0.05));
+    border: 2px solid rgba(34, 197, 94, 0.3);
+    border-radius: 16px;
+    padding: 1.5rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.season-section::before {
+    content: '🌱';
+    position: absolute;
+    top: -20px;
+    right: -20px;
+    font-size: 8rem;
+    opacity: 0.08;
+    pointer-events: none;
+}
+
+.season-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.season-title-area {
+    flex: 1;
+}
+
+.season-title {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--season-primary);
+    margin-bottom: 0.25rem;
+}
+
+.season-title .emoji {
+    font-size: 1.6rem;
+}
+
+.season-period {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.season-countdown {
+    background: var(--bg-card);
+    border-radius: 10px;
+    padding: 0.75rem 1.25rem;
+    text-align: center;
+    border: 1px solid var(--border);
+}
+
+.season-countdown .label {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.season-countdown .days {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--season-primary);
+}
+
+.season-my-status {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+.season-my-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.season-my-level {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.season-level-emoji {
+    font-size: 2.5rem;
+}
+
+.season-level-info h4 {
+    font-size: 1.1rem;
+    margin-bottom: 0.15rem;
+}
+
+.season-level-info span {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.season-my-exp {
+    text-align: right;
+}
+
+.season-my-exp .exp-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--season-primary);
+}
+
+.season-my-exp .exp-label {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.season-progress-bar {
+    width: 100%;
+    height: 16px;
+    background: var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+}
+
+.season-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--season-primary), var(--season-secondary));
+    border-radius: 8px;
+    transition: width 0.5s ease;
+    position: relative;
+}
+
+.season-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+    animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.season-progress-text {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* 시즌 배지 */
+.season-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+.season-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    background: var(--bg);
+    border: 1px solid var(--border);
+}
+
+.season-badge.earned {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(34, 197, 94, 0.05));
+    border-color: var(--season-primary);
+    color: var(--season-primary);
+}
+
+.season-badge.locked {
+    opacity: 0.5;
+}
+
+/* 시즌 퀘스트 */
+.season-quests {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--border);
+}
+
+.season-quests h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    font-size: 1rem;
+}
+
+.quest-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.quest-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg);
+    border-radius: 8px;
+    border: 1px solid var(--border);
+}
+
+.quest-item.completed {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), transparent);
+    border-color: rgba(34, 197, 94, 0.3);
+}
+
+.quest-check {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.quest-item.completed .quest-check {
+    background: var(--season-primary);
+    border-color: var(--season-primary);
+    color: white;
+}
+
+.quest-content {
+    flex: 1;
+}
+
+.quest-title {
+    font-weight: 500;
+    margin-bottom: 0.15rem;
+}
+
+.quest-item.completed .quest-title {
+    text-decoration: line-through;
+    opacity: 0.7;
+}
+
+.quest-desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.quest-reward {
+    padding: 0.25rem 0.6rem;
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--season-primary);
+    border-radius: 4px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* 시즌 레벨표 */
+.season-levels {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 1.25rem;
+    border: 1px solid var(--border);
+}
+
+.season-levels h4 {
+    margin-bottom: 1rem;
+}
+
+.level-track {
+    display: flex;
+    overflow-x: auto;
+    gap: 0.5rem;
+    padding-bottom: 0.5rem;
+}
+
+.level-node {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70px;
+    padding: 0.75rem 0.5rem;
+    border-radius: 10px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    transition: all 0.2s ease;
+}
+
+.level-node.current {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), transparent);
+    border-color: var(--season-primary);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.2);
+}
+
+.level-node.achieved {
+    border-color: rgba(34, 197, 94, 0.5);
+}
+
+.level-node.locked {
+    opacity: 0.5;
+}
+
+.level-node .emoji {
+    font-size: 1.5rem;
+    margin-bottom: 0.25rem;
+}
+
+.level-node .lv {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--season-primary);
+}
+
+.level-node .exp {
+    font-size: 0.65rem;
+    color: var(--text-muted);
+}
+
+/* 복귀 보너스 배너 */
+.return-bonus-banner {
+    background: linear-gradient(135deg, rgba(251, 191, 36, 0.15), rgba(245, 158, 11, 0.05));
+    border: 2px solid rgba(251, 191, 36, 0.4);
+    border-radius: 12px;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    animation: returnPulse 3s infinite;
+}
+
+@keyframes returnPulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(251, 191, 36, 0); }
+    50% { box-shadow: 0 0 20px 3px rgba(251, 191, 36, 0.2); }
+}
+
+.return-bonus-banner .emoji {
+    font-size: 2.5rem;
+}
+
+.return-bonus-banner .content {
+    flex: 1;
+}
+
+.return-bonus-banner h4 {
+    color: #fbbf24;
+    margin-bottom: 0.25rem;
+}
+
+.return-bonus-banner p {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.return-bonus-banner .bonus {
+    padding: 0.5rem 1rem;
+    background: rgba(251, 191, 36, 0.2);
+    border-radius: 8px;
+    color: #fbbf24;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+/* 시즌 탭 전환 */
+.exp-tabs {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    background: var(--bg-card);
+    padding: 0.35rem;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.exp-tab {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 500;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.exp-tab:hover {
+    color: var(--text);
+}
+
+.exp-tab.active {
+    background: var(--primary);
+    color: white;
+}
+
+.exp-tab.season.active {
+    background: var(--season-primary);
+}
+
+/* 시즌 TOP 10 */
+.season-top10 {
+    margin-top: 1.5rem;
+}
+
+.season-top10 h4 {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.top10-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+}
+
+.top10-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--bg-card);
+    border-radius: 10px;
+    border: 1px solid var(--border);
+}
+
+.top10-item .rank {
+    width: 28px;
+    height: 28px;
+    font-size: 0.85rem;
+}
+
+.top10-item .info {
+    flex: 1;
+}
+
+.top10-item .name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.top10-item .level {
+    font-size: 0.75rem;
+    color: var(--season-primary);
+}
+
+.top10-item .exp {
+    font-weight: 600;
+    color: var(--season-primary);
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .season-header {
+        flex-direction: column;
+    }
+
+    .season-countdown {
+        width: 100%;
+    }
+
+    .season-my-header {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .season-my-exp {
+        text-align: center;
+    }
+
+    .top10-list {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ========== 이벤트 배너 ========== */
+.event-banners {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.event-banner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-radius: 12px;
+    animation: bannerSlideIn 0.5s ease-out;
+}
+
+@keyframes bannerSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.event-banner.active {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(236, 72, 153, 0.2));
+    border: 1px solid rgba(124, 58, 237, 0.4);
+    box-shadow: 0 4px 20px rgba(124, 58, 237, 0.15);
+}
+
+.event-banner.upcoming {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.15), rgba(99, 102, 241, 0.15));
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.event-banner .event-emoji {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.event-banner .event-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.event-banner .event-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 0.25rem;
+}
+
+.event-banner .event-details {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.event-banner .event-right {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.event-banner .event-multiplier {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #7c3aed, #ec4899);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.event-banner .event-days-left {
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-weight: 600;
+}
+
+.event-banner .event-countdown {
+    font-size: 0.9rem;
+    color: #3b82f6;
+    font-weight: 600;
+}
+
+.event-banner .event-multiplier-text {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+@media (max-width: 600px) {
+    .event-banner {
+        flex-wrap: wrap;
+        padding: 1rem;
+    }
+
+    .event-banner .event-emoji {
+        font-size: 1.5rem;
+    }
+
+    .event-banner .event-info {
+        flex: 1 1 calc(100% - 4rem);
+    }
+
+    .event-banner .event-right {
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 0.5rem;
+        padding-top: 0.5rem;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .event-banner .event-multiplier {
+        font-size: 1.4rem;
     }
 }

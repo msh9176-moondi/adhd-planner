@@ -46,12 +46,130 @@ const CERT_CATEGORIES = {
     dailyLimit: 1,
     tags: ['#약', '#복약', '#약먹기', '#약복용', '#영양제'],
   },
+  diary: {
+    name: '일기',
+    emoji: '📝',
+    exp: 2,
+    dailyLimit: 1,
+    tags: ['#일기', '#감사일기', '#하루기록', '#오늘하루', '#일상'],
+  },
 };
 
 // 월간 레벨 시스템 (경험치 기반)
 const EXP_PER_LEVEL = 5; // 레벨당 필요 경험치 (한 달 최대 Lv.100)
-const PENALTY_PER_DAY = 1; // 인증 안 한 날 하루당 페널티
+const PENALTY_PER_DAY = 0; // 페널티 비활성화
 const MORNING_TOLERANCE = 10; // 기상 인증 허용 오차 (분)
+
+// ========== 시즌 이벤트 설정 ==========
+const SEASON_EVENTS = [
+  {
+    name: '작은 씨앗 시즌',
+    emoji: '🌱',
+    startDate: '2026-06-01',
+    endDate: '2026-08-31',
+    expMultiplier: 1, // 기본 배수
+    description: '작은 실행이 모여 숲이 된다',
+  },
+];
+
+// 특정 기간 경험치 배수 이벤트 (동적으로 로드됨)
+let EXP_BOOST_EVENTS = [];
+
+// 이벤트 히스토리 localStorage 키
+const EVENT_HISTORY_STORAGE_KEY = 'lurupl_event_history';
+
+// 저장된 이벤트 히스토리 불러오기
+function loadEventHistory() {
+  try {
+    const saved = localStorage.getItem(EVENT_HISTORY_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : [];
+  } catch (e) {
+    console.error('이벤트 히스토리 불러오기 실패:', e);
+    return [];
+  }
+}
+
+// 이벤트 히스토리 저장하기
+function saveEventHistory(events) {
+  try {
+    localStorage.setItem(EVENT_HISTORY_STORAGE_KEY, JSON.stringify(events));
+    console.log('이벤트 히스토리 저장 완료:', events);
+  } catch (e) {
+    console.error('이벤트 히스토리 저장 실패:', e);
+  }
+}
+
+// 새 이벤트 추가
+function addEvent(event) {
+  const events = loadEventHistory();
+  event.id = Date.now(); // 고유 ID
+  events.push(event);
+  saveEventHistory(events);
+  applyEventSettings();
+  return event.id;
+}
+
+// 이벤트 삭제
+function deleteEvent(eventId) {
+  let events = loadEventHistory();
+  events = events.filter(e => e.id !== eventId);
+  saveEventHistory(events);
+  applyEventSettings();
+}
+
+// 이벤트 수정
+function updateEvent(eventId, updatedEvent) {
+  const events = loadEventHistory();
+  const index = events.findIndex(e => e.id === eventId);
+  if (index !== -1) {
+    events[index] = { ...events[index], ...updatedEvent };
+    saveEventHistory(events);
+    applyEventSettings();
+  }
+}
+
+// 이벤트 히스토리를 EXP_BOOST_EVENTS에 적용
+function applyEventSettings() {
+  const events = loadEventHistory();
+  EXP_BOOST_EVENTS = events.filter(e => e.enabled).map(e => ({
+    name: e.name,
+    emoji: e.emoji || '🎉',
+    startDate: e.startDate,
+    endDate: e.endDate,
+    expMultiplier: parseFloat(e.expMultiplier) || 1,
+    categories: e.categories,
+  }));
+  console.log('적용된 이벤트 목록:', EXP_BOOST_EVENTS);
+}
+
+// 날짜가 이벤트 기간 내인지 확인
+function isDateInEventPeriod(dateStr, startDate, endDate) {
+  if (!dateStr) return false;
+  return dateStr >= startDate && dateStr <= endDate;
+}
+
+// 해당 날짜/카테고리에 적용될 경험치 배수 계산
+function getExpMultiplier(dateStr, category) {
+  let multiplier = 1;
+
+  for (const event of EXP_BOOST_EVENTS) {
+    if (isDateInEventPeriod(dateStr, event.startDate, event.endDate)) {
+      // 전체 카테고리 또는 해당 카테고리가 포함된 경우
+      if (event.categories === null || event.categories.includes(category)) {
+        multiplier = Math.max(multiplier, event.expMultiplier);
+      }
+    }
+  }
+
+  return multiplier;
+}
+
+// 현재 활성화된 이벤트 목록 가져오기
+function getActiveEvents(dateStr) {
+  return EXP_BOOST_EVENTS.filter(event =>
+    isDateInEventPeriod(dateStr, event.startDate, event.endDate)
+  );
+}
 
 // 멤버별 목표 기상 시간 저장
 let memberWakeUpTimes = {};
@@ -320,6 +438,7 @@ function calculateMonthlyData(memberRecords, nickname) {
     planning: 0,
     study: 0,
     medicine: 0,
+    diary: 0,
   };
 
   monthlyRecords.forEach((r) => {
@@ -442,19 +561,43 @@ function processFile(file) {
   reader.readAsText(file, 'UTF-8');
 }
 
-// 멤버 목록만 추출 (나간 사람 자동 제외)
+// 나간 사람 목록 (전역 변수로 저장하여 parseChat에서도 사용)
+let leftMembersSet = new Set();
+
+// 멤버 목록만 추출 (나간 사람 자동 제외, 재입장 시 복구)
 function extractMembers(content) {
   const members = new Set();
-  const leftMembers = new Set();
+  leftMembersSet = new Set(); // 전역 변수 초기화
   const lines = content.split('\n');
   const messagePattern = /\[([^\]]+)\]\s*\[(오전|오후)\s*(\d{1,2}):(\d{2})\]/;
   const leftPattern = /(.+)님이 나갔습니다/;
+  const kickedPattern = /(.+)님을 내보냈습니다/;
+  const joinedPattern = /(.+)님이 들어왔습니다/;
 
+  // 순차적으로 처리하여 마지막 상태 반영
   lines.forEach((line) => {
     // 나간 사람 감지
     const leftMatch = line.match(leftPattern);
     if (leftMatch) {
-      leftMembers.add(leftMatch[1].trim());
+      leftMembersSet.add(leftMatch[1].trim());
+      return;
+    }
+
+    // 내보낸 사람 감지
+    const kickedMatch = line.match(kickedPattern);
+    if (kickedMatch) {
+      leftMembersSet.add(kickedMatch[1].trim());
+      return;
+    }
+
+    // 다시 들어온 사람 감지 (나간 목록에서 제거)
+    const joinedMatch = line.match(joinedPattern);
+    if (joinedMatch) {
+      const joinedName = joinedMatch[1].trim();
+      if (leftMembersSet.has(joinedName)) {
+        leftMembersSet.delete(joinedName);
+        console.log(`[재입장] ${joinedName} - 활성 멤버로 복구`);
+      }
       return;
     }
 
@@ -465,24 +608,59 @@ function extractMembers(content) {
     }
   });
 
-  // 나간 사람 제외
-  leftMembers.forEach((name) => members.delete(name));
+  // 최종적으로 나간 상태인 사람만 제외
+  leftMembersSet.forEach((name) => members.delete(name));
+
+  console.log('최종 나간 사람 목록:', Array.from(leftMembersSet));
+  console.log('활성 멤버 목록:', Array.from(members));
 
   return Array.from(members).sort();
+}
+
+// localStorage 키
+const WAKE_TIMES_STORAGE_KEY = 'lurupl_wake_times';
+
+// 저장된 기상 시간 불러오기
+function loadSavedWakeTimes() {
+  try {
+    const saved = localStorage.getItem(WAKE_TIMES_STORAGE_KEY);
+    return saved ? JSON.parse(saved) : {};
+  } catch (e) {
+    console.error('기상 시간 불러오기 실패:', e);
+    return {};
+  }
+}
+
+// 기상 시간 저장하기
+function saveWakeTimes(wakeTimes) {
+  try {
+    localStorage.setItem(WAKE_TIMES_STORAGE_KEY, JSON.stringify(wakeTimes));
+    console.log('기상 시간 저장 완료:', wakeTimes);
+  } catch (e) {
+    console.error('기상 시간 저장 실패:', e);
+  }
 }
 
 // 멤버별 설정 UI 표시
 function displayMemberSettings(members) {
   memberSettings.innerHTML = '';
 
+  // 저장된 기상 시간 불러오기
+  const savedWakeTimes = loadSavedWakeTimes();
+  console.log('저장된 기상 시간:', savedWakeTimes);
+
   members.forEach((nickname) => {
+    // 저장된 시간이 있으면 사용, 없으면 07:00 기본값
+    const savedTime = savedWakeTimes[nickname] || '07:00';
+
     const card = document.createElement('div');
     card.className = 'member-setting-card';
     card.innerHTML = `
             <div class="member-name">${nickname}</div>
             <div class="time-input-group">
                 <label>목표 기상 시간:</label>
-                <input type="time" id="wake-${nickname}" value="07:00">
+                <input type="time" id="wake-${nickname}" value="${savedTime}">
+                ${savedWakeTimes[nickname] ? '<span class="saved-badge">저장됨</span>' : ''}
             </div>
         `;
     memberSettings.appendChild(card);
@@ -503,6 +681,9 @@ function runAnalysis() {
     const nickname = input.id.replace('wake-', '');
     memberWakeUpTimes[nickname] = input.value;
   });
+
+  // 기상 시간 localStorage에 저장 (다음에 불러올 수 있도록)
+  saveWakeTimes(memberWakeUpTimes);
 
   // 전체 분석 실행
   parseChat(rawChatContent);
@@ -550,6 +731,13 @@ function parseChat(content) {
     if (!messageMatch) return;
 
     const [, nickname, ampm, hour, minute, message] = messageMatch;
+    const trimmedNickname = nickname.trim();
+
+    // 나간 사람의 기록은 무시
+    if (leftMembersSet.has(trimmedNickname)) {
+      return;
+    }
+
     const category = findCategory(message);
     if (!category) return;
 
@@ -558,27 +746,40 @@ function parseChat(content) {
     if (ampm === '오전' && hour24 === 12) hour24 = 0;
     const timeStr = `${hour24.toString().padStart(2, '0')}:${minute}`;
 
-    let exp = CERT_CATEGORIES[category].exp;
+    let baseExp = CERT_CATEGORIES[category].exp;
+    let expMultiplier = getExpMultiplier(currentDate, category);
+    let exp = baseExp * expMultiplier;
     let isValidMorning = true;
     let isOverDailyLimit = false;
+    let isEventBoost = expMultiplier > 1;
+
+    // 이벤트 배수 로그
+    if (isEventBoost) {
+      console.log(`[이벤트] ${currentDate} ${category}: ${baseExp} x ${expMultiplier} = ${exp} EXP`);
+    }
 
     // 기상 인증 시간 검증
     if (category === 'morning') {
-      const targetTime = memberWakeUpTimes[nickname.trim()];
+      const targetTime = memberWakeUpTimes[trimmedNickname];
+      console.log(`[기상 인증] ${trimmedNickname}: 실제시간=${timeStr}, 목표시간=${targetTime || '미설정'}`);
       if (targetTime) {
         isValidMorning = isWithinTolerance(
           timeStr,
           targetTime,
           MORNING_TOLERANCE,
         );
+        console.log(`[기상 인증 결과] ${trimmedNickname}: ${isValidMorning ? '성공' : '실패'}`);
         if (!isValidMorning) {
           exp = 0; // 시간 벗어나면 경험치 0
         }
+      } else {
+        // 목표 시간이 설정되지 않은 경우에도 인증 기록은 남김 (기본 exp 유지)
+        console.log(`[기상 인증] ${trimmedNickname}: 목표 시간 미설정, 기본 exp 적용`);
       }
     }
 
     // 일일 제한 검증
-    const dailyKey = `${nickname.trim()}|${currentDate}|${category}`;
+    const dailyKey = `${trimmedNickname}|${currentDate}|${category}`;
     if (!dailyCertCounts[dailyKey]) {
       dailyCertCounts[dailyKey] = 0;
     }
@@ -593,17 +794,25 @@ function parseChat(content) {
     const record = {
       date: currentDate,
       time: timeStr,
-      nickname: nickname.trim(),
+      nickname: trimmedNickname,
       message: message.trim(),
       category: category,
       tag: extractTag(message, category),
+      baseExp: baseExp,
+      expMultiplier: expMultiplier,
       exp: exp,
+      isEventBoost: isEventBoost,
       isValidMorning: category === 'morning' ? isValidMorning : null,
       targetWakeTime:
-        category === 'morning' ? memberWakeUpTimes[nickname.trim()] : null,
+        category === 'morning' ? memberWakeUpTimes[trimmedNickname] : null,
       isOverDailyLimit: isOverDailyLimit,
       dailyCertNum: dailyCertCounts[dailyKey],
     };
+
+    // 디버그 로그
+    if (trimmedNickname.includes('지누')) {
+      console.log(`[DEBUG parseChat] 지누 기록 생성: ${currentDate} ${timeStr} ${category} exp=${exp} msg=${message.trim()}`);
+    }
 
     analysisData.records.push(record);
     analysisData.totalCount++;
@@ -612,8 +821,8 @@ function parseChat(content) {
       analysisData.categoryCount[category]++;
     }
 
-    if (!analysisData.members[nickname]) {
-      analysisData.members[nickname] = {
+    if (!analysisData.members[trimmedNickname]) {
+      analysisData.members[trimmedNickname] = {
         records: [],
         totalCount: 0,
         totalExp: 0,
@@ -629,11 +838,11 @@ function parseChat(content) {
         },
       };
     }
-    analysisData.members[nickname].records.push(record);
-    analysisData.members[nickname].totalCount++;
-    analysisData.members[nickname].totalExp += exp;
+    analysisData.members[trimmedNickname].records.push(record);
+    analysisData.members[trimmedNickname].totalCount++;
+    analysisData.members[trimmedNickname].totalExp += exp;
     if (exp > 0) {
-      analysisData.members[nickname].categoryCount[category]++;
+      analysisData.members[trimmedNickname].categoryCount[category]++;
     }
   });
 
@@ -775,37 +984,51 @@ function getWeekOfMonth(dateStr) {
   return Math.floor(diffDays / 7) + 2; // +2 because week 1 is before first Monday
 }
 
-// 주차별 날짜 범위 계산
+// 주차별 날짜 범위 계산 (월요일~일요일 기준)
 function getWeekRanges(year, month) {
   const weeks = [];
   const firstDay = new Date(year, month, 1);
   const lastDay = new Date(year, month + 1, 0);
 
-  let currentStart = new Date(firstDay);
+  // 1일부터 시작해서 각 날짜가 어느 주에 속하는지 계산
+  let currentDate = new Date(firstDay);
+  let currentWeek = null;
   let weekNum = 1;
 
-  while (currentStart <= lastDay) {
-    const weekEnd = new Date(currentStart);
-    // 해당 주의 일요일 또는 월말 중 빠른 날짜
-    const daysUntilSunday = (7 - currentStart.getDay()) % 7;
-    weekEnd.setDate(currentStart.getDate() + daysUntilSunday);
+  while (currentDate <= lastDay) {
+    const dayOfWeek = currentDate.getDay(); // 0=일, 1=월, ...
 
-    if (weekEnd > lastDay) {
-      weekEnd.setTime(lastDay.getTime());
+    // 월요일이거나 첫 날이면 새 주 시작
+    if (dayOfWeek === 1 || currentWeek === null) {
+      if (currentWeek !== null) {
+        weeks.push(currentWeek);
+      }
+      currentWeek = {
+        week: weekNum++,
+        start: new Date(currentDate),
+        end: null,
+        startStr: toLocalDateStr(currentDate),
+        endStr: null,
+      };
     }
 
-    weeks.push({
-      week: weekNum,
-      start: new Date(currentStart),
-      end: new Date(weekEnd),
-      startStr: currentStart.toISOString().split('T')[0],
-      endStr: weekEnd.toISOString().split('T')[0],
-    });
+    // 일요일이거나 월말이면 주 종료
+    if (dayOfWeek === 0 || currentDate.getTime() === lastDay.getTime()) {
+      currentWeek.end = new Date(currentDate);
+      currentWeek.endStr = toLocalDateStr(currentDate);
+    }
 
-    // 다음 주 월요일로 이동
-    currentStart = new Date(weekEnd);
-    currentStart.setDate(currentStart.getDate() + 1);
-    weekNum++;
+    // 다음 날로 이동
+    currentDate.setDate(currentDate.getDate() + 1);
+  }
+
+  // 마지막 주 추가
+  if (currentWeek && currentWeek.end === null) {
+    currentWeek.end = new Date(lastDay);
+    currentWeek.endStr = toLocalDateStr(lastDay);
+  }
+  if (currentWeek && !weeks.includes(currentWeek)) {
+    weeks.push(currentWeek);
   }
 
   return weeks;
@@ -820,6 +1043,7 @@ function calculateWeeklyRankings() {
   weeks.forEach((weekInfo) => {
     const memberExp = {};
 
+    // 해당 주간의 기록 집계 (startStr ~ endStr)
     // 해당 주간의 기록 집계
     for (const [nickname, memberData] of Object.entries(analysisData.members)) {
       memberExp[nickname] = 0;
@@ -988,6 +1212,7 @@ function displayTimeActivity() {
     planning: '#a78bfa',
     study: '#4ade80',
     medicine: '#f87171',
+    diary: '#fb923c',
   };
 
   for (let hour = 0; hour < 24; hour++) {
@@ -1114,6 +1339,7 @@ function displayPieChart() {
     planning: '#a78bfa',
     study: '#4ade80',
     medicine: '#f87171',
+    diary: '#fb923c',
   };
 
   // 총 인증 횟수
@@ -1284,6 +1510,12 @@ function displayRecords(filter) {
     const item = document.createElement('div');
     item.className = 'record-item';
 
+    // 이벤트 배수 배지
+    let eventBadge = '';
+    if (record.isEventBoost && record.expMultiplier > 1) {
+      eventBadge = `<span class="status-badge event">🎉 x${record.expMultiplier}</span>`;
+    }
+
     // 상태 배지 결정
     let statusBadge = '';
     if (record.isOverDailyLimit) {
@@ -1293,18 +1525,21 @@ function displayRecords(filter) {
     } else if (record.category === 'morning') {
       // 기상 인증 성공/실패 표시
       if (record.isValidMorning) {
-        statusBadge = `<span class="status-badge success">+${CERT_CATEGORIES.morning.exp}</span>`;
+        const displayExp = record.isEventBoost ? `${record.baseExp}x${record.expMultiplier}=${record.exp}` : record.exp;
+        statusBadge = `<span class="status-badge success">+${displayExp}</span>`;
       } else {
         statusBadge = `<span class="status-badge fail">실패 (목표: ${record.targetWakeTime})</span>`;
       }
     } else {
-      statusBadge = `<span class="status-badge success">+${record.exp}</span>`;
+      const displayExp = record.isEventBoost ? `${record.baseExp}x${record.expMultiplier}=${record.exp}` : record.exp;
+      statusBadge = `<span class="status-badge success">+${displayExp}</span>`;
     }
 
     item.innerHTML = `
             <div class="record-time">${record.date}<br>${record.time}</div>
             <div class="record-member">${record.nickname}</div>
             <div class="record-tag ${record.category}">${CERT_CATEGORIES[record.category].emoji} ${record.tag}</div>
+            ${eventBadge}
             ${statusBadge}
         `;
     list.appendChild(item);
@@ -1320,22 +1555,55 @@ function getWeekStart() {
   const now = new Date();
   const day = now.getDay();
   const diff = now.getDate() - day + (day === 0 ? -6 : 1); // 월요일로 조정
-  const monday = new Date(now.setDate(diff));
+  const monday = new Date(now);
+  monday.setDate(diff);
   monday.setHours(0, 0, 0, 0);
   return monday;
 }
 
-// 이번 주 인증 횟수 계산
-function getWeeklyCertCount(records) {
+// 이번 주 종료일 계산 (일요일 기준)
+function getWeekEnd() {
   const weekStart = getWeekStart();
-  const weekStartStr = weekStart.toISOString().split('T')[0];
+  const sunday = new Date(weekStart);
+  sunday.setDate(weekStart.getDate() + 6);
+  sunday.setHours(23, 59, 59, 999);
+  return sunday;
+}
+
+// 로컬 시간대 기준 날짜 문자열 (YYYY-MM-DD)
+function toLocalDateStr(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+// 이번 주 인증 횟수 계산 (월요일~일요일)
+function getWeeklyCertCount(records, nickname = '') {
+  const weekStart = getWeekStart();
+  const weekEnd = getWeekEnd();
+  const weekStartStr = toLocalDateStr(weekStart);
+  const weekEndStr = toLocalDateStr(weekEnd);
+
+  // 디버그 로그
+  if (nickname.includes('지누')) {
+    console.log(`[DEBUG] ${nickname} 주간 카운트 계산: ${weekStartStr} ~ ${weekEndStr}`);
+  }
 
   let count = 0;
   records.forEach((r) => {
-    if (r.date >= weekStartStr && r.exp > 0) {
+    if (r.date >= weekStartStr && r.date <= weekEndStr && r.exp > 0) {
       count++;
+      // 디버그 로그
+      if (nickname.includes('지누')) {
+        console.log(`[DEBUG] ${nickname} 카운트 +1: ${r.date} ${r.time} ${r.category} exp=${r.exp} msg=${r.message}`);
+      }
     }
   });
+
+  if (nickname.includes('지누')) {
+    console.log(`[DEBUG] ${nickname} 총 주간 인증: ${count}회`);
+  }
   return count;
 }
 
@@ -1349,7 +1617,7 @@ function displayWeeklyWarning() {
   const underperformers = [];
 
   for (const [nickname, data] of Object.entries(analysisData.members)) {
-    const weeklyCount = getWeeklyCertCount(data.records);
+    const weeklyCount = getWeeklyCertCount(data.records, nickname);
     if (weeklyCount < minWeeklyCerts) {
       underperformers.push({
         name: nickname,
@@ -1640,13 +1908,268 @@ function handleLogin() {
   }
 }
 
-// 페이지 로드 시 세션 확인
+// 페이지 로드 시 세션 확인 및 이벤트 설정 초기화
 document.addEventListener('DOMContentLoaded', () => {
   if (sessionStorage.getItem('isAdmin') === 'true') {
     if (adminLoginSection) adminLoginSection.style.display = 'none';
     if (adminArea) adminArea.style.display = 'block';
   }
+
+  // 이벤트 설정 초기화
+  initEventSettingsUI();
 });
+
+// 이벤트 설정 UI 초기화
+function initEventSettingsUI() {
+  const addEventBtn = document.getElementById('addEventBtn');
+  const eventForm = document.getElementById('eventForm');
+  const cancelEventBtn = document.getElementById('cancelEventBtn');
+  const saveEventBtn = document.getElementById('saveEventBtn');
+  const catAll = document.getElementById('catAll');
+  const catItems = document.querySelectorAll('.cat-item');
+
+  if (!addEventBtn) return;
+
+  // 이벤트 목록 표시
+  renderEventList();
+
+  // 새 이벤트 버튼
+  addEventBtn.addEventListener('click', () => {
+    resetEventForm();
+    document.getElementById('eventFormTitle').textContent = '새 이벤트 추가';
+    document.getElementById('editingEventId').value = '';
+    eventForm.style.display = 'block';
+    addEventBtn.style.display = 'none';
+  });
+
+  // 취소 버튼
+  cancelEventBtn.addEventListener('click', () => {
+    eventForm.style.display = 'none';
+    addEventBtn.style.display = 'block';
+  });
+
+  // 저장 버튼
+  saveEventBtn.addEventListener('click', () => {
+    saveEventFromForm();
+  });
+
+  // 전체 카테고리 체크박스
+  catAll.addEventListener('change', () => {
+    if (catAll.checked) {
+      catItems.forEach(item => item.checked = false);
+    }
+  });
+
+  // 개별 카테고리 체크박스
+  catItems.forEach(item => {
+    item.addEventListener('change', () => {
+      if (item.checked) {
+        catAll.checked = false;
+      }
+      const anyChecked = Array.from(catItems).some(i => i.checked);
+      if (!anyChecked) {
+        catAll.checked = true;
+      }
+    });
+  });
+
+  // 이벤트 설정 적용
+  applyEventSettings();
+}
+
+// 이벤트 폼 초기화
+function resetEventForm() {
+  document.getElementById('eventName').value = '';
+  document.getElementById('eventMultiplier').value = '3';
+  document.getElementById('eventStartDate').value = '';
+  document.getElementById('eventEndDate').value = '';
+  document.getElementById('catAll').checked = true;
+  document.querySelectorAll('.cat-item').forEach(item => item.checked = false);
+}
+
+// 폼에서 이벤트 저장
+function saveEventFromForm() {
+  const eventName = document.getElementById('eventName').value.trim();
+  const eventMultiplier = document.getElementById('eventMultiplier').value;
+  const eventStartDate = document.getElementById('eventStartDate').value;
+  const eventEndDate = document.getElementById('eventEndDate').value;
+  const catAll = document.getElementById('catAll');
+  const catItems = document.querySelectorAll('.cat-item');
+  const editingId = document.getElementById('editingEventId').value;
+
+  // 유효성 검사
+  if (!eventName) {
+    alert('이벤트 이름을 입력하세요.');
+    return;
+  }
+  if (!eventStartDate || !eventEndDate) {
+    alert('시작일과 종료일을 모두 입력하세요.');
+    return;
+  }
+  if (eventStartDate > eventEndDate) {
+    alert('종료일이 시작일보다 빠를 수 없습니다.');
+    return;
+  }
+
+  let categories = null;
+  if (!catAll.checked) {
+    categories = Array.from(catItems)
+      .filter(item => item.checked)
+      .map(item => item.value);
+    if (categories.length === 0) categories = null;
+  }
+
+  const eventData = {
+    name: eventName,
+    emoji: '🎉',
+    startDate: eventStartDate,
+    endDate: eventEndDate,
+    expMultiplier: parseFloat(eventMultiplier),
+    categories: categories,
+    enabled: true,
+  };
+
+  if (editingId) {
+    // 수정
+    updateEvent(parseInt(editingId), eventData);
+  } else {
+    // 새로 추가
+    addEvent(eventData);
+  }
+
+  // 폼 닫기
+  document.getElementById('eventForm').style.display = 'none';
+  document.getElementById('addEventBtn').style.display = 'block';
+
+  // 목록 갱신
+  renderEventList();
+}
+
+// 이벤트 목록 렌더링
+function renderEventList() {
+  const eventList = document.getElementById('eventList');
+  if (!eventList) return;
+
+  const events = loadEventHistory();
+  const today = toLocalDateStr(new Date());
+
+  eventList.innerHTML = '';
+
+  if (events.length === 0) {
+    return; // CSS :empty 스타일이 적용됨
+  }
+
+  // 최신 이벤트가 위로 오도록 정렬
+  events.sort((a, b) => new Date(b.startDate) - new Date(a.startDate));
+
+  events.forEach(event => {
+    const isOngoing = event.startDate <= today && event.endDate >= today;
+    const isUpcoming = event.startDate > today;
+    const isEnded = event.endDate < today;
+
+    let statusBadge = '';
+    let cardClass = '';
+    if (isOngoing && event.enabled) {
+      statusBadge = '<span class="event-status-badge ongoing">진행중</span>';
+      cardClass = 'active';
+    } else if (isUpcoming) {
+      statusBadge = '<span class="event-status-badge upcoming">예정</span>';
+    } else if (isEnded) {
+      statusBadge = '<span class="event-status-badge ended">종료</span>';
+      cardClass = 'expired';
+    }
+
+    let categoryText = '전체';
+    if (event.categories && event.categories.length > 0) {
+      categoryText = event.categories.map(c => {
+        const cat = CERT_CATEGORIES[c];
+        return cat ? cat.emoji : c;
+      }).join(' ');
+    }
+
+    const card = document.createElement('div');
+    card.className = `event-card ${cardClass}`;
+    card.innerHTML = `
+      <div class="event-card-toggle">
+        <label class="toggle-switch">
+          <input type="checkbox" ${event.enabled ? 'checked' : ''} data-event-id="${event.id}">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+      <div class="event-card-info">
+        <div class="event-card-name">
+          ${event.emoji || '🎉'} ${event.name}
+          <span class="multiplier">${event.expMultiplier}배</span>
+          ${statusBadge}
+        </div>
+        <div class="event-card-period">📅 ${event.startDate} ~ ${event.endDate}</div>
+        <div class="event-card-categories">대상: ${categoryText}</div>
+      </div>
+      <div class="event-card-actions">
+        <button type="button" class="edit" data-event-id="${event.id}" title="수정">✏️</button>
+        <button type="button" class="delete" data-event-id="${event.id}" title="삭제">🗑️</button>
+      </div>
+    `;
+
+    eventList.appendChild(card);
+  });
+
+  // 이벤트 핸들러 등록
+  eventList.querySelectorAll('.toggle-switch input').forEach(toggle => {
+    toggle.addEventListener('change', (e) => {
+      const eventId = parseInt(e.target.dataset.eventId);
+      updateEvent(eventId, { enabled: e.target.checked });
+      renderEventList();
+    });
+  });
+
+  eventList.querySelectorAll('.edit').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const eventId = parseInt(e.target.dataset.eventId);
+      editEvent(eventId);
+    });
+  });
+
+  eventList.querySelectorAll('.delete').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const eventId = parseInt(e.target.dataset.eventId);
+      if (confirm('이 이벤트를 삭제하시겠습니까?')) {
+        deleteEvent(eventId);
+        renderEventList();
+      }
+    });
+  });
+}
+
+// 이벤트 수정 모드
+function editEvent(eventId) {
+  const events = loadEventHistory();
+  const event = events.find(e => e.id === eventId);
+  if (!event) return;
+
+  document.getElementById('eventFormTitle').textContent = '이벤트 수정';
+  document.getElementById('editingEventId').value = eventId;
+  document.getElementById('eventName').value = event.name;
+  document.getElementById('eventMultiplier').value = event.expMultiplier;
+  document.getElementById('eventStartDate').value = event.startDate;
+  document.getElementById('eventEndDate').value = event.endDate;
+
+  const catAll = document.getElementById('catAll');
+  const catItems = document.querySelectorAll('.cat-item');
+
+  if (event.categories === null) {
+    catAll.checked = true;
+    catItems.forEach(item => item.checked = false);
+  } else {
+    catAll.checked = false;
+    catItems.forEach(item => {
+      item.checked = event.categories.includes(item.value);
+    });
+  }
+
+  document.getElementById('eventForm').style.display = 'block';
+  document.getElementById('addEventBtn').style.display = 'none';
+}
 
 // Google Sheets에 결과 저장 (Form 방식)
 function saveToGoogleSheets() {

@@ -49,9 +49,9 @@
                     <p>매월 새로운 시작, 누구나 1등 가능</p>
                 </div>
                 <div class="science-card">
-                    <span class="icon">⚡</span>
-                    <h3>레벨 하락</h3>
-                    <p>인증 안 한 날 -1 EXP 페널티</p>
+                    <span class="icon">🌱</span>
+                    <h3>시즌 성장</h3>
+                    <p>인증할수록 시즌 EXP 누적</p>
                 </div>
                 <div class="science-card">
                     <span class="icon">🏆</span>
@@ -67,7 +67,70 @@
         </section>
 
         <section class="settings-section" id="settingsSection" style="display: none;">
-            <h2>멤버별 목표 기상 시간 설정</h2>
+            <!-- 이벤트 히스토리 관리 -->
+            <div class="event-settings-box">
+                <div class="event-header">
+                    <h2>🎉 경험치 이벤트 관리</h2>
+                    <button type="button" class="add-event-btn" id="addEventBtn">+ 새 이벤트</button>
+                </div>
+                <p class="event-desc">이벤트는 히스토리로 저장되어, 해당 기간의 기록에 배수가 적용됩니다.</p>
+
+                <!-- 이벤트 목록 -->
+                <div class="event-list" id="eventList"></div>
+
+                <!-- 새 이벤트 추가 폼 (숨김) -->
+                <div class="event-form" id="eventForm" style="display: none;">
+                    <h3 id="eventFormTitle">새 이벤트 추가</h3>
+                    <input type="hidden" id="editingEventId">
+                    <div class="event-row">
+                        <div class="event-field">
+                            <label>이벤트 이름</label>
+                            <input type="text" id="eventName" placeholder="예: 오픈 기념 이벤트">
+                        </div>
+                        <div class="event-field">
+                            <label>경험치 배수</label>
+                            <select id="eventMultiplier">
+                                <option value="1.5">1.5배</option>
+                                <option value="2">2배</option>
+                                <option value="3" selected>3배</option>
+                                <option value="5">5배</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="event-row">
+                        <div class="event-field">
+                            <label>시작일</label>
+                            <input type="date" id="eventStartDate">
+                        </div>
+                        <div class="event-field">
+                            <label>종료일</label>
+                            <input type="date" id="eventEndDate">
+                        </div>
+                    </div>
+                    <div class="event-row">
+                        <div class="event-field full">
+                            <label>적용 카테고리</label>
+                            <div class="category-checkboxes">
+                                <label><input type="checkbox" value="all" id="catAll" checked> 전체</label>
+                                <label><input type="checkbox" value="morning" class="cat-item"> ⏰ 기상</label>
+                                <label><input type="checkbox" value="exercise" class="cat-item"> 🏃 운동</label>
+                                <label><input type="checkbox" value="cleaning" class="cat-item"> 🧹 청소</label>
+                                <label><input type="checkbox" value="planning" class="cat-item"> 📋 계획</label>
+                                <label><input type="checkbox" value="study" class="cat-item"> 📚 공부</label>
+                                <label><input type="checkbox" value="medicine" class="cat-item"> 💊 약</label>
+                                <label><input type="checkbox" value="diary" class="cat-item"> 📝 일기</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="event-form-buttons">
+                        <button type="button" class="btn-cancel" id="cancelEventBtn">취소</button>
+                        <button type="button" class="btn-save" id="saveEventBtn">저장</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 기상 시간 설정 -->
+            <h2>⏰ 멤버별 목표 기상 시간 설정</h2>
             <p class="settings-desc">각 멤버의 목표 기상 시간을 설정하세요. 목표 시간 +-10분 이내 인증만 인정됩니다.</p>
             <div class="member-settings" id="memberSettings"></div>
             <button class="analyze-btn" id="analyzeBtn">분석 시작</button>
@@ -194,13 +257,14 @@
                     <button class="filter-btn" data-filter="planning">📋 계획</button>
                     <button class="filter-btn" data-filter="study">📚 공부</button>
                     <button class="filter-btn" data-filter="medicine">💊 약</button>
+                    <button class="filter-btn" data-filter="diary">📝 일기</button>
                 </div>
                 <div class="records-list" id="recordsList"></div>
             </div>
         </section>
 
             <footer>
-                <p>월간 랭킹 시스템 | 인증 안 하면 -1 EXP 페널티</p>
+                <p>월간 랭킹 시스템 | 꾸준히 인증하고 성장하세요</p>
                 <p class="tip">"꾸준함이 실력이다. 매일 인증하고 1등을 노려보세요!"</p>
             </footer>
         </div><!-- adminArea 끝 -->

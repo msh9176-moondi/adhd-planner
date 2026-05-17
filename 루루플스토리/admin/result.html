@@ -52,6 +52,87 @@
                 </div>
             </div>
 
+            <!-- 이벤트 배너 -->
+            <div class="event-banners" id="eventBanners"></div>
+
+            <!-- 시즌 경험치 섹션 -->
+            <section class="season-section" id="seasonSection">
+                <div class="season-header">
+                    <div class="season-title-area">
+                        <div class="season-title">
+                            <span class="emoji">🌱</span>
+                            <span id="seasonName">작은 씨앗 시즌</span>
+                        </div>
+                        <div class="season-period" id="seasonPeriod">2025.06.01 ~ 2025.08.31</div>
+                    </div>
+                    <div class="season-countdown">
+                        <div class="label">시즌 종료까지</div>
+                        <div class="days" id="seasonDaysLeft">D-47</div>
+                    </div>
+                </div>
+
+                <!-- 복귀 보너스 배너 (해당자만 표시) -->
+                <div class="return-bonus-banner" id="returnBonusBanner" style="display: none;">
+                    <div class="emoji">🌸</div>
+                    <div class="content">
+                        <h4>다시 오신 걸 환영해요!</h4>
+                        <p>오랜만에 돌아오셨군요. 복귀 보너스를 드려요!</p>
+                    </div>
+                    <div class="bonus" id="returnBonusAmount">+20 EXP</div>
+                </div>
+
+                <!-- 내 시즌 현황 -->
+                <div class="season-my-status" id="seasonMyStatus">
+                    <div class="season-my-header">
+                        <div class="season-my-level">
+                            <div class="season-level-emoji" id="seasonLevelEmoji">🌱</div>
+                            <div class="season-level-info">
+                                <h4 id="seasonLevelName">Lv.2 새싹</h4>
+                                <span id="seasonLevelDesc">땅을 뚫고 나왔어요</span>
+                            </div>
+                        </div>
+                        <div class="season-my-exp">
+                            <div class="exp-value" id="seasonExpValue">75</div>
+                            <div class="exp-label">시즌 EXP</div>
+                        </div>
+                    </div>
+                    <div class="season-progress-bar">
+                        <div class="season-progress-fill" id="seasonProgressFill" style="width: 50%"></div>
+                    </div>
+                    <div class="season-progress-text">
+                        <span id="seasonExpCurrent">75 / 120 EXP</span>
+                        <span id="seasonNextLevel">다음: Lv.3 풀잎</span>
+                    </div>
+                    <div class="season-badges" id="seasonBadges">
+                        <!-- 배지들 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 이번 주 시즌 퀘스트 -->
+                <div class="season-quests">
+                    <h4>📋 이번 주 퀘스트</h4>
+                    <div class="quest-list" id="seasonQuestList">
+                        <!-- 퀘스트 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 시즌 레벨 트랙 -->
+                <div class="season-levels">
+                    <h4>🌳 시즌 레벨</h4>
+                    <div class="level-track" id="seasonLevelTrack">
+                        <!-- 레벨 노드 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 시즌 TOP 10 -->
+                <div class="season-top10">
+                    <h4>🏆 시즌 성장 현황</h4>
+                    <div class="top10-list" id="seasonTop10">
+                        <!-- TOP 10 동적 생성 -->
+                    </div>
+                </div>
+            </section>
+
             <!-- 주간 인증 경고 시스템 -->
             <div class="weekly-alert-section" id="weeklyAlertSection">
                 <div class="alert-header">
@@ -131,7 +212,7 @@
         </section>
 
         <footer>
-            <p>월간 랭킹 시스템 | 인증 안 하면 -1 EXP 페널티</p>
+            <p>월간 랭킹 시스템 | 꾸준히 인증하고 성장하세요</p>
             <p class="tip">"꾸준함이 실력이다. 매일 인증하고 1등을 노려보세요!"</p>
         </footer>
     </div>
