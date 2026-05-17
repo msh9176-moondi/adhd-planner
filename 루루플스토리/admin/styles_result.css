@@ -1248,6 +1248,7 @@ header h1 {
 .record-tag.planning { background: rgba(167, 139, 250, 0.2); color: var(--planning); }
 .record-tag.study { background: rgba(74, 222, 128, 0.2); color: var(--study); }
 .record-tag.medicine { background: rgba(248, 113, 113, 0.2); color: var(--medicine); }
+.record-tag.diary { background: rgba(251, 146, 60, 0.2); color: var(--diary); }
 
 .status-badge {
     padding: 0.25rem 0.5rem;

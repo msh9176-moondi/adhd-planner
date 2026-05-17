@@ -975,6 +975,7 @@ header h1 {
 .category-card.planning::before { background: var(--planning); }
 .category-card.study::before { background: var(--study); }
 .category-card.medicine::before { background: var(--medicine); }
+.category-card.diary::before { background: var(--diary); }
 
 .category-card .emoji {
     font-size: 2rem;
@@ -1022,6 +1023,7 @@ header h1 {
 .category-card.planning .count { color: var(--planning); }
 .category-card.study .count { color: var(--study); }
 .category-card.medicine .count { color: var(--medicine); }
+.category-card.diary .count { color: var(--diary); }
 
 .leaderboard-section {
     margin-bottom: 2rem;
@@ -1616,6 +1618,7 @@ header h1 {
 .record-tag.planning { background: rgba(167, 139, 250, 0.2); color: var(--planning); }
 .record-tag.study { background: rgba(74, 222, 128, 0.2); color: var(--study); }
 .record-tag.medicine { background: rgba(248, 113, 113, 0.2); color: var(--medicine); }
+.record-tag.diary { background: rgba(251, 146, 60, 0.2); color: var(--diary); }
 
 .status-badge {
     padding: 0.25rem 0.5rem;
