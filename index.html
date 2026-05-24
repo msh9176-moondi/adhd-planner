@@ -827,11 +827,8 @@
         border-radius: 50%;
         border: 2px solid #c8b9ea;
         background: #fff;
-        display: grid;
-        place-items: center;
-        color: #fff;
-        font-weight: 900;
         flex: 0 0 auto;
+        position: relative;
       }
       .goal-item.done .goal-check {
         background: var(--point);
@@ -839,6 +836,13 @@
       }
       .goal-item.done .goal-check::after {
         content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
       }
       .goal-item.done .goal-main strong {
         text-decoration: line-through;
@@ -885,6 +889,26 @@
         background: #f3f8f1;
         color: #6f946a;
       }
+      .life-category {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 6px 10px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 900;
+        white-space: nowrap;
+        background: #f8f5fc;
+        color: #725ca3;
+      }
+      .life-category.health { background: #e8f5e9; color: #388e3c; }
+      .life-category.finance { background: #fff8e1; color: #f57c00; }
+      .life-category.relationship { background: #fce4ec; color: #c2185b; }
+      .life-category.career { background: #e3f2fd; color: #1976d2; }
+      .life-category.growth { background: #ede7f6; color: #7b1fa2; }
+      .life-category.leisure { background: #fff3e0; color: #e65100; }
+      .life-category.mind { background: #e0f2f1; color: #00796b; }
+      .life-category.other { background: #f3e5f5; color: #8e24aa; }
       .goal-add-panel {
         margin-top: 14px;
         padding: 14px;
@@ -1578,8 +1602,46 @@
         text-decoration: line-through;
         color: #aaa3b5;
       }
-      .parent-goal.done::after {
-        content: '완료됨';
+      .parent-goal-content {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+      }
+      .parent-goal-check {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        border: 2px solid #d4cce3;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+        margin-top: 2px;
+        transition: all 0.15s;
+        position: relative;
+      }
+      .parent-goal-check:hover {
+        border-color: var(--point);
+        background: #f8f5fc;
+      }
+      .parent-goal.done .parent-goal-check {
+        background: var(--point);
+        border-color: var(--point);
+      }
+      .parent-goal.done .parent-goal-check::after {
+        content: '✓';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .parent-goal-main {
+        flex: 1;
+        min-width: 0;
+      }
+      .parent-goal-status {
         display: inline-flex;
         margin-top: 8px;
         min-height: 26px;
@@ -1656,6 +1718,15 @@
 
         .card {
           margin-bottom: 0;
+        }
+
+        .parent-list {
+          max-height: none;
+          overflow-y: visible;
+        }
+
+        .drag-hint {
+          display: none;
         }
       }
 
@@ -4172,6 +4243,198 @@
         resize: vertical;
         background: #fdfbff;
         color: #5b4b8a;
+      }
+
+      /* AI 분석 새 스타일 */
+      .ai-analyze-btn {
+        width: 100%;
+        padding: 16px;
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        color: #fff;
+        border: none;
+        border-radius: 16px;
+        font-size: 16px;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.2s;
+        box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+      }
+      .ai-analyze-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(124, 58, 237, 0.4);
+      }
+      .ai-analyze-btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+      .ai-prompt-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 12px 0;
+        color: #a89cc4;
+        font-size: 12px;
+      }
+      .ai-prompt-divider::before,
+      .ai-prompt-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: #e8e1f2;
+      }
+      .ai-analysis-loading {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+        padding: 24px;
+        background: #faf7ff;
+        border-radius: 16px;
+        margin-top: 12px;
+      }
+      .ai-analysis-loading.hidden {
+        display: none;
+      }
+      .ai-loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 3px solid #e8e1f2;
+        border-top-color: #7c3aed;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      .ai-analysis-loading p {
+        font-size: 15px;
+        font-weight: 700;
+        color: #5b4b8a;
+        margin: 0;
+      }
+      .ai-analysis-loading span {
+        font-size: 12px;
+        color: #a89cc4;
+      }
+
+      /* AI 분석 모달 */
+      .ai-analysis-modal {
+        background: #fff;
+        border-radius: 24px;
+        width: 90%;
+        max-width: 600px;
+        max-height: 85vh;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        box-shadow: 0 20px 60px rgba(91, 75, 138, 0.3);
+      }
+      .ai-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 20px 24px;
+        border-bottom: 1px solid #f0ebf8;
+        background: linear-gradient(135deg, #faf7ff, #f3f0ff);
+      }
+      .ai-modal-header h2 {
+        font-size: 18px;
+        font-weight: 800;
+        color: #5b4b8a;
+        margin: 0;
+      }
+      .ai-modal-close {
+        width: 32px;
+        height: 32px;
+        border: none;
+        background: #ede9fe;
+        color: #7c3aed;
+        border-radius: 50%;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background 0.2s;
+      }
+      .ai-modal-close:hover {
+        background: #ddd6fe;
+      }
+      .ai-modal-date {
+        padding: 12px 24px;
+        background: #faf7ff;
+        font-size: 12px;
+        color: #8f819c;
+        text-align: center;
+      }
+      .ai-modal-content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 24px;
+        font-size: 14px;
+        line-height: 1.7;
+        color: #4a4458;
+      }
+      .ai-modal-content h2 {
+        font-size: 16px;
+        font-weight: 800;
+        color: #5b4b8a;
+        margin: 24px 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #ede9fe;
+      }
+      .ai-modal-content h2:first-child {
+        margin-top: 0;
+      }
+      .ai-modal-content h3 {
+        font-size: 14px;
+        font-weight: 700;
+        color: #7c3aed;
+        margin: 16px 0 8px;
+      }
+      .ai-modal-content p {
+        margin: 8px 0;
+      }
+      .ai-modal-content ul,
+      .ai-modal-content ol {
+        margin: 8px 0;
+        padding-left: 20px;
+      }
+      .ai-modal-content li {
+        margin: 6px 0;
+      }
+      .ai-modal-content strong {
+        color: #5b4b8a;
+      }
+      .ai-modal-footer {
+        display: flex;
+        gap: 12px;
+        padding: 16px 24px;
+        border-top: 1px solid #f0ebf8;
+        background: #fdfbff;
+      }
+      .ai-modal-btn {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .ai-modal-btn.primary {
+        background: linear-gradient(135deg, #7c3aed, #5b21b6);
+        color: #fff;
+      }
+      .ai-modal-btn.primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
+      }
+      .ai-modal-btn.secondary {
+        background: #ede9fe;
+        color: #7c3aed;
+      }
+      .ai-modal-btn.secondary:hover {
+        background: #ddd6fe;
       }
 
       @media (min-width: 768px) {
@@ -8702,6 +8965,16 @@
               <option value="p3">해야할 일</option>
               <option value="p4">하면 좋은 일</option>
             </select>
+            <select id="goalCategory" class="hidden">
+              <option value="health">💪 건강</option>
+              <option value="finance">💰 재정</option>
+              <option value="relationship">❤️ 관계</option>
+              <option value="career">💼 커리어</option>
+              <option value="growth">📚 자기계발</option>
+              <option value="leisure">🎨 여가</option>
+              <option value="mind">🧘 마음</option>
+              <option value="other">✨ 기타</option>
+            </select>
             <button class="goal-save-add" id="saveGoal">＋ 목표 추가</button>
           </div>
         </div>
@@ -8936,22 +9209,30 @@
           <div class="goal-card-head">
             <div>
               <h2>🧠 AI 맞춤 분석</h2>
-              <p class="sub">ChatGPT에게 내 데이터를 분석받아보세요.</p>
+              <p class="sub">나의 모든 데이터를 AI가 종합 분석해요.</p>
             </div>
           </div>
           <div class="ai-analysis-info">
             <p>
-              아래 버튼을 누르면 이번 달 기록을 바탕으로 AI 분석용 프롬프트가
-              생성됩니다.
-            </p>
-            <p class="ai-hint">
-              생성된 프롬프트를 ChatGPT에 붙여넣으면 ADHD 전문가 관점의 맞춤
-              피드백을 받을 수 있어요.
+              목표, 감정, 생산성, 루틴 등 모든 기록을 바탕으로<br>
+              <strong>맞춤형 인사이트와 조언</strong>을 받아보세요.
             </p>
           </div>
           <div class="ai-stats-preview" id="aiStatsPreview"></div>
+          <button class="ai-analyze-btn" id="runAiAnalysis">
+            🔮 AI 종합 분석 시작하기
+          </button>
+          <div class="ai-analysis-loading hidden" id="aiAnalysisLoading">
+            <div class="ai-loading-spinner"></div>
+            <p>AI가 데이터를 분석하고 있어요...</p>
+            <span>잠시만 기다려주세요 (약 10-20초)</span>
+          </div>
+
+          <div class="ai-prompt-divider">
+            <span>또는</span>
+          </div>
           <button class="ai-generate-btn" id="generateAiPrompt">
-            📋 AI 분석 프롬프트 생성
+            📋 ChatGPT용 프롬프트 생성
           </button>
           <div class="ai-prompt-result hidden" id="aiPromptResult">
             <div class="ai-prompt-header">
@@ -9308,10 +9589,35 @@
           <option value="p3">해야할 일</option>
           <option value="p4">하면 좋은 일</option>
         </select>
+        <select id="editGoalCategory" class="hidden">
+          <option value="health">💪 건강</option>
+          <option value="finance">💰 재정</option>
+          <option value="relationship">❤️ 관계</option>
+          <option value="career">💼 커리어</option>
+          <option value="growth">📚 자기계발</option>
+          <option value="leisure">🎨 여가</option>
+          <option value="mind">🧘 마음</option>
+          <option value="other">✨ 기타</option>
+        </select>
 
         <div class="edit-modal-actions">
           <button class="modal-cancel" id="cancelGoalEdit">취소</button>
           <button class="modal-save" id="saveGoalEdit">저장하기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-backdrop hidden" id="aiAnalysisModal">
+      <div class="ai-analysis-modal">
+        <div class="ai-modal-header">
+          <h2>🧠 AI 맞춤 분석 리포트</h2>
+          <button class="ai-modal-close" id="closeAiAnalysis">✕</button>
+        </div>
+        <div class="ai-modal-date" id="aiAnalysisDate"></div>
+        <div class="ai-modal-content" id="aiAnalysisContent"></div>
+        <div class="ai-modal-footer">
+          <button class="ai-modal-btn secondary" id="copyAiAnalysis">📋 복사하기</button>
+          <button class="ai-modal-btn primary" id="closeAiAnalysisBtn">확인</button>
         </div>
       </div>
     </div>
@@ -10695,15 +11001,18 @@
             Object.keys(goals).forEach(k => delete goals[k]);
             Object.assign(goals, appData.goals);
             console.log('메모리 goals 업데이트 완료');
-          }
-          if (typeof todos !== 'undefined') {
-            const todayKey = 'd-' + getDateKeyFromDate(new Date());
+
+            // 중요: selectedDate에 맞는 todos 배열로 동기화
+            const todayKey = 'd-' + (typeof selectedDate !== 'undefined' ? selectedDate : getDateKeyFromDate(new Date()));
             console.log('오늘 키:', todayKey);
-            if (appData.goals.day && appData.goals.day[todayKey]) {
-              console.log('오늘 할일:', appData.goals.day[todayKey].length, '개');
-              // todos 배열 내용을 완전히 교체
-              todos.length = 0;
-              todos.push(...appData.goals.day[todayKey]);
+            console.log('goals.day에서 찾기:', goals.day[todayKey] ? goals.day[todayKey].length + '개' : '없음');
+
+            if (goals.day[todayKey]) {
+              // todos 변수를 goals.day[todayKey] 배열로 직접 재할당
+              if (typeof syncTodosToSelectedDay === 'function') {
+                syncTodosToSelectedDay();
+                console.log('syncTodosToSelectedDay 호출 완료, todos 길이:', todos.length);
+              }
             } else {
               console.log('오늘 할일 데이터 없음');
             }
@@ -10847,9 +11156,21 @@
           if (userData && userData.app_data) {
             restoreAllAppData(userData.app_data);
 
+            // 복원 후 todos 상태 확인
+            console.log('=== 복원 후 상태 ===');
+            console.log('todos 배열:', todos);
+            console.log('todos 길이:', todos.length);
+            console.log('selectedDate:', selectedDate);
+            console.log('dayKey(selectedDate):', dayKey(selectedDate));
+            console.log('goals.day[dayKey()]:', goals.day[dayKey(selectedDate)]);
+
             // UI 새로고침
             if (typeof setGreeting === 'function') setGreeting();
-            if (typeof renderTodos === 'function') renderTodos();
+            if (typeof renderTodos === 'function') {
+              console.log('renderTodos 호출 전');
+              renderTodos();
+              console.log('renderTodos 호출 후, todoList 자식 수:', document.getElementById('todoList').children.length);
+            }
             if (typeof renderGoalsSection === 'function') renderGoalsSection();
             if (typeof renderRewardShop === 'function') renderRewardShop();
             if (typeof loadMorningJournal === 'function') loadMorningJournal();
@@ -11316,7 +11637,7 @@
             );
             const updatedTodo = todos.find((t) => t.id === id);
             if (!beforeTodo?.done && updatedTodo?.done) {
-              rewardTaskCompletion(`task-${id}`);
+              rewardTaskCompletion(`task-${id}`, updatedTodo?.title || '');
             } else if (beforeTodo?.done && !updatedTodo?.done) {
               revokeTaskCompletion(`task-${id}`);
             }
@@ -11731,7 +12052,7 @@
         );
         const completedTodo = todos.find((t) => t.id === currentId);
         if (!beforeTodo?.done && completedTodo?.done) {
-          rewardTaskCompletion(`task-${currentId}`);
+          rewardTaskCompletion(`task-${currentId}`, completedTodo?.title || '');
         }
         syncParentCompletionFromChild(completedTodo);
         syncDayGoals();
@@ -13148,9 +13469,20 @@
         },
       ];
 
+      // 해시태그 기반 경험치 카테고리
+      const EXP_CATEGORIES = [
+        { id: 'clean', tags: ['청소', '방청소', '정리', '설거지', '빨래'], xp: 1, dailyLimit: 3, emoji: '🧹', label: '청소' },
+        { id: 'exercise', tags: ['운동', '헬스', '러닝', '산책', '식단'], xp: 4, dailyLimit: 3, emoji: '🏃', label: '운동' },
+        { id: 'plan', tags: ['계획', '계획표', '투두', '할일'], xp: 3, dailyLimit: 1, emoji: '📋', label: '계획' },
+        { id: 'study', tags: ['공부', '스터디', '독서', '학습'], xp: 4, dailyLimit: 3, emoji: '📚', label: '공부' },
+        { id: 'morning', tags: ['기상', '굿모닝', '아침'], xp: 2, dailyLimit: 1, emoji: '⏰', label: '기상' },
+        { id: 'medicine', tags: ['약', '복약', '약먹기', '영양제'], xp: 1, dailyLimit: 1, emoji: '💊', label: '약' },
+        { id: 'diary', tags: ['일기', '다이어리', '기록', '회고'], xp: 1, dailyLimit: 1, emoji: '📝', label: '일기' },
+      ];
+
       let rewardState = JSON.parse(
         localStorage.getItem('floca_reward_state') ||
-          '{"spent":0,"inventory":[],"customRewards":[],"earnedPoints":0,"xp":0,"completedKeys":[],"totalCompleted":0,"dailyCloseRewardedDates":[],"perfectRewardedDates":[],"streakBonuses":[]}',
+          '{"spent":0,"inventory":[],"customRewards":[],"earnedPoints":0,"xp":0,"completedKeys":[],"totalCompleted":0,"dailyCloseRewardedDates":[],"perfectRewardedDates":[],"streakBonuses":[],"dailyExpCounts":{}}',
       );
 
       function normalizeRewardState() {
@@ -13167,8 +13499,47 @@
         rewardState.perfectRewardedDates =
           rewardState.perfectRewardedDates || [];
         rewardState.streakBonuses = rewardState.streakBonuses || [];
+        rewardState.dailyExpCounts = rewardState.dailyExpCounts || {};
+        rewardState.completionXpLog = rewardState.completionXpLog || {};
       }
       normalizeRewardState();
+
+      // 할일 텍스트에서 해시태그 카테고리 찾기
+      function getExpCategoryForTask(taskTitle) {
+        if (!taskTitle) return null;
+        const lowerTitle = taskTitle.toLowerCase();
+        for (const cat of EXP_CATEGORIES) {
+          for (const tag of cat.tags) {
+            if (lowerTitle.includes(tag) || lowerTitle.includes('#' + tag)) {
+              return cat;
+            }
+          }
+        }
+        return null;
+      }
+
+      // 오늘 해당 카테고리 경험치 지급 횟수 확인
+      function getDailyExpCount(categoryId) {
+        const todayKey = getDateKeyFromDate(new Date());
+        const key = `${todayKey}-${categoryId}`;
+        return rewardState.dailyExpCounts[key] || 0;
+      }
+
+      // 오늘 경험치 지급 가능 여부
+      function canGiveExpToday(category) {
+        if (!category) return false;
+        return getDailyExpCount(category.id) < category.dailyLimit;
+      }
+
+      // 경험치 지급 기록
+      function recordDailyExp(categoryId, delta = 1) {
+        const todayKey = getDateKeyFromDate(new Date());
+        const key = `${todayKey}-${categoryId}`;
+        rewardState.dailyExpCounts[key] = (rewardState.dailyExpCounts[key] || 0) + delta;
+        if (rewardState.dailyExpCounts[key] <= 0) {
+          delete rewardState.dailyExpCounts[key];
+        }
+      }
 
       function saveRewardState() {
         normalizeRewardState();
@@ -13207,19 +13578,43 @@
         return true;
       }
 
-      function rewardTaskCompletion(completionKey) {
-        const awarded = addRewardPoints({
-          points: 10,
-          xp: 20,
-          completionKey,
-          countCompletion: true,
-        });
-        if (awarded) {
-          const message = '할 일 완료 보상 +10P, +20XP';
+      function rewardTaskCompletion(completionKey, taskTitle = '') {
+        normalizeRewardState();
+
+        // 이미 보상 받은 경우 무시
+        if (rewardState.completedKeys.includes(completionKey)) return false;
+
+        const category = getExpCategoryForTask(taskTitle);
+        let xpToGive = 0;
+        let message = '';
+
+        if (category && canGiveExpToday(category)) {
+          xpToGive = category.xp;
+          recordDailyExp(category.id, 1);
+          const remaining = category.dailyLimit - getDailyExpCount(category.id);
+          message = `${category.emoji} ${category.label} +${xpToGive}XP`;
+          if (remaining > 0) {
+            message += ` (오늘 ${remaining}회 남음)`;
+          }
+        } else if (category && !canGiveExpToday(category)) {
+          message = `${category.emoji} ${category.label} 완료! (오늘 XP 한도 도달)`;
+        }
+
+        rewardState.completedKeys.push(completionKey);
+        rewardState.xp += xpToGive;
+        rewardState.totalCompleted += 1;
+
+        // 완료 시 지급된 XP 기록 (취소 시 사용)
+        if (!rewardState.completionXpLog) rewardState.completionXpLog = {};
+        rewardState.completionXpLog[completionKey] = { xp: xpToGive, categoryId: category?.id || null };
+
+        saveRewardState();
+
+        if (message) {
           renderRewardPage(message);
           showPointToast(message);
         }
-        return awarded;
+        return true;
       }
 
       function revokeTaskCompletion(completionKey) {
@@ -13227,11 +13622,17 @@
         const idx = rewardState.completedKeys.indexOf(completionKey);
         if (idx === -1) return;
         rewardState.completedKeys.splice(idx, 1);
-        rewardState.earnedPoints = Math.max(
-          0,
-          (rewardState.earnedPoints || 0) - 10,
-        );
-        rewardState.xp = Math.max(0, (rewardState.xp || 0) - 20);
+
+        // 기록된 XP만큼 차감
+        const log = rewardState.completionXpLog?.[completionKey];
+        if (log) {
+          rewardState.xp = Math.max(0, (rewardState.xp || 0) - log.xp);
+          if (log.categoryId) {
+            recordDailyExp(log.categoryId, -1);
+          }
+          delete rewardState.completionXpLog[completionKey];
+        }
+
         rewardState.totalCompleted = Math.max(
           0,
           (rewardState.totalCompleted || 0) - 1,
@@ -14829,12 +15230,206 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         return { error: null, prompt, data: analysisData };
       }
 
+      // AI 분석용 전체 데이터 수집
+      function collectAllUserData() {
+        const data = {
+          collectedAt: new Date().toISOString(),
+          goals: {},
+          dailyCloseRecords: {},
+          morningJournal: {},
+          emotionTherapy: [],
+          procRecords: [],
+          rewardState: {},
+          brainDump: '',
+          routines: [],
+        };
+
+        // 목표 데이터
+        try {
+          const goalsData = JSON.parse(localStorage.getItem(FLOCA_GOALS_KEY) || '{}');
+          data.goals = {
+            life: goalsData.life || [],
+            year: goalsData.year || [],
+            month: goalsData.month || {},
+            week: goalsData.week || {},
+            day: goalsData.day || {},
+          };
+
+          // 목표 통계 계산
+          const allDayGoals = Object.values(data.goals.day || {}).flat();
+          const allWeekGoals = Object.values(data.goals.week || {}).flat();
+          const allMonthGoals = Object.values(data.goals.month || {}).flat();
+
+          data.goalStats = {
+            life: { total: data.goals.life.length, done: data.goals.life.filter(g => g.done).length },
+            year: { total: data.goals.year.length, done: data.goals.year.filter(g => g.done).length },
+            month: { total: allMonthGoals.length, done: allMonthGoals.filter(g => g.done).length },
+            week: { total: allWeekGoals.length, done: allWeekGoals.filter(g => g.done).length },
+            day: { total: allDayGoals.length, done: allDayGoals.filter(g => g.done).length },
+          };
+
+          // 인생 목표 카테고리 분포
+          data.lifeCategoryDistribution = data.goals.life.reduce((acc, g) => {
+            const cat = g.category || 'other';
+            acc[cat] = (acc[cat] || 0) + 1;
+            return acc;
+          }, {});
+        } catch (e) { console.error('Goals data error:', e); }
+
+        // 하루 마무리 기록
+        try {
+          data.dailyCloseRecords = JSON.parse(localStorage.getItem('floca_daily_close_records') || '{}');
+        } catch (e) {}
+
+        // 아침 저널
+        try {
+          data.morningJournal = JSON.parse(localStorage.getItem('floca_morning_journal') || '{}');
+        } catch (e) {}
+
+        // 감정 인지치료
+        try {
+          data.emotionTherapy = JSON.parse(localStorage.getItem('floca_emotion_therapy') || '[]');
+        } catch (e) {}
+
+        // 미루기 대처 기록
+        try {
+          data.procRecords = JSON.parse(localStorage.getItem('floca_proc_records') || '[]');
+        } catch (e) {}
+
+        // 보상 상태
+        try {
+          data.rewardState = JSON.parse(localStorage.getItem('floca_reward_state') || '{}');
+        } catch (e) {}
+
+        // 브레인 덤프
+        try {
+          data.brainDump = localStorage.getItem('floca_brain_dump') || '';
+        } catch (e) {}
+
+        // 루틴
+        try {
+          data.routines = JSON.parse(localStorage.getItem('floca_routines') || '[]');
+        } catch (e) {}
+
+        return data;
+      }
+
+      // AI 분석 실행
+      async function runAiAnalysis() {
+        const analyzeBtn = document.getElementById('runAiAnalysis');
+        const loadingDiv = document.getElementById('aiAnalysisLoading');
+        const modal = document.getElementById('aiAnalysisModal');
+        const contentDiv = document.getElementById('aiAnalysisContent');
+        const dateDiv = document.getElementById('aiAnalysisDate');
+
+        if (!analyzeBtn || !loadingDiv) return;
+
+        try {
+          // UI 상태 변경
+          analyzeBtn.disabled = true;
+          analyzeBtn.textContent = '분석 중...';
+          loadingDiv.classList.remove('hidden');
+
+          // 데이터 수집
+          const userData = collectAllUserData();
+
+          // Edge Function 호출
+          const response = await fetch(`${SUPABASE_URL}/functions/v1/analyze-user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+            },
+            body: JSON.stringify({ userData }),
+          });
+
+          if (!response.ok) {
+            throw new Error('분석 요청에 실패했습니다.');
+          }
+
+          const result = await response.json();
+
+          if (result.error) {
+            throw new Error(result.error);
+          }
+
+          // 결과 표시
+          const analysisHtml = markdownToHtml(result.analysis);
+          contentDiv.innerHTML = analysisHtml;
+          dateDiv.textContent = `분석 일시: ${new Date(result.analyzedAt).toLocaleString('ko-KR')}`;
+          modal.classList.remove('hidden');
+
+          showToast('✨ AI 분석이 완료되었어요!');
+
+        } catch (error) {
+          console.error('AI Analysis error:', error);
+          showToast(error.message || '분석 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
+        } finally {
+          // UI 상태 복구
+          analyzeBtn.disabled = false;
+          analyzeBtn.textContent = '🔮 AI 종합 분석 시작하기';
+          loadingDiv.classList.add('hidden');
+        }
+      }
+
+      // 간단한 마크다운 → HTML 변환
+      function markdownToHtml(md) {
+        if (!md) return '';
+        return md
+          .replace(/^## (.+)$/gm, '<h2>$1</h2>')
+          .replace(/^### (.+)$/gm, '<h3>$1</h3>')
+          .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+          .replace(/^- (.+)$/gm, '<li>$1</li>')
+          .replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>')
+          .replace(/\n\n/g, '</p><p>')
+          .replace(/\n/g, '<br>')
+          .replace(/^(.+)$/gm, (match) => {
+            if (match.startsWith('<')) return match;
+            return match;
+          });
+      }
+
       function bindAiAnalysisEvents() {
         const generateBtn = document.getElementById('generateAiPrompt');
         const copyBtn = document.getElementById('copyAiPrompt');
         const resultDiv = document.getElementById('aiPromptResult');
         const promptText = document.getElementById('aiPromptText');
 
+        // AI 분석 버튼
+        const analyzeBtn = document.getElementById('runAiAnalysis');
+        if (analyzeBtn) {
+          analyzeBtn.addEventListener('click', runAiAnalysis);
+        }
+
+        // AI 분석 모달 닫기
+        const closeModal = document.getElementById('closeAiAnalysis');
+        const closeModalBtn = document.getElementById('closeAiAnalysisBtn');
+        const modal = document.getElementById('aiAnalysisModal');
+
+        if (closeModal) {
+          closeModal.addEventListener('click', () => modal.classList.add('hidden'));
+        }
+        if (closeModalBtn) {
+          closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
+        }
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.classList.add('hidden');
+          });
+        }
+
+        // AI 분석 결과 복사
+        const copyAnalysis = document.getElementById('copyAiAnalysis');
+        const contentDiv = document.getElementById('aiAnalysisContent');
+        if (copyAnalysis && contentDiv) {
+          copyAnalysis.addEventListener('click', () => {
+            navigator.clipboard.writeText(contentDiv.innerText)
+              .then(() => showToast('분석 결과가 복사되었어요!'))
+              .catch(() => showToast('복사에 실패했어요.'));
+          });
+        }
+
+        // 기존 프롬프트 생성 버튼
         if (generateBtn) {
           generateBtn.addEventListener('click', () => {
             const result = generateAiAnalysisPrompt();
@@ -15152,6 +15747,22 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         p3: '해야할 일',
         p4: '하면 좋은 일',
       };
+
+      const lifeCategoryList = [
+        { id: 'health', emoji: '💪', label: '건강' },
+        { id: 'finance', emoji: '💰', label: '재정' },
+        { id: 'relationship', emoji: '❤️', label: '관계' },
+        { id: 'career', emoji: '💼', label: '커리어' },
+        { id: 'growth', emoji: '📚', label: '자기계발' },
+        { id: 'leisure', emoji: '🎨', label: '여가' },
+        { id: 'mind', emoji: '🧘', label: '마음' },
+        { id: 'other', emoji: '✨', label: '기타' },
+      ];
+
+      const lifeCategoryMap = lifeCategoryList.reduce((acc, cat) => {
+        acc[cat.id] = cat;
+        return acc;
+      }, {});
 
       function loadGoals() {
         try {
@@ -15543,6 +16154,48 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         renderGoalsSection();
       }
 
+      function toggleParentGoalDone(parentLevel, goalId) {
+        const bucket = getParentGoalBucket(parentLevel);
+        const beforeGoal = bucket.find((g) => g.id === goalId);
+        if (!beforeGoal) return;
+
+        const updatedBucket = bucket.map((g) =>
+          g.id === goalId ? { ...g, done: !g.done } : g
+        );
+
+        // 상위 레벨 버킷 직접 업데이트
+        if (parentLevel === 'life' || parentLevel === 'year') {
+          goals[parentLevel] = updatedBucket;
+        } else if (parentLevel === 'month') {
+          goals.month[monthKey(selectedMonth)] = updatedBucket;
+        } else if (parentLevel === 'week') {
+          goals.week[weekKey(selectedMonth, selectedWeek)] = updatedBucket;
+        } else if (parentLevel === 'day') {
+          goals.day[dayKey(selectedDate)] = updatedBucket;
+        }
+
+        const updatedGoal = updatedBucket.find((g) => g.id === goalId);
+
+        // 리워드 처리
+        if (!beforeGoal.done && updatedGoal?.done) {
+          rewardTaskCompletion(
+            getRewardCompletionKeyForGoal(parentLevel, goalId),
+            updatedGoal.title || ''
+          );
+        } else if (beforeGoal.done && !updatedGoal?.done) {
+          revokeTaskCompletion(
+            getRewardCompletionKeyForGoal(parentLevel, goalId)
+          );
+        }
+
+        // 상위 목표 연동 처리
+        syncParentCompletionFromChild(updatedGoal);
+
+        // UI 업데이트
+        renderParentGoals();
+        saveGoals();
+      }
+
       function renderParentGoals() {
         const info = levelInfo[currentGoalLevel];
         document.getElementById('parentTitle').textContent = info.parentTitle;
@@ -15567,14 +16220,31 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           const item = document.createElement('div');
           item.className = `parent-goal ${goal.done ? 'done' : ''}`;
           item.dataset.id = goal.id;
+          item.dataset.level = info.parent;
+
+          // 인생 목표는 카테고리 표시, 그 외는 우선순위 표시
+          let tagHtml = '';
+          if (info.parent === 'life' && goal.category) {
+            const cat = lifeCategoryMap[goal.category] || lifeCategoryMap.other;
+            tagHtml = `<span class="life-category ${goal.category}">${cat.emoji} ${cat.label}</span>`;
+          } else {
+            tagHtml = `<span class="priority ${goal.priority}">${priorityGoalText[goal.priority] || ''}</span>`;
+          }
+
           item.innerHTML = `
       <div class="parent-top">
         <span class="level-pill">${levelInfo[info.parent].tab}</span>
-        <span class="priority ${goal.priority}">${priorityGoalText[goal.priority]}</span>
+        ${tagHtml}
         <button class="import-goal-btn" data-id="${goal.id}">${importButtonText(currentGoalLevel)}</button>
       </div>
-      <strong>${goal.title}</strong>
-      <p>${goal.memo}</p>
+      <div class="parent-goal-content">
+        <button class="parent-goal-check" title="완료 체크"></button>
+        <div class="parent-goal-main">
+          <strong>${goal.title}</strong>
+          <p>${goal.memo}</p>
+          ${goal.done ? '<span class="parent-goal-status">완료됨</span>' : ''}
+        </div>
+      </div>
     `;
           list.appendChild(item);
         });
@@ -15583,6 +16253,17 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           'beforeend',
           `<div class="drag-hint">목표가 많다면 이 영역 안에서 위아래로 스크롤해요.</div>`,
         );
+
+        // 상위 목표 완료 체크 이벤트
+        content.querySelectorAll('.parent-goal-check').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const item = btn.closest('.parent-goal');
+            const goalId = Number(item.dataset.id);
+            const parentLevel = item.dataset.level;
+            toggleParentGoalDone(parentLevel, goalId);
+          });
+        });
 
         content.querySelectorAll('.import-goal-btn').forEach((btn) => {
           btn.addEventListener('click', (e) => {
@@ -15605,6 +16286,8 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         document.getElementById('editGoalMemo').value = goal.memo || '';
         document.getElementById('editGoalPriority').value =
           goal.priority || 'p3';
+        document.getElementById('editGoalCategory').value =
+          goal.category || 'health';
         document.getElementById('editGoalStart').value =
           goal.startTime || goal.time || '09:00';
         document.getElementById('editGoalEnd').value =
@@ -15612,6 +16295,18 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         document
           .getElementById('goalEditTimeGrid')
           .classList.toggle('hidden', level !== 'day');
+
+        // 인생 목표일 때 카테고리 선택, 그 외에는 우선순위 선택
+        const prioritySelect = document.getElementById('editGoalPriority');
+        const categorySelect = document.getElementById('editGoalCategory');
+        if (level === 'life') {
+          prioritySelect.classList.add('hidden');
+          categorySelect.classList.remove('hidden');
+        } else {
+          prioritySelect.classList.remove('hidden');
+          categorySelect.classList.add('hidden');
+        }
+
         document.getElementById('goalEditModal').classList.remove('hidden');
       }
 
@@ -15627,6 +16322,7 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         const title = document.getElementById('editGoalTitle').value.trim();
         const memo = document.getElementById('editGoalMemo').value.trim();
         const priority = document.getElementById('editGoalPriority').value;
+        const category = document.getElementById('editGoalCategory').value;
         const startTime =
           document.getElementById('editGoalStart').value || '09:00';
         const endTime = document.getElementById('editGoalEnd').value || '';
@@ -15637,20 +16333,31 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         }
 
         const bucket = getBucketByRef(level, key);
-        const nextBucket = bucket.map((g) =>
-          g.id === id
-            ? {
-                ...g,
-                title,
-                memo: memo || '메모 없음',
-                priority,
-                startTime: level === 'day' ? startTime : g.startTime,
-                endTime: level === 'day' ? endTime : g.endTime,
-                time: level === 'day' ? startTime : g.time,
-                tag: level === 'day' ? priorityGoalText[priority] : g.tag,
-              }
-            : g,
-        );
+        const nextBucket = bucket.map((g) => {
+          if (g.id !== id) return g;
+
+          const updated = {
+            ...g,
+            title,
+            memo: memo || '메모 없음',
+          };
+
+          if (level === 'life') {
+            // 인생 목표는 카테고리 저장
+            updated.category = category;
+          } else {
+            // 그 외 레벨은 우선순위 저장
+            updated.priority = priority;
+            if (level === 'day') {
+              updated.startTime = startTime;
+              updated.endTime = endTime;
+              updated.time = startTime;
+              updated.tag = priorityGoalText[priority];
+            }
+          }
+
+          return updated;
+        });
 
         setBucketByRef(level, key, nextBucket);
 
@@ -15740,17 +16447,38 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           return;
         }
 
-        const displayGoals =
-          currentGoalLevel === 'day'
-            ? [...currentGoals].sort((a, b) =>
-                getStartTime(a).localeCompare(getStartTime(b)),
-              )
-            : currentGoals;
+        let displayGoals;
+        if (currentGoalLevel === 'day') {
+          // 일간 목표는 시작 시간순 정렬
+          displayGoals = [...currentGoals].sort((a, b) =>
+            getStartTime(a).localeCompare(getStartTime(b)),
+          );
+        } else if (currentGoalLevel === 'life') {
+          // 인생 목표는 카테고리별로 그룹화 정렬
+          const categoryOrder = lifeCategoryList.map((c) => c.id);
+          displayGoals = [...currentGoals].sort((a, b) => {
+            const aIdx = categoryOrder.indexOf(a.category || 'other');
+            const bIdx = categoryOrder.indexOf(b.category || 'other');
+            return aIdx - bIdx;
+          });
+        } else {
+          displayGoals = currentGoals;
+        }
 
         displayGoals.forEach((goal) => {
           const item = document.createElement('div');
           item.className = `goal-item ${goal.done ? 'done' : ''}`;
           item.dataset.id = goal.id;
+
+          // 인생 목표는 카테고리 표시, 그 외는 우선순위 표시
+          let tagHtml = '';
+          if (currentGoalLevel === 'life' && goal.category) {
+            const cat = lifeCategoryMap[goal.category] || lifeCategoryMap.other;
+            tagHtml = `<span class="life-category ${goal.category}">${cat.emoji} ${cat.label}</span>`;
+          } else {
+            tagHtml = `<span class="priority ${goal.priority}">${priorityGoalText[goal.priority] || ''}</span>`;
+          }
+
           item.innerHTML = `
       <div class="goal-actions">
         <button class="goal-edit-btn">수정</button>
@@ -15762,7 +16490,7 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           <strong>${goal.title}</strong>
           <span>${currentGoalLevel === 'day' ? `${timeRangeText(goal)} · ${goal.memo || '메모 없음'}` : goal.memo}</span>
         </div>
-        <span class="priority ${goal.priority}">${priorityGoalText[goal.priority]}</span>
+        ${tagHtml}
       </div>
     `;
           list.appendChild(item);
@@ -15785,6 +16513,7 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
             if (!beforeGoal?.done && updatedGoal?.done) {
               rewardTaskCompletion(
                 getRewardCompletionKeyForGoal(currentGoalLevel, id),
+                updatedGoal?.title || '',
               );
             } else if (beforeGoal?.done && !updatedGoal?.done) {
               revokeTaskCompletion(
@@ -16076,6 +16805,17 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         target.classList.add('active');
         currentGoalLevel = level;
 
+        // 인생 목표일 때 카테고리 선택, 그 외에는 우선순위 선택
+        const prioritySelect = document.getElementById('goalPriority');
+        const categorySelect = document.getElementById('goalCategory');
+        if (level === 'life') {
+          prioritySelect.classList.add('hidden');
+          categorySelect.classList.remove('hidden');
+        } else {
+          prioritySelect.classList.remove('hidden');
+          categorySelect.classList.add('hidden');
+        }
+
         if (currentGoalLevel === 'day') {
           selectedWeek = getWeekOfDate(selectedDate);
           syncTodosToSelectedDay();
@@ -16100,32 +16840,34 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         const title = document.getElementById('goalTitle').value.trim();
         const memo = document.getElementById('goalMemo').value.trim();
         const priority = document.getElementById('goalPriority').value;
+        const category = document.getElementById('goalCategory').value;
         if (!title) {
           alert('목표를 입력해줘.');
           return;
         }
 
-        getGoalBucket(currentGoalLevel).push({
+        const goalData = {
           id: Date.now(),
           title,
           memo: memo || '메모 없음',
-          startTime:
-            currentGoalLevel === 'day'
-              ? document.getElementById('goalStartTime').value || '09:00'
-              : undefined,
-          endTime:
-            currentGoalLevel === 'day'
-              ? document.getElementById('goalEndTime').value || ''
-              : undefined,
-          time:
-            currentGoalLevel === 'day'
-              ? document.getElementById('goalStartTime').value || '09:00'
-              : undefined,
-          tag:
-            currentGoalLevel === 'day' ? priorityGoalText[priority] : undefined,
-          priority,
           done: false,
-        });
+        };
+
+        if (currentGoalLevel === 'life') {
+          // 인생 목표는 카테고리 사용
+          goalData.category = category;
+        } else {
+          // 그 외 레벨은 우선순위 사용
+          goalData.priority = priority;
+          if (currentGoalLevel === 'day') {
+            goalData.startTime = document.getElementById('goalStartTime').value || '09:00';
+            goalData.endTime = document.getElementById('goalEndTime').value || '';
+            goalData.time = goalData.startTime;
+            goalData.tag = priorityGoalText[priority];
+          }
+        }
+
+        getGoalBucket(currentGoalLevel).push(goalData);
         if (currentGoalLevel === 'day') {
           syncTodosToSelectedDay();
           renderTodos();
