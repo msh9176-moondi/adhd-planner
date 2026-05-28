@@ -13506,7 +13506,7 @@
           date: new Date().toISOString(),
           task: procTargetTask,
           thought: document.getElementById('procThought').value,
-          discomfort: document.getElementById('procDiscomfort').value,
+          discomfort: parseInt(document.getElementById('procDiscomfort').value) || 0,
           acceptance: procAcceptance,
           reframe: document.getElementById('procReframe').value,
           goalPoint: document.getElementById('procGoalPoint').value,
@@ -15202,7 +15202,7 @@ async function migrateToSupabase(supabaseClient, userId) {
         const avgDiscomfort =
           monthlyProc.length > 0
             ? Math.round(
-                monthlyProc.reduce((sum, r) => sum + (r.discomfort || 50), 0) /
+                monthlyProc.reduce((sum, r) => sum + (Number(r.discomfort) || 0), 0) /
                   monthlyProc.length,
               )
             : 0;
@@ -15350,10 +15350,9 @@ async function migrateToSupabase(supabaseClient, userId) {
 ${correlations.length > 0 ? correlations.map((c) => `• ${c}`).join('\n') : '• 아직 충분한 데이터가 없어요'}
 
 ═══════════════════════════════════════
-📅 최근 7일 상세 기록
+📅 이번 달 전체 기록 (${records.length}일)
 ═══════════════════════════════════════
 ${records
-  .slice(-7)
   .map(
     (r) =>
       `[${r.date}] ${r.emotion} | 에너지 ${r.energy}/5 | 달성 ${r.rate}% | 수면 ${r.sleep || '-'} | 운동 ${r.exercise || '-'}${r.nightGood?.length ? `\n  └ 좋았던 일: ${r.nightGood.join(', ')}` : ''}`,
@@ -15370,7 +15369,6 @@ ${
 
 최근 세션:
 ${monthlyEmoTherapy
-  .slice(-3)
   .map(
     (s) =>
       `- 상황: "${s.situation || '-'}"
@@ -15393,7 +15391,6 @@ ${
 
 최근 세션:
 ${monthlyProc
-  .slice(-3)
   .map(
     (r) =>
       `- 과제: "${r.task || '-'}"
