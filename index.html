@@ -9300,28 +9300,16 @@
           <div class="goal-card-head">
             <div>
               <h2>🧠 AI 맞춤 분석</h2>
-              <p class="sub">나의 모든 데이터를 AI가 종합 분석해요.</p>
+              <p class="sub">나의 데이터를 AI에게 분석받아요.</p>
             </div>
           </div>
           <div class="ai-analysis-info">
             <p>
-              목표, 감정, 생산성, 루틴 등 모든 기록을 바탕으로<br>
-              <strong>맞춤형 인사이트와 조언</strong>을 받아보세요.
+              목표, 감정, 생산성, 루틴 등 모든 기록을 담은 프롬프트를 생성해요.<br>
+              <strong>ChatGPT / Claude 등에 붙여넣기</strong>하면 맞춤 분석을 받을 수 있어요.
             </p>
           </div>
           <div class="ai-stats-preview" id="aiStatsPreview"></div>
-          <button class="ai-analyze-btn" id="runAiAnalysis">
-            🔮 AI 종합 분석 시작하기
-          </button>
-          <div class="ai-analysis-loading hidden" id="aiAnalysisLoading">
-            <div class="ai-loading-spinner"></div>
-            <p>AI가 데이터를 분석하고 있어요...</p>
-            <span>잠시만 기다려주세요 (약 10-20초)</span>
-          </div>
-
-          <div class="ai-prompt-divider">
-            <span>또는</span>
-          </div>
           <button class="ai-generate-btn" id="generateAiPrompt">
             📋 ChatGPT용 프롬프트 생성
           </button>
@@ -9703,20 +9691,6 @@
       </div>
     </div>
 
-    <div class="modal-backdrop hidden" id="aiAnalysisModal">
-      <div class="ai-analysis-modal">
-        <div class="ai-modal-header">
-          <h2>🧠 AI 맞춤 분석 리포트</h2>
-          <button class="ai-modal-close" id="closeAiAnalysis">✕</button>
-        </div>
-        <div class="ai-modal-date" id="aiAnalysisDate"></div>
-        <div class="ai-modal-content" id="aiAnalysisContent"></div>
-        <div class="ai-modal-footer">
-          <button class="ai-modal-btn secondary" id="copyAiAnalysis">📋 복사하기</button>
-          <button class="ai-modal-btn primary" id="closeAiAnalysisBtn">확인</button>
-        </div>
-      </div>
-    </div>
 
     <div class="modal-backdrop hidden" id="motivationModal">
       <div class="motivation-modal">
@@ -15576,64 +15550,6 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         return data;
       }
 
-      // AI 분석 실행
-      async function runAiAnalysis() {
-        const analyzeBtn = document.getElementById('runAiAnalysis');
-        const loadingDiv = document.getElementById('aiAnalysisLoading');
-        const modal = document.getElementById('aiAnalysisModal');
-        const contentDiv = document.getElementById('aiAnalysisContent');
-        const dateDiv = document.getElementById('aiAnalysisDate');
-
-        if (!analyzeBtn || !loadingDiv) return;
-
-        try {
-          // UI 상태 변경
-          analyzeBtn.disabled = true;
-          analyzeBtn.textContent = '분석 중...';
-          loadingDiv.classList.remove('hidden');
-
-          // 데이터 수집
-          const userData = collectAllUserData();
-
-          // Edge Function 호출
-          const response = await fetch(`${SUPABASE_URL}/functions/v1/analyze-user`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-            },
-            body: JSON.stringify({ userData }),
-          });
-
-          if (!response.ok) {
-            throw new Error('분석 요청에 실패했습니다.');
-          }
-
-          const result = await response.json();
-
-          if (result.error) {
-            throw new Error(result.error);
-          }
-
-          // 결과 표시
-          const analysisHtml = markdownToHtml(result.analysis);
-          contentDiv.innerHTML = analysisHtml;
-          dateDiv.textContent = `분석 일시: ${new Date(result.analyzedAt).toLocaleString('ko-KR')}`;
-          modal.classList.remove('hidden');
-
-          showToast('✨ AI 분석이 완료되었어요!');
-
-        } catch (error) {
-          console.error('AI Analysis error:', error);
-          showToast(error.message || '분석 중 오류가 발생했어요. 잠시 후 다시 시도해주세요.');
-        } finally {
-          // UI 상태 복구
-          analyzeBtn.disabled = false;
-          analyzeBtn.textContent = '🔮 AI 종합 분석 시작하기';
-          loadingDiv.classList.add('hidden');
-        }
-      }
-
       // 간단한 마크다운 → HTML 변환
       function markdownToHtml(md) {
         if (!md) return '';
@@ -15657,41 +15573,7 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         const resultDiv = document.getElementById('aiPromptResult');
         const promptText = document.getElementById('aiPromptText');
 
-        // AI 분석 버튼
-        const analyzeBtn = document.getElementById('runAiAnalysis');
-        if (analyzeBtn) {
-          analyzeBtn.addEventListener('click', runAiAnalysis);
-        }
-
-        // AI 분석 모달 닫기
-        const closeModal = document.getElementById('closeAiAnalysis');
-        const closeModalBtn = document.getElementById('closeAiAnalysisBtn');
-        const modal = document.getElementById('aiAnalysisModal');
-
-        if (closeModal) {
-          closeModal.addEventListener('click', () => modal.classList.add('hidden'));
-        }
-        if (closeModalBtn) {
-          closeModalBtn.addEventListener('click', () => modal.classList.add('hidden'));
-        }
-        if (modal) {
-          modal.addEventListener('click', (e) => {
-            if (e.target === modal) modal.classList.add('hidden');
-          });
-        }
-
-        // AI 분석 결과 복사
-        const copyAnalysis = document.getElementById('copyAiAnalysis');
-        const contentDiv = document.getElementById('aiAnalysisContent');
-        if (copyAnalysis && contentDiv) {
-          copyAnalysis.addEventListener('click', () => {
-            navigator.clipboard.writeText(contentDiv.innerText)
-              .then(() => showToast('분석 결과가 복사되었어요!'))
-              .catch(() => showToast('복사에 실패했어요.'));
-          });
-        }
-
-        // 기존 프롬프트 생성 버튼
+        // 프롬프트 생성 버튼
         if (generateBtn) {
           generateBtn.addEventListener('click', () => {
             const result = generateAiAnalysisPrompt();
