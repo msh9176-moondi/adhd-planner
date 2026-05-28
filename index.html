@@ -1849,6 +1849,9 @@
 
       .edit-modal {
         width: min(430px, 100%);
+        max-height: calc(100dvh - 36px);
+        display: flex;
+        flex-direction: column;
         background: #fff;
         border: 1px solid var(--line);
         border-radius: 28px;
@@ -1880,6 +1883,7 @@
         align-items: flex-start;
         gap: 12px;
         margin-bottom: 16px;
+        flex-shrink: 0;
       }
 
       .modal-close {
@@ -1930,6 +1934,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 8px;
         margin-top: 4px;
+        flex-shrink: 0;
       }
 
       .modal-cancel,
@@ -2226,11 +2231,15 @@
       }
       .daily-step.active {
         display: block;
+        overflow-y: auto;
+        flex: 1;
+        min-height: 0;
       }
       .daily-step-indicator {
         display: flex;
         gap: 6px;
         margin: 2px 0 16px;
+        flex-shrink: 0;
       }
       .daily-dot {
         flex: 1;
@@ -2706,6 +2715,22 @@
       .morning-toggle:hover {
         background: #e8e1f2;
       }
+      .morning-saved-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        margin-top: 6px;
+        padding: 3px 10px;
+        background: #edf7ee;
+        border: 1px solid #b7e2ba;
+        border-radius: 20px;
+        font-size: 11.5px;
+        font-weight: 600;
+        color: #2e7d32;
+      }
+      .morning-saved-badge.hidden {
+        display: none;
+      }
       .morning-journal-body {
         margin-top: 16px;
       }
@@ -2775,6 +2800,7 @@
         grid-template-columns: 1fr 1fr;
         gap: 8px;
         margin-top: 14px;
+        flex-shrink: 0;
       }
       .daily-modal-actions .modal-save,
       .daily-modal-actions .modal-cancel {
@@ -8338,10 +8364,74 @@
         color: #f57c00;
       }
       /* ===== END SUPABASE AUTH STYLES ===== */
+
+      /* 저장 확인 Alert 팝업 */
+      .save-alert-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(37, 35, 42, 0.35);
+        backdrop-filter: blur(4px);
+        animation: fadeIn 0.15s ease;
+      }
+      .save-alert-backdrop.hidden {
+        display: none !important;
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+      }
+      .save-alert-box {
+        background: #fff;
+        border-radius: 24px;
+        padding: 28px 24px 20px;
+        width: min(300px, calc(100vw - 40px));
+        text-align: center;
+        box-shadow: 0 16px 48px rgba(37, 35, 42, 0.18);
+        animation: popUp 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+      }
+      @keyframes popUp {
+        from { transform: scale(0.88); opacity: 0.6; }
+        to   { transform: scale(1);    opacity: 1; }
+      }
+      .save-alert-icon {
+        font-size: 40px;
+        line-height: 1;
+        margin-bottom: 12px;
+      }
+      .save-alert-msg {
+        font-size: 15px;
+        font-weight: 700;
+        color: #342c42;
+        line-height: 1.5;
+        margin-bottom: 18px;
+      }
+      .save-alert-confirm {
+        width: 100%;
+        height: 44px;
+        border: 0;
+        border-radius: 14px;
+        background: var(--point);
+        color: #fff;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+      }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   </head>
   <body>
+    <div class="save-alert-backdrop hidden" id="saveAlertBackdrop">
+      <div class="save-alert-box">
+        <div class="save-alert-icon" id="saveAlertIcon">✅</div>
+        <div class="save-alert-msg" id="saveAlertMsg">저장됐어요!</div>
+        <button class="save-alert-confirm" id="saveAlertConfirm">확인</button>
+      </div>
+    </div>
+
     <div class="point-toast hidden" id="pointToast" aria-live="polite">
       <div class="point-toast-icon">✨</div>
       <div class="point-toast-text">
@@ -8445,6 +8535,7 @@
               <div>
                 <h2>☀️ 아침 일기</h2>
                 <p class="sub">오늘 하루를 기분 좋게 시작해요</p>
+                <span class="morning-saved-badge hidden" id="morningSavedBadge">✓ 오늘 작성됨</span>
               </div>
               <button class="morning-toggle" id="morningJournalToggle">
                 펼치기
@@ -9354,31 +9445,36 @@
                 <p class="setting-login-message" id="settingLoginMessage"></p>
               </div>
 
+              <!-- 자동 동기화 상태 -->
+              <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 16px; padding: 10px 14px; background: #f7f2fe; border-radius: 12px; border: 1px solid #e8e1f2;">
+                <span style="font-size: 12.5px; font-weight: 600; color: #725ca3;">☁️ 자동 동기화</span>
+                <span id="syncStatusIndicator" style="font-size: 12px; color: #9b95a7; font-weight: 500;">로그인하면 자동으로 동기화돼요</span>
+              </div>
               <!-- 수동 동기화 버튼 -->
-              <div class="sync-buttons" style="display: flex; gap: 8px; margin-top: 16px;">
+              <div class="sync-buttons" style="display: flex; gap: 8px; margin-top: 10px;">
                 <button
                   id="btnUploadCloud"
                   onclick="uploadToCloud()"
-                  style="flex: 1; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #4CAF50, #45a049); color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                  style="flex: 1; padding: 10px 8px; border: 1px solid #e8e1f2; border-radius: 12px; background: #fff; color: #5b4b8a; font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;"
                 >
-                  <span>☁️</span> 클라우드에 백업
+                  <span>☁️</span> 수동 백업
                 </button>
                 <button
                   id="btnDownloadCloud"
                   onclick="downloadFromCloud()"
-                  style="flex: 1; padding: 12px; border: none; border-radius: 12px; background: linear-gradient(135deg, #2196F3, #1976D2); color: white; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px;"
+                  style="flex: 1; padding: 10px 8px; border: 1px solid #e8e1f2; border-radius: 12px; background: #fff; color: #5b4b8a; font-size: 12.5px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;"
                 >
-                  <span>📥</span> 클라우드에서 복원
+                  <span>📥</span> 수동 복원
                 </button>
               </div>
-              <p style="font-size: 12px; color: #888; margin-top: 8px; text-align: center;">
-                다른 기기에서 사용하려면 먼저 백업 후, 그 기기에서 복원하세요
+              <p style="font-size: 12px; color: #aaa; margin-top: 6px; text-align: center;">
+                수동 버튼은 데이터를 강제로 덮어쓸 때만 사용하세요
               </p>
             </div>
 
             <p class="setting-note">
-              로그인하면 홈 화면 인사말이 설정한 이름으로 바뀌고,<br>
-              동기화 버튼으로 다른 기기와 데이터를 주고받을 수 있어요.
+              로그인하면 데이터가 자동으로 클라우드에 저장돼요.<br>
+              다른 기기에서 로그인하면 최신 데이터로 자동 복원돼요.
             </p>
           </div>
 
@@ -10777,17 +10873,111 @@
 
       let supabaseUser = null;
       let isSyncing = false;
+      let _syncDebounce = null;
 
-      // Supabase 인증 상태 리스너 (수동 동기화 방식 - 자동 동기화 없음)
+      function updateSyncIndicator(state) {
+        const el = document.getElementById('syncStatusIndicator');
+        if (!el) return;
+        if (state === 'pending') {
+          el.textContent = '🔄 저장 중...';
+          el.style.color = '#9b95a7';
+        } else if (state === 'saved') {
+          const t = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
+          el.textContent = `✓ ${t} 자동 저장됨`;
+          el.style.color = '#4CAF50';
+        } else if (state === 'error') {
+          el.textContent = '⚠️ 자동 저장 실패 (수동 백업 권장)';
+          el.style.color = '#f44336';
+        } else if (state === 'idle') {
+          el.textContent = '로그인하면 자동으로 동기화돼요';
+          el.style.color = '#9b95a7';
+        }
+      }
+
+      async function silentUpload() {
+        if (!supabaseUser || isSyncing) return;
+        isSyncing = true;
+        updateSyncIndicator('pending');
+        try {
+          const appData = collectAllAppData();
+          const { error } = await supabaseClient
+            .from('user_app_data')
+            .upsert(
+              { user_id: supabaseUser.id, app_data: appData, updated_at: new Date().toISOString() },
+              { onConflict: 'user_id' }
+            );
+          if (error) throw error;
+          localStorage.setItem('floca_last_local_save', new Date().toISOString());
+          updateSyncIndicator('saved');
+        } catch (e) {
+          console.error('자동 동기화 실패:', e);
+          updateSyncIndicator('error');
+        } finally {
+          isSyncing = false;
+        }
+      }
+
+      async function autoRestoreOnLogin() {
+        if (!supabaseUser || isSyncing) return;
+        isSyncing = true;
+        updateSyncIndicator('pending');
+        try {
+          const { data, error } = await supabaseClient
+            .from('user_app_data')
+            .select('app_data, updated_at')
+            .eq('user_id', supabaseUser.id)
+            .limit(1);
+          if (error) throw error;
+
+          const userData = data?.[0];
+          if (!userData?.app_data) {
+            // 클라우드에 데이터 없음 → 현재 로컬 데이터 업로드
+            isSyncing = false;
+            silentUpload();
+            return;
+          }
+
+          const cloudTime = new Date(userData.updated_at).getTime();
+          const localTimeStr = localStorage.getItem('floca_last_local_save');
+          const localTime = localTimeStr ? new Date(localTimeStr).getTime() : 0;
+
+          if (cloudTime > localTime) {
+            // 클라우드가 더 최신 → 복원
+            restoreAllAppData(userData.app_data);
+            if (typeof renderTodos === 'function') renderTodos();
+            if (typeof renderGoalsSection === 'function') renderGoalsSection();
+            if (typeof renderRewardShop === 'function') renderRewardShop();
+            if (typeof loadMorningJournal === 'function') loadMorningJournal();
+            if (typeof renderDailyCloseCard === 'function') renderDailyCloseCard();
+            if (typeof renderMorningSavedBadge === 'function') renderMorningSavedBadge();
+            localStorage.setItem('floca_last_local_save', userData.updated_at);
+            showToast('☁️ 클라우드 데이터로 복원했어요.');
+            updateSyncIndicator('saved');
+          } else {
+            // 로컬이 더 최신 → 업로드
+            isSyncing = false;
+            silentUpload();
+            return;
+          }
+        } catch (e) {
+          console.error('자동 복원 실패:', e);
+          updateSyncIndicator('error');
+        } finally {
+          isSyncing = false;
+        }
+      }
+
+      // Supabase 인증 상태 리스너
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         supabaseUser = session?.user || null;
         if (typeof updateAuthUI === 'function') updateAuthUI();
 
         if (event === 'SIGNED_IN' && supabaseUser) {
-          if (typeof showToast === 'function')
-            showToast('로그인 성공! 동기화 버튼으로 데이터를 백업/복원하세요.');
+          showToast('로그인 성공! 클라우드 데이터를 확인하는 중...');
+          autoRestoreOnLogin();
         } else if (event === 'SIGNED_OUT') {
+          updateSyncIndicator('idle');
           if (typeof showToast === 'function') showToast('로그아웃되었어요.');
         }
       });
@@ -11176,6 +11366,8 @@
             if (typeof loadMorningJournal === 'function') loadMorningJournal();
 
             const lastSync = new Date(userData.updated_at).toLocaleString('ko-KR');
+            localStorage.setItem('floca_last_local_save', userData.updated_at);
+            updateSyncIndicator('saved');
             if (typeof showToast === 'function')
               showToast(`✅ 복원 완료! (${lastSync})`);
           } else {
@@ -11220,6 +11412,8 @@
 
           if (error) throw error;
 
+          localStorage.setItem('floca_last_local_save', new Date().toISOString());
+          updateSyncIndicator('saved');
           if (typeof showToast === 'function')
             showToast('✅ 클라우드 백업 완료!');
         } catch (error) {
@@ -11232,20 +11426,19 @@
         }
       }
 
-      // 기존 함수들 호환성 유지 (자동 호출되어도 아무것도 안 함)
+      // 데이터 변경 시 자동 호출 → 5초 debounce 후 조용히 업로드
       function syncToSupabase() {
-        // 수동 동기화 방식이므로 자동 호출 무시
+        if (!supabaseUser) return;
+        clearTimeout(_syncDebounce);
+        updateSyncIndicator('pending');
+        _syncDebounce = setTimeout(silentUpload, 5000);
       }
-      function syncFromSupabase() {
-        // 수동 동기화 방식이므로 자동 호출 무시
-      }
-
-      // 기존 함수들 하위 호환성 유지 (자동 호출되어도 아무것도 안 함)
-      function syncTodoToSupabase() {}
-      function deleteTodoFromSupabase() {}
-      function syncDailyLogToSupabase() {}
-      function syncMorningJournalToSupabase() {}
-      function syncRewardsToSupabase() {}
+      function syncFromSupabase() {}
+      function syncTodoToSupabase() { syncToSupabase(); }
+      function deleteTodoFromSupabase() { syncToSupabase(); }
+      function syncDailyLogToSupabase() { syncToSupabase(); }
+      function syncMorningJournalToSupabase() { syncToSupabase(); }
+      function syncRewardsToSupabase() { syncToSupabase(); }
       function syncGoalsToSupabase() {}
       function syncNicknameToSupabase() {}
 
@@ -11893,6 +12086,8 @@
       }
 
       let _audioCtx = null;
+      let _audioHeartbeat = null;
+
       function getAudioCtx() {
         if (!_audioCtx) {
           try {
@@ -11902,6 +12097,35 @@
           } catch (e) {}
         }
         return _audioCtx;
+      }
+
+      function startAudioHeartbeat() {
+        if (_audioHeartbeat) return;
+        _audioHeartbeat = setInterval(() => {
+          const ctx = getAudioCtx();
+          if (!ctx) return;
+          if (ctx.state === 'suspended') { ctx.resume(); return; }
+          // 무음 버퍼 재생으로 AudioContext 활성 상태 유지
+          const buf = ctx.createBuffer(1, 1, ctx.sampleRate);
+          const src = ctx.createBufferSource();
+          src.buffer = buf;
+          src.connect(ctx.destination);
+          src.start();
+        }, 20000);
+      }
+
+      function stopAudioHeartbeat() {
+        clearInterval(_audioHeartbeat);
+        _audioHeartbeat = null;
+      }
+
+      function notifyPomodoroEnd(title, body) {
+        // 브라우저 알림 (권한 있을 때)
+        if (Notification.permission === 'granted') {
+          new Notification(title, { body, icon: '/apple-touch-icon.png' });
+        }
+        // 시각 팝업 (항상)
+        showSaveAlert(body, title.startsWith('집중') ? '🎉' : title.startsWith('쉬는') ? '⏰' : '🏆');
       }
 
       function unlockAudio() {
@@ -11975,6 +12199,7 @@
         currentRound = 1;
         remainingSeconds = focusMinutes * 60;
         totalSessionSeconds = focusMinutes * 60;
+        stopAudioHeartbeat();
         startBtn.textContent = 'START'; updateTimerIcon('start');
         timerMessage.textContent = 'START를 누르면 집중 시간이 시작돼요.';
         updateTimer();
@@ -12027,9 +12252,10 @@
             remainingSeconds = focusMinutes * 60;
             totalSessionSeconds = focusMinutes * 60;
             startBtn.textContent = 'START'; updateTimerIcon('start');
-            timerMessage.textContent =
-              '휴식이 끝났어요. 다시 집중을 시작해볼까요?';
+            timerMessage.textContent = '휴식이 끝났어요. START를 눌러 집중을 시작해요.';
             playPomodoroSound('breakEnd');
+            stopAudioHeartbeat();
+            notifyPomodoroEnd('쉬는 시간 완료 ⏰', '다시 집중을 시작할 준비가 됐나요?\nSTART를 눌러 시작해요.');
             updateTimer();
           }
         }, 1000);
@@ -12067,6 +12293,7 @@
 
       quickBreakBtn.addEventListener('click', () => {
         unlockAudio();
+        startAudioHeartbeat();
         startBreakTimer();
       });
       completeCurrentTaskBtn.addEventListener('click', completeCurrentTask);
@@ -12077,6 +12304,7 @@
           clearInterval(timerId);
           timerId = null;
           isRunning = false;
+          stopAudioHeartbeat();
           startBtn.textContent = 'RESUME'; updateTimerIcon('resume');
           timerMessage.textContent = isBreak
             ? '쉬는 시간이 잠시 멈췄어요.'
@@ -12085,6 +12313,7 @@
         }
 
         isRunning = true;
+        startAudioHeartbeat();
         startBtn.textContent = 'PAUSE'; updateTimerIcon('pause');
         timerMessage.textContent = isBreak
           ? '5분 쉬는 시간이에요. 물 한 모금 마셔요.'
@@ -12098,34 +12327,37 @@
             clearInterval(timerId);
             timerId = null;
             isRunning = false;
+            startBtn.textContent = 'START'; updateTimerIcon('start');
 
             if (!isBreak) {
+              // 집중 완료 → 쉬는 시간 대기
               isBreak = true;
               remainingSeconds = 5 * 60;
               totalSessionSeconds = 5 * 60;
-              timerMessage.textContent =
-                '좋아요! 집중 시간이 끝났어요. 이제 5분 쉬는 시간이에요.';
+              timerMessage.textContent = '집중 완료! START를 눌러 5분 쉬는 시간을 시작해요.';
               playPomodoroSound('session');
+              notifyPomodoroEnd('집중 완료! 🎉', '수고했어요! START를 눌러 5분 쉬는 시간을 시작해요.');
               updateTimer();
-              startBtn.click();
             } else {
               if (currentRound < repeatTotal) {
+                // 휴식 완료 → 다음 라운드 대기
                 currentRound += 1;
                 isBreak = false;
                 remainingSeconds = focusMinutes * 60;
                 totalSessionSeconds = focusMinutes * 60;
-                timerMessage.textContent = `${currentRound}회차 집중 시간이 시작돼요.`;
+                timerMessage.textContent = `휴식 완료! START를 눌러 ${currentRound}회차 집중을 시작해요.`;
                 playPomodoroSound('breakEnd');
+                notifyPomodoroEnd('쉬는 시간 완료 ⏰', `START를 눌러 ${currentRound}회차 집중을 시작해요.`);
                 updateTimer();
-                startBtn.click();
               } else {
+                // 전체 완료
                 isBreak = false;
                 remainingSeconds = focusMinutes * 60;
                 totalSessionSeconds = focusMinutes * 60;
-                startBtn.textContent = 'START'; updateTimerIcon('start');
-                timerMessage.textContent =
-                  '전체 뽀모도로가 완료됐어요. 정말 잘했어요!';
+                timerMessage.textContent = '전체 뽀모도로 완료! 정말 잘했어요! 🏆';
                 playPomodoroSound('allDone');
+                stopAudioHeartbeat();
+                notifyPomodoroEnd('뽀모도로 전체 완료 🏆', '모든 세션을 완료했어요! 정말 잘했어요!');
                 updateTimer();
               }
             }
@@ -12198,6 +12430,20 @@
           toast.classList.remove('hidden');
           setTimeout(() => toast.classList.add('hidden'), 3000);
         }
+      }
+
+      function showSaveAlert(message, icon) {
+        const backdrop = document.getElementById('saveAlertBackdrop');
+        const msg = document.getElementById('saveAlertMsg');
+        const ico = document.getElementById('saveAlertIcon');
+        const btn = document.getElementById('saveAlertConfirm');
+        if (!backdrop || !msg) return;
+        msg.textContent = message;
+        if (ico) ico.textContent = icon || '✅';
+        backdrop.classList.remove('hidden');
+        const close = () => backdrop.classList.add('hidden');
+        btn.onclick = close;
+        backdrop.onclick = (e) => { if (e.target === backdrop) close(); };
       }
 
       function sendTaskNotification(task) {
@@ -12289,6 +12535,18 @@
         localStorage.getItem('floca_morning_journal') || '{}',
       );
 
+      function renderMorningSavedBadge() {
+        const todayKey = getTodayKey();
+        const data = morningJournalData[todayKey];
+        const hasSaved = data && (
+          data.gratitude?.some(v => v) ||
+          data.joy?.some(v => v) ||
+          data.affirm?.some(v => v)
+        );
+        const badge = document.getElementById('morningSavedBadge');
+        if (badge) badge.classList.toggle('hidden', !hasSaved);
+      }
+
       function loadMorningJournal() {
         const todayKey = getTodayKey();
         const data = morningJournalData[todayKey] || {};
@@ -12334,7 +12592,8 @@
           'floca_morning_journal',
           JSON.stringify(morningJournalData),
         );
-        showToast('아침 일기가 저장됐어요! ☀️');
+        renderMorningSavedBadge();
+        showSaveAlert('아침 일기가 저장됐어요!', '☀️');
         syncToSupabase();
       }
 
@@ -12355,6 +12614,8 @@
       document
         .getElementById('saveMorningJournal')
         ?.addEventListener('click', saveMorningJournal);
+
+      renderMorningSavedBadge();
 
       /* 감정 인지치료 기능 */
       let emoTherapyStep = 1;
@@ -13057,6 +13318,7 @@
         closeDailyCloseModal();
         renderDailyCloseCard();
         renderMypage();
+        showSaveAlert('오늘 마무리가 저장됐어요!', '🌙');
 
         const openBtn = document.getElementById('openDailyClose');
         if (openBtn) openBtn.textContent = '오늘 마무리하기';
