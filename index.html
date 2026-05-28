@@ -15098,33 +15098,21 @@ async function migrateToSupabase(supabaseClient, userId) {
         const yearMonth = `${now.getFullYear()}년 ${now.getMonth() + 1}월`;
         const todayKey = getDateKeyFromDate(now);
 
-        if (records.length < 3) {
-          return { error: '분석을 위해 최소 3일 이상의 기록이 필요합니다.' };
-        }
-
         // 1. 감정 통계
         const emotionCounts = {};
         const positiveEmotions = ['행복', '평온', '뿌듯', '설렘', '감사'];
         const negativeEmotions = [
-          '피곤',
-          '불안',
-          '우울',
-          '짜증',
-          '무기력',
-          '슬픔',
-          '분노',
-          '걱정',
-          '외로움',
-          '후회',
+          '피곤', '불안', '우울', '짜증', '무기력',
+          '슬픔', '분노', '걱정', '외로움', '후회',
         ];
         records.forEach((r) => {
-          emotionCounts[r.emotion] = (emotionCounts[r.emotion] || 0) + 1;
+          if (r.emotion) emotionCounts[r.emotion] = (emotionCounts[r.emotion] || 0) + 1;
         });
         const topEmotions = Object.entries(emotionCounts)
           .sort((a, b) => b[1] - a[1])
           .slice(0, 3)
           .map(([e, c]) => `${e}(${c}일)`)
-          .join(', ');
+          .join(', ') || '기록 없음';
         const positiveCount = records.filter((r) =>
           positiveEmotions.includes(r.emotion),
         ).length;
@@ -15133,12 +15121,12 @@ async function migrateToSupabase(supabaseClient, userId) {
         ).length;
 
         // 2. 컨디션 통계
-        const avgRate = Math.round(
-          records.reduce((sum, r) => sum + (r.rate || 0), 0) / records.length,
-        );
-        const avgEnergy = (
-          records.reduce((sum, r) => sum + (r.energy || 3), 0) / records.length
-        ).toFixed(1);
+        const avgRate = records.length > 0
+          ? Math.round(records.reduce((sum, r) => sum + (r.rate || 0), 0) / records.length)
+          : 0;
+        const avgEnergy = records.length > 0
+          ? (records.reduce((sum, r) => sum + (r.energy || 3), 0) / records.length).toFixed(1)
+          : '-';
         const sleepCounts = {};
         records.forEach((r) => {
           if (r.sleep) sleepCounts[r.sleep] = (sleepCounts[r.sleep] || 0) + 1;
@@ -15280,7 +15268,7 @@ async function migrateToSupabase(supabaseClient, userId) {
 
         // Supabase 호환 데이터 구조 (나중에 DB 저장용)
         const analysisData = {
-          user_id: flokaUser?.visitorId || 'local_user',
+          user_id: supabaseUser?.id || currentUser?.username || 'local_user',
           year_month: `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`,
           generated_at: now.toISOString(),
           summary: {
@@ -15578,22 +15566,33 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           generateBtn.addEventListener('click', () => {
             const result = generateAiAnalysisPrompt();
             if (result.error) {
-              showToast(result.error);
+              showSaveAlert(result.error, '⚠️');
               return;
             }
             promptText.value = result.prompt;
             resultDiv.classList.remove('hidden');
-            showToast(
-              '프롬프트가 생성되었어요! 복사해서 ChatGPT에 붙여넣으세요.',
-            );
+            promptText.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            showSaveAlert('프롬프트가 생성됐어요!\n복사하기 버튼을 눌러 ChatGPT에 붙여넣으세요.', '📋');
           });
         }
 
         if (copyBtn) {
           copyBtn.addEventListener('click', () => {
-            promptText.select();
-            document.execCommand('copy');
-            showToast('클립보드에 복사되었어요!');
+            const text = promptText.value;
+            if (!text) return;
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(text)
+                .then(() => showSaveAlert('클립보드에 복사됐어요!\nChatGPT나 Claude에 붙여넣기 하세요.', '✅'))
+                .catch(() => {
+                  promptText.select();
+                  document.execCommand('copy');
+                  showSaveAlert('복사됐어요!', '✅');
+                });
+            } else {
+              promptText.select();
+              document.execCommand('copy');
+              showSaveAlert('복사됐어요!', '✅');
+            }
           });
         }
       }
