@@ -15219,13 +15219,34 @@ async function migrateToSupabase(supabaseClient, userId) {
           document.getElementById('brainDump')?.value || '';
         const hasBrainDump = brainDumpContent.trim().length > 0;
 
-        // 8. 할일 패턴 분석 (오늘 기준)
-        const todayTodos = getDayItemsByDate(todayKey);
-        const doneTodos = todayTodos.filter((t) => t.done);
-        const priorityCounts = { p1: 0, p2: 0, p3: 0, p4: 0 };
-        todayTodos.forEach((t) => {
-          if (t.priority) priorityCounts[t.priority]++;
-        });
+        // 8. 이번 달 할일 전체 수집
+        const monthDayKeys = Object.keys(goals.day || {}).filter((k) => {
+          const dateStr = k.replace('d-', '');
+          const d = new Date(dateStr);
+          return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+        }).sort();
+
+        const monthTodosByDay = monthDayKeys.map((k) => {
+          const dateStr = k.replace('d-', '');
+          const items = goals.day[k] || [];
+          return {
+            date: dateStr,
+            total: items.length,
+            done: items.filter((t) => t.done).length,
+            todos: items.map((t) => ({
+              title: t.title,
+              done: t.done,
+              priority: t.priority || 'p2',
+            })),
+          };
+        }).filter((d) => d.total > 0);
+
+        const allMonthTodos = monthTodosByDay.flatMap((d) => d.todos);
+        const incompleteTitles = allMonthTodos
+          .filter((t) => !t.done)
+          .map((t) => t.title)
+          .filter(Boolean)
+          .slice(0, 10);
 
         // 9. 상관관계 분석
         const correlations = [];
@@ -15415,6 +15436,22 @@ ${
 }
 
 ${
+  monthTodosByDay.length > 0
+    ? `
+═══════════════════════════════════════
+✅ 이번 달 일간 할일 기록
+═══════════════════════════════════════
+${monthTodosByDay.map((d) =>
+  `[${d.date}] ${d.done}/${d.total} 완료\n${d.todos.map((t) =>
+    `  ${t.done ? '✓' : '✗'} [${t.priority}] ${t.title}`
+  ).join('\n')}`
+).join('\n')}
+
+미완료 항목 패턴: ${incompleteTitles.length > 0 ? incompleteTitles.join(', ') : '없음'}`
+    : ''
+}
+
+${
   hasBrainDump
     ? `
 ═══════════════════════════════════════
@@ -15439,13 +15476,16 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
 3. **인지치료 효과 분석**
    감정인지치료와 미루기 대처의 활용 패턴, 효과적인 부분과 개선점
 
-4. **핵심 강점 3가지**
+4. **할일 패턴 분석**
+   자주 미완료되는 과제 유형, 완료율이 높은 날의 특징, 할일 구성 패턴
+
+5. **핵심 강점 3가지**
    데이터에서 발견되는 사용자의 강점, 잘 유지하고 있는 것
 
-5. **ADHD 맞춤 개선 제안 1가지**
+6. **ADHD 맞춤 개선 제안 1가지**
    작고 구체적이며 즉시 실행 가능한 제안 (ADHD 특성 고려)
 
-6. **다음 주 실행 전략**
+7. **다음 주 실행 전략**
    데이터 기반의 구체적인 If-Then 형식 액션 플랜 1개`;
 
         return { error: null, prompt, data: analysisData };
