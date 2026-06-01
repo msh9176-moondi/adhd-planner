@@ -807,6 +807,33 @@
         background: #fceeef;
         color: #c86b78;
       }
+      .goal-postpone-btn {
+        background: #eef4ff;
+        color: #4a7fd4;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .goal-cancel-postpone-btn {
+        background: #fff4e0;
+        color: #c47f00;
+        font-size: 11px;
+        line-height: 1.3;
+      }
+      .goal-item.postponed .goal-content {
+        opacity: 0.5;
+      }
+      .goal-item.postponed .goal-main strong {
+        text-decoration: line-through;
+      }
+      .goal-postponed-badge {
+        font-size: 11px;
+        color: #4a7fd4;
+        background: #eef4ff;
+        border-radius: 6px;
+        padding: 1px 7px;
+        margin-top: 2px;
+        display: inline-block;
+      }
       .goal-content {
         position: relative;
         z-index: 2;
@@ -817,9 +844,7 @@
         background: #fff;
         transition: transform 0.24s ease;
       }
-      .goal-item.swiped .goal-content {
-        transform: translateX(-140px);
-      }
+      /* 스와이프 위치는 JS 인라인 스타일로 제어 */
       .goal-check {
         margin-top: 2px;
         width: 22px;
@@ -5499,7 +5524,7 @@
       }
       .pill-group {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(4, 1fr);
         gap: 0;
         flex: none;
         width: 100%;
@@ -8397,6 +8422,17 @@
         from { transform: scale(0.88); opacity: 0.6; }
         to   { transform: scale(1);    opacity: 1; }
       }
+      .item-use-particle {
+        position: fixed;
+        pointer-events: none;
+        font-size: 22px;
+        z-index: 9999;
+        animation: itemParticleFly 0.9s ease-out forwards;
+      }
+      @keyframes itemParticleFly {
+        0%   { transform: translate(0, 0) scale(1); opacity: 1; }
+        100% { transform: translate(var(--dx), var(--dy)) scale(0.3); opacity: 0; }
+      }
       .save-alert-icon {
         font-size: 40px;
         line-height: 1;
@@ -8506,6 +8542,7 @@
 
             <div class="controls">
               <div class="pill-group">
+                <button class="pill time-option" data-time="10">10분</button>
                 <button class="pill time-option active" data-time="25">
                   25분
                 </button>
@@ -11804,7 +11841,7 @@
             );
             const updatedTodo = todos.find((t) => t.id === id);
             if (!beforeTodo?.done && updatedTodo?.done) {
-              rewardTaskCompletion(`task-${id}`, updatedTodo?.title || '');
+              rewardTaskCompletion(`task-${id}`, updatedTodo?.title || '', updatedTodo?.priority);
             } else if (beforeTodo?.done && !updatedTodo?.done) {
               revokeTaskCompletion(`task-${id}`);
             }
@@ -12252,7 +12289,7 @@
         );
         const completedTodo = todos.find((t) => t.id === currentId);
         if (!beforeTodo?.done && completedTodo?.done) {
-          rewardTaskCompletion(`task-${currentId}`, completedTodo?.title || '');
+          rewardTaskCompletion(`task-${currentId}`, completedTodo?.title || '', completedTodo?.priority);
         }
         syncParentCompletionFromChild(completedTodo);
         syncDayGoals();
@@ -13610,6 +13647,27 @@
         });
       }
 
+      function playItemUseEffect(triggerEl, icon) {
+        const rect = triggerEl.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        const emojis = [icon, '✨', '🌟', '💫', icon, '⭐'];
+        emojis.forEach((em, i) => {
+          const el = document.createElement('span');
+          el.className = 'item-use-particle';
+          el.textContent = em;
+          const angle = (i / emojis.length) * Math.PI * 2;
+          const dist = 60 + Math.random() * 50;
+          el.style.setProperty('--dx', `${Math.cos(angle) * dist}px`);
+          el.style.setProperty('--dy', `${Math.sin(angle) * dist - 30}px`);
+          el.style.left = `${cx}px`;
+          el.style.top = `${cy}px`;
+          el.style.animationDelay = `${i * 0.05}s`;
+          document.body.appendChild(el);
+          setTimeout(() => el.remove(), 1000);
+        });
+      }
+
       function showPointToast(message) {
         const toast = document.getElementById('pointToast');
         const msg = document.getElementById('pointToastMessage');
@@ -13814,42 +13872,28 @@
         return true;
       }
 
-      function rewardTaskCompletion(completionKey, taskTitle = '') {
+      const XP_BY_PRIORITY = { p1: 4, p2: 3, p3: 2, p4: 1 };
+      const PRIORITY_LABEL = { p1: '⚡ 긴급·중요', p2: '⭐ 중요', p3: '✅ 할일', p4: '💡 여유' };
+
+      function rewardTaskCompletion(completionKey, taskTitle = '', priority = 'p3') {
         normalizeRewardState();
 
-        // 이미 보상 받은 경우 무시
         if (rewardState.completedKeys.includes(completionKey)) return false;
 
-        const category = getExpCategoryForTask(taskTitle);
-        let xpToGive = 0;
-        let message = '';
-
-        if (category && canGiveExpToday(category)) {
-          xpToGive = category.xp;
-          recordDailyExp(category.id, 1);
-          const remaining = category.dailyLimit - getDailyExpCount(category.id);
-          message = `${category.emoji} ${category.label} +${xpToGive}XP`;
-          if (remaining > 0) {
-            message += ` (오늘 ${remaining}회 남음)`;
-          }
-        } else if (category && !canGiveExpToday(category)) {
-          message = `${category.emoji} ${category.label} 완료! (오늘 XP 한도 도달)`;
-        }
+        const xpToGive = XP_BY_PRIORITY[priority] ?? 1;
+        const label = PRIORITY_LABEL[priority] || '✅ 완료';
+        const message = `${label} +${xpToGive}XP`;
 
         rewardState.completedKeys.push(completionKey);
         rewardState.xp += xpToGive;
         rewardState.totalCompleted += 1;
 
-        // 완료 시 지급된 XP 기록 (취소 시 사용)
         if (!rewardState.completionXpLog) rewardState.completionXpLog = {};
-        rewardState.completionXpLog[completionKey] = { xp: xpToGive, categoryId: category?.id || null };
+        rewardState.completionXpLog[completionKey] = { xp: xpToGive, priority };
 
         saveRewardState();
-
-        if (message) {
-          renderRewardPage(message);
-          showPointToast(message);
-        }
+        renderRewardPage(message);
+        showPointToast(message);
         return true;
       }
 
@@ -13863,9 +13907,6 @@
         const log = rewardState.completionXpLog?.[completionKey];
         if (log) {
           rewardState.xp = Math.max(0, (rewardState.xp || 0) - log.xp);
-          if (log.categoryId) {
-            recordDailyExp(log.categoryId, -1);
-          }
           delete rewardState.completionXpLog[completionKey];
         }
 
@@ -14011,9 +14052,11 @@
         wrap.querySelectorAll('[data-use-index]').forEach((btn) => {
           btn.addEventListener('click', () => {
             const index = Number(btn.dataset.useIndex);
+            const item = rewardState.inventory[index];
+            playItemUseEffect(btn, item?.icon || '🎉');
             rewardState.inventory.splice(index, 1);
             saveRewardState();
-            renderRewardPage('보상을 사용 처리했어요.');
+            renderRewardPage(`${item?.icon || '🎉'} ${item?.title || '보상'}을 사용했어요!`);
           });
         });
       }
@@ -14171,8 +14214,9 @@
       }
 
       function calcRate(items) {
-        const total = items.length;
-        const done = items.filter((item) => item.done).length;
+        const active = items.filter((item) => !item.postponed);
+        const total = active.length;
+        const done = active.filter((item) => item.done).length;
         return {
           total,
           done,
@@ -15287,6 +15331,36 @@ async function migrateToSupabase(supabaseClient, userId) {
         const spentPoints = rewardState.spent || 0;
         const xp = rewardState.xp || 0;
 
+        // 11. 미루기 목표 데이터 수집
+        const postponedGoals = [];
+        const allWeekBuckets = Object.entries(goals.week || {});
+        const allMonthBuckets = Object.entries(goals.month || {});
+
+        allWeekBuckets.forEach(([key, items]) => {
+          (items || []).filter((g) => g.postponed).forEach((g) => {
+            const copyDone = g.postponedCopyKey && g.postponedCopyId
+              ? (goals.week[g.postponedCopyKey] || []).find((c) => c.id === g.postponedCopyId)?.done ?? null
+              : null;
+            const [, m, , w] = key.split('-');
+            postponedGoals.push({
+              level: 'week', period: `${m}월 ${w}주차`, title: g.title,
+              priority: g.priority || 'p3', postponedAt: g.postponedAt, copyDone,
+            });
+          });
+        });
+        allMonthBuckets.forEach(([key, items]) => {
+          (items || []).filter((g) => g.postponed).forEach((g) => {
+            const copyDone = g.postponedCopyKey && g.postponedCopyId
+              ? (goals.month[g.postponedCopyKey] || []).find((c) => c.id === g.postponedCopyId)?.done ?? null
+              : null;
+            const [, m] = key.split('-');
+            postponedGoals.push({
+              level: 'month', period: `${m}월`, title: g.title,
+              priority: g.priority || 'p3', postponedAt: g.postponedAt, copyDone,
+            });
+          });
+        });
+
         // Supabase 호환 데이터 구조 (나중에 DB 저장용)
         const analysisData = {
           user_id: supabaseUser?.id || currentUser?.username || 'local_user',
@@ -15349,6 +15423,12 @@ async function migrateToSupabase(supabaseClient, userId) {
           })),
           correlations: correlations,
           reward: { total_points: totalPoints, spent: spentPoints, xp: xp },
+          postponed_goals: {
+            total: postponedGoals.length,
+            resolved: postponedGoals.filter((g) => g.copyDone === true).length,
+            still_pending: postponedGoals.filter((g) => g.copyDone === false).length,
+            items: postponedGoals,
+          },
         };
 
         // 프롬프트 생성
@@ -15461,6 +15541,23 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
     : ''
 }
 
+${
+  postponedGoals.length > 0
+    ? `
+═══════════════════════════════════════
+📅 미룬 목표 현황 (총 ${postponedGoals.length}개)
+═══════════════════════════════════════
+• 이후 완료됨: ${postponedGoals.filter((g) => g.copyDone === true).length}개
+• 아직 미완료: ${postponedGoals.filter((g) => g.copyDone === false).length}개
+• 확인 불가: ${postponedGoals.filter((g) => g.copyDone === null).length}개
+
+목록:
+${postponedGoals.map((g) =>
+  `- [${g.priority}] "${g.title}" (${g.period}) → ${g.copyDone === true ? '✓ 나중에 완료' : g.copyDone === false ? '✗ 아직 미완료' : '- 추적 불가'}`
+).join('\n')}`
+    : ''
+}
+
 ═══════════════════════════════════════
 🎯 분석 요청
 ═══════════════════════════════════════
@@ -15478,6 +15575,9 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
 
 4. **할일 패턴 분석**
    자주 미완료되는 과제 유형, 완료율이 높은 날의 특징, 할일 구성 패턴
+
+4-1. **미루기 패턴 분석**
+   미룬 목표의 우선순위·종류 패턴, 미룬 후 실제로 완료된 비율, ADHD 관점에서 이 미루기가 회피인지 현실적 재조정인지
 
 5. **핵심 강점 3가지**
    데이터에서 발견되는 사용자의 강점, 잘 유지하고 있는 것
@@ -15521,12 +15621,17 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           const allWeekGoals = Object.values(data.goals.week || {}).flat();
           const allMonthGoals = Object.values(data.goals.month || {}).flat();
 
+          const activeLife = data.goals.life.filter(g => !g.postponed);
+          const activeYear = data.goals.year.filter(g => !g.postponed);
+          const activeMonth = allMonthGoals.filter(g => !g.postponed);
+          const activeWeek = allWeekGoals.filter(g => !g.postponed);
+          const activeDay = allDayGoals.filter(g => !g.postponed);
           data.goalStats = {
-            life: { total: data.goals.life.length, done: data.goals.life.filter(g => g.done).length },
-            year: { total: data.goals.year.length, done: data.goals.year.filter(g => g.done).length },
-            month: { total: allMonthGoals.length, done: allMonthGoals.filter(g => g.done).length },
-            week: { total: allWeekGoals.length, done: allWeekGoals.filter(g => g.done).length },
-            day: { total: allDayGoals.length, done: allDayGoals.filter(g => g.done).length },
+            life: { total: activeLife.length, done: activeLife.filter(g => g.done).length },
+            year: { total: activeYear.length, done: activeYear.filter(g => g.done).length },
+            month: { total: activeMonth.length, done: activeMonth.filter(g => g.done).length },
+            week: { total: activeWeek.length, done: activeWeek.filter(g => g.done).length },
+            day: { total: activeDay.length, done: activeDay.filter(g => g.done).length },
           };
 
           // 인생 목표 카테고리 분포
@@ -15981,11 +16086,12 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
       let selectedDate = getDateKeyFromDate(new Date());
 
       function getWeekOfDate(dateString) {
-        const date = new Date(dateString);
+        const date = new Date(dateString + 'T00:00:00');
         const year = date.getFullYear();
         const month = date.getMonth() + 1;
         const first = new Date(year, month - 1, 1);
-        const firstDay = first.getDay();
+        // 월요일 기준: Mon=0 ... Sun=6
+        const firstDay = (first.getDay() + 6) % 7;
         return Math.ceil((firstDay + date.getDate()) / 7);
       }
 
@@ -16133,6 +16239,103 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         }
       }
 
+      function getNextWeekKey(month, week) {
+        const year = new Date().getFullYear();
+        const weeksInCurrent = getWeeksInMonth(year, month);
+        if (week < weeksInCurrent) return weekKey(month, week + 1);
+        const nextMonth = month < 12 ? month + 1 : 1;
+        return weekKey(nextMonth, 1);
+      }
+
+      function getNextMonthKey(month) {
+        const nextMonth = month < 12 ? month + 1 : 1;
+        return monthKey(nextMonth);
+      }
+
+      function postponeGoal(id, level) {
+        const bucket = getGoalBucket(level);
+        const goal = bucket.find((g) => g.id === id);
+        if (!goal) return;
+
+        const copyId = Date.now();
+        const copy = {
+          ...goal,
+          id: copyId,
+          done: false,
+          postponed: undefined,
+          postponedAt: undefined,
+          parentRef: undefined,
+        };
+
+        let nextKey = null;
+        let alertMsg = '';
+        if (level === 'week') {
+          nextKey = getNextWeekKey(selectedMonth, selectedWeek);
+          if (!goals.week[nextKey]) goals.week[nextKey] = [];
+          goals.week[nextKey].push(copy);
+          const [, nm, , nw] = nextKey.split('-');
+          alertMsg = `${nm}월 ${nw}주차로 미뤘어요.`;
+        } else if (level === 'month') {
+          nextKey = getNextMonthKey(selectedMonth);
+          if (!goals.month[nextKey]) goals.month[nextKey] = [];
+          goals.month[nextKey].push(copy);
+          const nextMonth = selectedMonth < 12 ? selectedMonth + 1 : 1;
+          alertMsg = `${nextMonth}월로 미뤘어요.`;
+        }
+
+        // 원본에 미룸 표시 + 복사본 참조 저장
+        const nextBucket = bucket.map((g) =>
+          g.id === id
+            ? { ...g, postponed: true, postponedAt: new Date().toISOString(), postponedCopyId: copyId, postponedCopyKey: nextKey }
+            : g,
+        );
+        setGoalBucket(level, nextBucket);
+
+        saveGoals();
+        renderGoalsSection();
+        if (alertMsg) showSaveAlert(alertMsg, '📅');
+      }
+
+      function cancelPostpone(id, level) {
+        const bucket = getGoalBucket(level);
+        const goal = bucket.find((g) => g.id === id);
+        if (!goal || !goal.postponed) return;
+
+        // 복사본 삭제
+        if (goal.postponedCopyKey && goal.postponedCopyId) {
+          if (level === 'week') {
+            goals.week[goal.postponedCopyKey] = (goals.week[goal.postponedCopyKey] || [])
+              .filter((g) => g.id !== goal.postponedCopyId);
+          } else if (level === 'month') {
+            goals.month[goal.postponedCopyKey] = (goals.month[goal.postponedCopyKey] || [])
+              .filter((g) => g.id !== goal.postponedCopyId);
+          }
+        }
+
+        // 원본 미룸 해제
+        const nextBucket = bucket.map((g) =>
+          g.id === id
+            ? { ...g, postponed: undefined, postponedAt: undefined, postponedCopyId: undefined, postponedCopyKey: undefined }
+            : g,
+        );
+        setGoalBucket(level, nextBucket);
+
+        saveGoals();
+        renderGoalsSection();
+      }
+
+      // 이전 주차 키 반환 (월 경계 포함)
+      function getPrevWeekKey(month, week) {
+        if (week > 1) return weekKey(month, week - 1);
+        if (month <= 1) return null;
+        const prevMonth = month - 1;
+        const prevWeeks = getWeeksInMonth(new Date().getFullYear(), prevMonth);
+        return `m-${prevMonth}-w-${prevWeeks}`;
+      }
+
+      // 주간 상위목표 폴백 키 (이번 주 목표 없을 때 이전 주 표시용)
+      let _weekParentFallbackKey = null;
+
       function getParentGoalBucket(parentLevel) {
         if (parentLevel === 'life' || parentLevel === 'year') {
           return goals[parentLevel];
@@ -16145,7 +16348,7 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         }
 
         if (parentLevel === 'week') {
-          const key = weekKey(selectedMonth, selectedWeek);
+          const key = _weekParentFallbackKey || weekKey(selectedMonth, selectedWeek);
           if (!goals.week[key]) goals.week[key] = [];
           return goals.week[key];
         }
@@ -16168,7 +16371,8 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
       function getWeeksInMonth(year, month) {
         const first = new Date(year, month - 1, 1);
         const last = new Date(year, month, 0);
-        const firstDay = first.getDay();
+        // 월요일 기준: Mon=0 ... Sun=6
+        const firstDay = (first.getDay() + 6) % 7;
         return Math.ceil((firstDay + last.getDate()) / 7);
       }
 
@@ -16360,7 +16564,8 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
         if (!beforeGoal.done && updatedGoal?.done) {
           rewardTaskCompletion(
             getRewardCompletionKeyForGoal(parentLevel, goalId),
-            updatedGoal.title || ''
+            updatedGoal.title || '',
+            updatedGoal?.priority,
           );
         } else if (beforeGoal.done && !updatedGoal?.done) {
           revokeTaskCompletion(
@@ -16390,10 +16595,37 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
 
         const list = document.createElement('div');
         list.className = 'parent-list';
-        const parentGoals = getParentGoalBucket(info.parent);
+
+        // 주간 상위목표: 이번 주가 비어있으면 이전 주 폴백
+        _weekParentFallbackKey = null;
+        let fallbackLabel = '';
+        if (info.parent === 'week') {
+          const currentKey = weekKey(selectedMonth, selectedWeek);
+          const hasCurrentWeek = goals.week[currentKey]?.length > 0;
+          if (!hasCurrentWeek) {
+            const prevKey = getPrevWeekKey(selectedMonth, selectedWeek);
+            if (prevKey && goals.week[prevKey]?.length > 0) {
+              _weekParentFallbackKey = prevKey;
+              const [, pm, , pw] = prevKey.split('-');
+              fallbackLabel = `📌 ${pm}월 ${pw}주차 목표 (이번 주 목표 없음)`;
+            }
+          }
+        }
+
+        let parentGoals = getParentGoalBucket(info.parent);
         if (!parentGoals.length) {
+          _weekParentFallbackKey = null;
           content.innerHTML = `<div class="empty-context">이 기간에 작성된 상위 목표가 아직 없어요.</div>`;
           return;
+        }
+
+        if (info.parent === 'life') {
+          const categoryOrder = lifeCategoryList.map((c) => c.id);
+          parentGoals = [...parentGoals].sort((a, b) => {
+            const aIdx = categoryOrder.indexOf(a.category || 'other');
+            const bIdx = categoryOrder.indexOf(b.category || 'other');
+            return aIdx - bIdx;
+          });
         }
 
         parentGoals.forEach((goal) => {
@@ -16428,6 +16660,12 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
     `;
           list.appendChild(item);
         });
+        if (fallbackLabel) {
+          content.insertAdjacentHTML(
+            'afterbegin',
+            `<div style="font-size:12px;color:#9b8bb0;margin-bottom:8px;">${fallbackLabel}</div>`,
+          );
+        }
         content.appendChild(list);
         content.insertAdjacentHTML(
           'beforeend',
@@ -16645,12 +16883,16 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           displayGoals = currentGoals;
         }
 
+        const canPostpone = currentGoalLevel === 'week' || currentGoalLevel === 'month';
+        const postponeLabel = currentGoalLevel === 'week' ? '다음주로\n미루기' : '다음달로\n미루기';
+
         displayGoals.forEach((goal) => {
           const item = document.createElement('div');
-          item.className = `goal-item ${goal.done ? 'done' : ''}`;
+          const swipeWidth = goal.postponed ? 70 : (canPostpone && !goal.done ? 210 : 140);
+          item.className = `goal-item ${goal.done ? 'done' : ''} ${goal.postponed ? 'postponed' : ''} ${canPostpone && !goal.done && !goal.postponed ? 'has-postpone' : ''}`;
           item.dataset.id = goal.id;
+          item.dataset.sw = swipeWidth;
 
-          // 인생 목표는 카테고리 표시, 그 외는 우선순위 표시
           let tagHtml = '';
           if (currentGoalLevel === 'life' && goal.category) {
             const cat = lifeCategoryMap[goal.category] || lifeCategoryMap.other;
@@ -16659,18 +16901,29 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
             tagHtml = `<span class="priority ${goal.priority}">${priorityGoalText[goal.priority] || ''}</span>`;
           }
 
+          const postponedBadge = goal.postponed
+            ? `<span class="goal-postponed-badge">📅 미룸</span>`
+            : '';
+          const postponeBtn = canPostpone && !goal.postponed && !goal.done
+            ? `<button class="goal-postpone-btn">${postponeLabel}</button>`
+            : goal.postponed && canPostpone
+            ? `<button class="goal-cancel-postpone-btn">미루기\n취소</button>`
+            : '';
+
           item.innerHTML = `
       <div class="goal-actions">
-        <button class="goal-edit-btn">수정</button>
-        <button class="goal-delete-btn">삭제</button>
+        ${goal.postponed ? '' : '<button class="goal-edit-btn">수정</button>'}
+        ${postponeBtn}
+        ${goal.postponed ? '' : '<button class="goal-delete-btn">삭제</button>'}
       </div>
       <div class="goal-content">
-        <button class="goal-check"></button>
+        <button class="goal-check" ${goal.postponed ? 'disabled' : ''}></button>
         <div class="goal-main">
           <strong>${goal.title}</strong>
           <span>${currentGoalLevel === 'day' ? `${timeRangeText(goal)} · ${goal.memo || '메모 없음'}` : goal.memo}</span>
+          ${postponedBadge}
         </div>
-        ${tagHtml}
+        ${goal.postponed ? '' : tagHtml}
       </div>
     `;
           list.appendChild(item);
@@ -16694,6 +16947,7 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
               rewardTaskCompletion(
                 getRewardCompletionKeyForGoal(currentGoalLevel, id),
                 updatedGoal?.title || '',
+                updatedGoal?.priority,
               );
             } else if (beforeGoal?.done && !updatedGoal?.done) {
               revokeTaskCompletion(
@@ -16710,44 +16964,72 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
             renderGoalsSection();
           });
 
-          item
-            .querySelector('.goal-delete-btn')
-            .addEventListener('click', () => {
-              setGoalBucket(
-                currentGoalLevel,
-                getGoalBucket(currentGoalLevel).filter((g) => g.id !== id),
-              );
-              if (currentGoalLevel === 'day') {
-                syncTodosToSelectedDay();
-                renderTodos();
-              }
-              renderGoalsSection();
-            });
+          item.querySelector('.goal-delete-btn')?.addEventListener('click', () => {
+            setGoalBucket(
+              currentGoalLevel,
+              getGoalBucket(currentGoalLevel).filter((g) => g.id !== id),
+            );
+            if (currentGoalLevel === 'day') {
+              syncTodosToSelectedDay();
+              renderTodos();
+            }
+            renderGoalsSection();
+          });
 
-          item.querySelector('.goal-edit-btn').addEventListener('click', () => {
+          item.querySelector('.goal-edit-btn')?.addEventListener('click', () => {
             openGoalEditModal(id);
           });
 
+          function stopAndRun(btn, fn) {
+            if (!btn) return;
+            btn.addEventListener('mousedown', (e) => e.stopPropagation());
+            btn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: false });
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              // 모든 goal-item의 swiped 상태 강제 초기화
+              document.querySelectorAll('#goalList .goal-item').forEach((el) => {
+                el.classList.remove('swiped');
+                const c = el.querySelector('.goal-content');
+                if (c) { c.style.transform = ''; c.style.transition = ''; }
+              });
+              fn();
+            });
+          }
+
+          stopAndRun(item.querySelector('.goal-postpone-btn'), () => postponeGoal(id, currentGoalLevel));
+          stopAndRun(item.querySelector('.goal-cancel-postpone-btn'), () => cancelPostpone(id, currentGoalLevel));
+
           let startX = 0;
+          let startOffset = 0;
           let currentX = 0;
           let dragging = false;
+          const sw = Number(item.dataset.sw) || 140;
 
           function openSwipe() {
             document.querySelectorAll('.goal-item').forEach((g) => {
-              if (g !== item) g.classList.remove('swiped');
+              if (g !== item) {
+                g.classList.remove('swiped');
+                const gc = g.querySelector('.goal-content');
+                if (gc) gc.style.transform = '';
+              }
             });
             item.classList.add('swiped');
-            content.style.transform = '';
+            content.style.transition = '';
+            content.style.transform = `translateX(-${sw}px)`;
           }
 
           function closeSwipe() {
             item.classList.remove('swiped');
+            content.style.transition = '';
             content.style.transform = '';
           }
 
           function dragStart(x) {
             startX = x;
             currentX = x;
+            // 이미 열려있으면 -sw 에서 시작, 닫혀있으면 0에서 시작
+            startOffset = item.classList.contains('swiped') ? -sw : 0;
+            content.style.transform = `translateX(${startOffset}px)`;
             dragging = true;
             content.style.transition = 'none';
           }
@@ -16755,7 +17037,7 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           function dragMove(x) {
             if (!dragging) return;
             currentX = x;
-            const diff = Math.min(0, Math.max(-140, currentX - startX));
+            const diff = Math.min(0, Math.max(-sw, startOffset + (currentX - startX)));
             content.style.transform = `translateX(${diff}px)`;
           }
 
@@ -16763,14 +17045,11 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
             if (!dragging) return;
             dragging = false;
             content.style.transition = '';
-            const diff = currentX - startX;
+            const moved = currentX - startX;
+            const total = startOffset + moved;
 
-            if (diff < -45) openSwipe();
-            else if (diff > 30) closeSwipe();
-            else
-              content.style.transform = item.classList.contains('swiped')
-                ? 'translateX(-140px)'
-                : '';
+            if (total < -sw / 2) openSwipe();
+            else closeSwipe();
           }
 
           item.addEventListener(
@@ -16793,7 +17072,8 @@ ${brainDumpContent.slice(0, 500)}${brainDumpContent.length > 500 ? '...' : ''}`
           window.addEventListener('mouseup', dragEnd);
 
           item.addEventListener('dblclick', () => {
-            item.classList.contains('swiped') ? closeSwipe() : openSwipe();
+            if (item.classList.contains('swiped')) closeSwipe();
+            else openSwipe();
           });
         });
       }
