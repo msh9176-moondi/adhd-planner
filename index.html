@@ -11765,6 +11765,19 @@
             }
           }
 
+          // day에서 time과 중복된 데이터 제거 (버그로 인해 생긴 중복 데이터 정리)
+          const dayKeysToCheck = Object.keys(restoredGoals.day);
+          for (const dk of dayKeysToCheck) {
+            const parts = dk.split('-');
+            if (parts.length === 5) { // d-YYYY-MM-DD-dow
+              const correspondingTimeKey = `t-${parts[1]}-${parts[2]}-${parts[3]}`; // t-YYYY-MM-DD
+              if (restoredGoals.time[correspondingTimeKey]) {
+                delete restoredGoals.day[dk];
+                console.log('[복원] 중복 제거:', dk, '(time에 존재)');
+              }
+            }
+          }
+
           localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(restoredGoals));
 
           // localStorage에 저장됐는지 확인
@@ -12280,8 +12293,16 @@
 
       function syncDayGoals() {
         try {
-          if (typeof goals !== 'undefined') {
-            goals.day[dayKey(selectedDate)] = todos;
+          if (typeof goals !== 'undefined' && typeof currentGoalLevel !== 'undefined') {
+            // time 레벨일 때는 goals.time에, day 레벨일 때만 goals.day에 저장
+            if (currentGoalLevel === 'time') {
+              const todayKey = `t-${getDateKeyFromDate(new Date())}`;
+              if (!goals.time) goals.time = {};
+              goals.time[todayKey] = todos;
+            } else if (currentGoalLevel === 'day') {
+              if (!goals.day) goals.day = {};
+              goals.day[dayKey()] = todos;
+            }
           }
         } catch (e) {}
       }
@@ -16897,6 +16918,21 @@ ${postponedGoals.map((g) =>
                 const newKey = 't' + oldKey.slice(1); // d- → t-
                 result.time[newKey] = result.day[oldKey];
                 delete result.day[oldKey];
+              }
+            }
+
+            // day에서 time과 중복된 데이터 제거 (버그로 인해 생긴 중복 데이터 정리)
+            // day 키: d-2024-01-15-mon (5 parts), time 키: t-2024-01-15 (4 parts)
+            const dayKeys = Object.keys(result.day);
+            for (const dk of dayKeys) {
+              const parts = dk.split('-');
+              if (parts.length === 5) { // d-YYYY-MM-DD-dow
+                const correspondingTimeKey = `t-${parts[1]}-${parts[2]}-${parts[3]}`; // t-YYYY-MM-DD
+                if (result.time[correspondingTimeKey]) {
+                  // time에 같은 날짜 데이터가 있으면 day에서 삭제 (time이 원본)
+                  delete result.day[dk];
+                  console.log('[loadGoals] 중복 제거:', dk, '(time에 존재)');
+                }
               }
             }
 
