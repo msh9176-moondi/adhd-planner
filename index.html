@@ -11504,7 +11504,13 @@
           console.log('[autoRestoreOnLogin] cloudTime:', new Date(cloudTime).toISOString(), 'localTime:', localTimeStr || '없음');
           console.log('[autoRestoreOnLogin] 클라우드가 최신?', cloudTime > localTime);
 
-          if (cloudTime > localTime) {
+          // 로컬 데이터가 비어있는지 확인 (life 목표가 없으면 빈 것으로 간주)
+          const localGoals = JSON.parse(localStorage.getItem('floca_goals') || '{}');
+          const isLocalEmpty = !localGoals.life || localGoals.life.length === 0;
+          console.log('[autoRestoreOnLogin] 로컬 데이터 비어있음?', isLocalEmpty);
+
+          // 클라우드가 최신이거나, 로컬이 비어있으면 복원
+          if (cloudTime > localTime || isLocalEmpty) {
             // 클라우드가 더 최신 → 복원
             console.log('[autoRestoreOnLogin] 클라우드 데이터로 복원 시작');
             console.log('[autoRestoreOnLogin] app_data.goals:', userData.app_data.goals);
