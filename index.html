@@ -11453,6 +11453,17 @@
         updateSyncIndicator('pending');
         try {
           const appData = collectAllAppData();
+
+          // 빈 데이터는 업로드하지 않음 (기존 데이터 보호)
+          const hasLifeGoals = appData.goals?.life?.length > 0;
+          const hasTimeGoals = Object.values(appData.goals?.time || {}).some(arr => arr.length > 0);
+          if (!hasLifeGoals && !hasTimeGoals) {
+            console.log('[silentUpload] 빈 데이터, 업로드 건너뜀');
+            updateSyncIndicator('saved');
+            isSyncing = false;
+            return;
+          }
+
           const { error } = await supabaseClient
             .from('user_app_data')
             .upsert(
