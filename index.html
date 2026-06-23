@@ -11471,20 +11471,27 @@
       }
 
       async function autoRestoreOnLogin() {
+        console.log('[autoRestoreOnLogin] 시작, supabaseUser:', !!supabaseUser, 'isSyncing:', isSyncing);
         if (!supabaseUser || isSyncing) return;
         isSyncing = true;
         updateSyncIndicator('pending');
         try {
+          console.log('[autoRestoreOnLogin] Supabase에서 데이터 조회 중...');
           const { data, error } = await supabaseClient
             .from('user_app_data')
             .select('app_data, updated_at')
             .eq('user_id', supabaseUser.id)
             .limit(1);
+
+          console.log('[autoRestoreOnLogin] 조회 결과 - data:', data, 'error:', error);
           if (error) throw error;
 
           const userData = data?.[0];
+          console.log('[autoRestoreOnLogin] userData:', userData ? '있음' : '없음');
+
           if (!userData?.app_data) {
             // 클라우드에 데이터 없음 → 현재 로컬 데이터 업로드
+            console.log('[autoRestoreOnLogin] 클라우드에 데이터 없음, 로컬 데이터 업로드');
             isSyncing = false;
             silentUpload();
             return;
@@ -11494,8 +11501,13 @@
           const localTimeStr = localStorage.getItem('floca_last_local_save');
           const localTime = localTimeStr ? new Date(localTimeStr).getTime() : 0;
 
+          console.log('[autoRestoreOnLogin] cloudTime:', new Date(cloudTime).toISOString(), 'localTime:', localTimeStr || '없음');
+          console.log('[autoRestoreOnLogin] 클라우드가 최신?', cloudTime > localTime);
+
           if (cloudTime > localTime) {
             // 클라우드가 더 최신 → 복원
+            console.log('[autoRestoreOnLogin] 클라우드 데이터로 복원 시작');
+            console.log('[autoRestoreOnLogin] app_data.goals:', userData.app_data.goals);
             restoreAllAppData(userData.app_data);
             if (typeof renderTodos === 'function') renderTodos();
             if (typeof renderGoalsSection === 'function') renderGoalsSection();
@@ -11508,12 +11520,13 @@
             updateSyncIndicator('saved');
           } else {
             // 로컬이 더 최신 → 업로드
+            console.log('[autoRestoreOnLogin] 로컬이 더 최신, 업로드');
             isSyncing = false;
             silentUpload();
             return;
           }
         } catch (e) {
-          console.error('자동 복원 실패:', e);
+          console.error('[autoRestoreOnLogin] 자동 복원 실패:', e);
           updateSyncIndicator('error');
         } finally {
           isSyncing = false;
