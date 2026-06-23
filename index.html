@@ -599,7 +599,7 @@
       }
       .goal-tabs {
         display: grid;
-        grid-template-columns: repeat(5, 1fr);
+        grid-template-columns: repeat(6, 1fr);
         gap: 3px;
         background: var(--semi);
         padding: 4px;
@@ -767,6 +767,32 @@
         color: #725ca3;
         font-weight: 900;
         flex-shrink: 0;
+      }
+      .dow-tabs {
+        display: flex;
+        gap: 6px;
+        margin-top: 12px;
+      }
+      .dow-tab {
+        flex: 1;
+        height: 36px;
+        border: 1.5px solid #e8e1f2;
+        border-radius: 10px;
+        background: #fff;
+        color: #8f819c;
+        font-weight: 700;
+        font-size: 14px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .dow-tab:hover {
+        border-color: var(--point);
+        color: var(--point);
+      }
+      .dow-tab.active {
+        background: var(--point);
+        border-color: var(--point);
+        color: #fff;
       }
       .period-caption {
         margin-top: 10px;
@@ -1900,6 +1926,491 @@
         to {
           transform: rotate(360deg);
         }
+      }
+
+      /* 인생 목표 마법사 스타일 */
+      .life-wizard-modal {
+        width: min(480px, 100%);
+        max-height: calc(100dvh - 36px);
+        display: flex;
+        flex-direction: column;
+        background: #fff;
+        border: 1px solid var(--line);
+        border-radius: 28px;
+        padding: 24px;
+        box-shadow: 0 24px 70px rgba(37, 35, 42, 0.16);
+        animation: modalUp 0.18s ease-out;
+      }
+
+      .wizard-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 8px;
+      }
+
+      .wizard-header h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #342c42;
+        margin: 0;
+      }
+
+      .wizard-steps {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+
+      .wizard-step {
+        flex: 1;
+        height: 4px;
+        background: #e8e1f2;
+        border-radius: 2px;
+        transition: background 0.2s;
+      }
+
+      .wizard-step.active {
+        background: var(--point);
+      }
+
+      .wizard-step.done {
+        background: #9b8bb0;
+      }
+
+      .wizard-content {
+        flex: 1;
+        overflow-y: auto;
+        margin-bottom: 20px;
+      }
+
+      .wizard-question {
+        font-size: 15px;
+        font-weight: 600;
+        color: #342c42;
+        margin-bottom: 6px;
+      }
+
+      .wizard-hint {
+        font-size: 13px;
+        color: #8f819c;
+        margin-bottom: 16px;
+      }
+
+      .wizard-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+
+      .wizard-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 10px 16px;
+        border: 1.5px solid #e8e1f2;
+        border-radius: 20px;
+        background: #fff;
+        font-size: 14px;
+        font-weight: 600;
+        color: #544764;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .wizard-chip:hover {
+        border-color: var(--point);
+        background: #faf8fc;
+      }
+
+      .wizard-chip.selected {
+        border-color: var(--point);
+        background: var(--semi);
+        color: var(--point);
+      }
+
+      .wizard-chip.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+        pointer-events: none;
+      }
+
+      .wizard-option.disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+
+      .wizard-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .wizard-option {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border: 1.5px solid #e8e1f2;
+        border-radius: 14px;
+        background: #fff;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .wizard-option:hover {
+        border-color: #d4c8e2;
+        background: #faf8fc;
+      }
+
+      .wizard-option.selected {
+        border-color: var(--point);
+        background: var(--semi);
+      }
+
+      .wizard-option-radio {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #c4b8d4;
+        border-radius: 50%;
+        flex-shrink: 0;
+        position: relative;
+        transition: all 0.15s;
+      }
+
+      .wizard-option.selected .wizard-option-radio {
+        border-color: var(--point);
+      }
+
+      .wizard-option.selected .wizard-option-radio::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 8px;
+        height: 8px;
+        background: var(--point);
+        border-radius: 50%;
+      }
+
+      .wizard-option-check {
+        width: 18px;
+        height: 18px;
+        border: 2px solid #c4b8d4;
+        border-radius: 6px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+
+      .wizard-option.selected .wizard-option-check {
+        border-color: var(--point);
+        background: var(--point);
+      }
+
+      .wizard-option.selected .wizard-option-check::after {
+        content: '✓';
+        color: #fff;
+        font-size: 11px;
+        font-weight: 700;
+      }
+
+      .wizard-option-text {
+        font-size: 14px;
+        font-weight: 600;
+        color: #544764;
+      }
+
+      .wizard-option.selected .wizard-option-text {
+        color: var(--point);
+      }
+
+      .wizard-custom-input {
+        flex: 1;
+        border: none;
+        background: transparent;
+        font-size: 14px;
+        font-weight: 600;
+        color: #544764;
+        outline: none;
+      }
+
+      .wizard-custom-input::placeholder {
+        color: #b4a8c4;
+      }
+
+      .wizard-sentence-options {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-bottom: 8px;
+      }
+
+      .wizard-sentence-label {
+        font-size: 14px;
+        font-weight: 600;
+        color: #544764;
+        margin-bottom: 4px;
+      }
+
+      .wizard-sentence-card {
+        background: #fff;
+        border: 2px solid #e8e1f2;
+        border-radius: 14px;
+        padding: 14px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .wizard-sentence-card:hover {
+        border-color: var(--point);
+        background: #fcfaff;
+      }
+
+      .wizard-sentence-card.selected {
+        border-color: var(--point);
+        background: linear-gradient(135deg, #f8f5ff 0%, #f0eaff 100%);
+        box-shadow: 0 2px 8px rgba(143, 115, 191, 0.15);
+      }
+
+      .wizard-sentence-type {
+        display: inline-block;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--point);
+        background: rgba(143, 115, 191, 0.1);
+        padding: 3px 8px;
+        border-radius: 6px;
+        margin-bottom: 8px;
+      }
+
+      .wizard-sentence-text {
+        font-size: 14px;
+        font-weight: 500;
+        color: #342c42;
+        line-height: 1.5;
+        margin: 0;
+      }
+
+      .wizard-preview-box {
+        background: var(--semi);
+        border-radius: 16px;
+        padding: 18px;
+        margin-bottom: 16px;
+      }
+
+      .wizard-preview-label {
+        font-size: 12px;
+        font-weight: 700;
+        color: #8f819c;
+        margin-bottom: 10px;
+      }
+
+      .wizard-preview-text {
+        font-size: 15px;
+        font-weight: 600;
+        color: #342c42;
+        line-height: 1.6;
+        white-space: pre-wrap;
+      }
+
+      .wizard-edit-textarea {
+        width: 100%;
+        min-height: 100px;
+        border: 1.5px solid #e8e1f2;
+        border-radius: 14px;
+        padding: 14px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #342c42;
+        line-height: 1.6;
+        resize: none;
+        margin-bottom: 12px;
+      }
+
+      .wizard-edit-textarea:focus {
+        outline: none;
+        border-color: var(--point);
+      }
+
+      .wizard-reflection {
+        background: linear-gradient(135deg, #f8f6fa 0%, #f0ebf5 100%);
+        border-radius: 14px;
+        padding: 16px;
+        margin-bottom: 16px;
+        border-left: 3px solid var(--point);
+      }
+
+      .wizard-reflection-question {
+        display: block;
+        font-size: 14px;
+        font-weight: 700;
+        color: #544764;
+        margin: 0 0 10px 0;
+      }
+
+      .wizard-reflection-input {
+        width: 100%;
+        min-height: 70px;
+        border: 1.5px solid #d4c8e2;
+        border-radius: 12px;
+        padding: 12px;
+        font-size: 14px;
+        font-weight: 600;
+        color: #342c42;
+        background: #fff;
+        resize: none;
+        margin-bottom: 8px;
+      }
+
+      .wizard-reflection-input:focus {
+        outline: none;
+        border-color: var(--point);
+      }
+
+      .wizard-reflection-input::placeholder {
+        color: #b4a8c4;
+      }
+
+      .wizard-reflection-hint {
+        font-size: 12px;
+        color: #8f819c;
+        margin: 0;
+      }
+
+      .wizard-save-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 16px;
+      }
+
+      .wizard-save-actions .wizard-btn {
+        flex: 1;
+        font-size: 13px;
+        padding: 12px 8px;
+      }
+
+      .wizard-memo-input {
+        width: 100%;
+        height: 42px;
+        border: 1.5px solid #e8e1f2;
+        border-radius: 14px;
+        padding: 0 14px;
+        font-size: 13px;
+        font-weight: 600;
+        color: #342c42;
+        margin-bottom: 12px;
+      }
+
+      .wizard-memo-input:focus {
+        outline: none;
+        border-color: var(--point);
+      }
+
+      .wizard-recommend-btn {
+        width: 100%;
+        margin-top: 16px;
+        padding: 12px;
+        border: 1.5px dashed #c4b8d4;
+        border-radius: 12px;
+        background: transparent;
+        color: #725ca3;
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .wizard-recommend-btn:hover {
+        border-color: var(--point);
+        background: #faf8fc;
+      }
+
+      .wizard-example {
+        background: #f8f6fa;
+        border-radius: 12px;
+        padding: 14px;
+        margin-top: 16px;
+      }
+
+      .wizard-example-label {
+        font-size: 11px;
+        font-weight: 700;
+        color: #9b8bb0;
+        margin-bottom: 8px;
+      }
+
+      .wizard-example-text {
+        font-size: 13px;
+        color: #725ca3;
+        line-height: 1.5;
+        white-space: pre-wrap;
+      }
+
+      .wizard-actions {
+        display: flex;
+        gap: 10px;
+        flex-shrink: 0;
+      }
+
+      .wizard-btn {
+        flex: 1;
+        height: 48px;
+        border: none;
+        border-radius: 14px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+
+      .wizard-btn.secondary {
+        background: var(--semi);
+        color: #725ca3;
+      }
+
+      .wizard-btn.secondary:hover {
+        background: #e8e1f2;
+      }
+
+      .wizard-btn.primary {
+        background: var(--point);
+        color: #fff;
+      }
+
+      .wizard-btn.primary:hover {
+        background: #6d4fa3;
+      }
+
+      .wizard-btn:disabled {
+        opacity: 1;
+        cursor: not-allowed;
+        background: #e0dae8;
+        color: #a89bb8;
+      }
+
+      .life-wizard-trigger {
+        width: 100%;
+        padding: 16px;
+        border: 2px dashed #d4c8e2;
+        border-radius: 16px;
+        background: #faf8fc;
+        color: #725ca3;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+
+      .life-wizard-trigger:hover {
+        border-color: var(--point);
+        background: var(--semi);
       }
 
       .edit-modal-head {
@@ -8870,7 +9381,8 @@
             <button class="goal-tab" data-level="year">연간</button>
             <button class="goal-tab" data-level="month">월간</button>
             <button class="goal-tab" data-level="week">주간</button>
-            <button class="goal-tab active" data-level="day">일간</button>
+            <button class="goal-tab" data-level="day">일간</button>
+            <button class="goal-tab active" data-level="time">시간</button>
           </div>
         </div>
 
@@ -9012,11 +9524,18 @@
           <div class="swipe-hint">← 좌측으로 밀어 수정 · 삭제</div>
 
           <div class="goal-add-panel">
-            <input id="goalTitle" placeholder="목표를 입력해요" />
-            <input
-              id="goalMemo"
-              placeholder="짧은 메모 예: 이번 주까지 초안 완성"
-            />
+            <!-- 인생 목표 마법사 트리거 (인생 탭에서만 표시) -->
+            <button class="life-wizard-trigger hidden" id="lifeWizardTrigger">
+              ✨ 인생 목표 만들기
+            </button>
+
+            <!-- 일반 목표 입력 (인생 탭 외에서 표시) -->
+            <div id="goalNormalInputs">
+              <input id="goalTitle" placeholder="목표를 입력해요" />
+              <input
+                id="goalMemo"
+                placeholder="짧은 메모 예: 이번 주까지 초안 완성"
+              />
             <div class="goal-time-grid" id="goalTimeGrid" style="display: grid">
               <div>
                 <span class="time-picker-label">시작</span>
@@ -9093,17 +9612,18 @@
               <option value="p3">해야할 일</option>
               <option value="p4">하면 좋은 일</option>
             </select>
-            <select id="goalCategory" class="hidden">
-              <option value="health">💪 건강</option>
-              <option value="finance">💰 재정</option>
-              <option value="relationship">❤️ 관계</option>
-              <option value="career">💼 커리어</option>
-              <option value="growth">📚 자기계발</option>
-              <option value="leisure">🎨 여가</option>
-              <option value="mind">🧘 마음</option>
-              <option value="other">✨ 기타</option>
-            </select>
-            <button class="goal-save-add" id="saveGoal">＋ 목표 추가</button>
+              <select id="goalCategory" class="hidden">
+                <option value="health">💪 건강</option>
+                <option value="finance">💰 재정</option>
+                <option value="relationship">❤️ 관계</option>
+                <option value="career">💼 커리어</option>
+                <option value="growth">📚 자기계발</option>
+                <option value="leisure">🎨 여가</option>
+                <option value="mind">🧘 마음</option>
+                <option value="other">✨ 기타</option>
+              </select>
+              <button class="goal-save-add" id="saveGoal">＋ 목표 추가</button>
+            </div>
           </div>
         </div>
 
@@ -9728,6 +10248,28 @@
       </div>
     </div>
 
+    <!-- 인생 목표 마법사 모달 -->
+    <div class="modal-backdrop hidden" id="lifeWizardModal">
+      <div class="life-wizard-modal">
+        <div class="wizard-header">
+          <h3 id="wizardTitle">인생 목표 만들기</h3>
+          <button class="modal-close" id="closeLifeWizard">×</button>
+        </div>
+        <div class="wizard-steps">
+          <div class="wizard-step" data-step="1"></div>
+          <div class="wizard-step" data-step="2"></div>
+          <div class="wizard-step" data-step="3"></div>
+          <div class="wizard-step" data-step="4"></div>
+        </div>
+        <div class="wizard-content" id="wizardContent">
+          <!-- 동적 콘텐츠 -->
+        </div>
+        <div class="wizard-actions" id="wizardActions">
+          <button class="wizard-btn secondary hidden" id="wizardPrev">이전</button>
+          <button class="wizard-btn primary" id="wizardNext">다음</button>
+        </div>
+      </div>
+    </div>
 
     <div class="modal-backdrop hidden" id="motivationModal">
       <div class="motivation-modal">
@@ -11190,6 +11732,7 @@
 
         if (appData.goals) {
           console.log('goals 복원:', appData.goals);
+          console.log('goals.time 키들:', Object.keys(appData.goals.time || {}));
           console.log('goals.day 키들:', Object.keys(appData.goals.day || {}));
           localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(appData.goals));
 
@@ -11203,13 +11746,16 @@
             Object.assign(goals, appData.goals);
             console.log('메모리 goals 업데이트 완료');
 
-            // 중요: selectedDate에 맞는 todos 배열로 동기화
-            const todayKey = 'd-' + (typeof selectedDate !== 'undefined' ? selectedDate : getDateKeyFromDate(new Date()));
+            // 중요: 오늘 날짜에 맞는 todos 배열로 동기화 (time 레벨)
+            const todayKey = 't-' + getDateKeyFromDate(new Date());
             console.log('오늘 키:', todayKey);
-            console.log('goals.day에서 찾기:', goals.day[todayKey] ? goals.day[todayKey].length + '개' : '없음');
+            console.log('goals.time에서 찾기:', goals.time && goals.time[todayKey] ? goals.time[todayKey].length + '개' : '없음');
 
-            if (goals.day[todayKey]) {
-              // todos 변수를 goals.day[todayKey] 배열로 직접 재할당
+            // time 레벨 초기화
+            if (!goals.time) goals.time = {};
+
+            if (goals.time[todayKey]) {
+              // todos 변수를 goals.time[todayKey] 배열로 직접 재할당
               if (typeof syncTodosToSelectedDay === 'function') {
                 syncTodosToSelectedDay();
                 console.log('syncTodosToSelectedDay 호출 완료, todos 길이:', todos.length);
@@ -11790,7 +12336,7 @@
         const updatedTodo = todos.find((t) => t.id === editingTodoId);
         if (updatedTodo) syncTodoToSupabase(updatedTodo, selectedDate);
 
-        if (currentGoalLevel === 'day') {
+        if (currentGoalLevel === 'time') {
           renderGoalsSection();
         }
 
@@ -13847,7 +14393,7 @@
       }
 
       function getRewardCompletionKeyForGoal(level, id) {
-        if (level === 'day') return `task-${id}`;
+        if (level === 'time') return `task-${id}`;
         const key = getCurrentKeyForLevel(level) || 'root';
         return `goal-${level}-${key}-${id}`;
       }
@@ -16021,8 +16567,15 @@ ${postponedGoals.map((g) =>
           tab: '일간',
           parent: 'week',
           parentTitle: '상위 목표 · 주간 목표',
-          parentSub: '주간 목표를 참고해서 오늘 목표를 작성해요.',
-          writeTitle: '오늘 목표 작성',
+          parentSub: '주간 목표를 참고해서 요일별 목표를 작성해요.',
+          writeTitle: '요일별 목표 작성',
+        },
+        time: {
+          tab: '시간',
+          parent: 'day',
+          parentTitle: '상위 목표 · 일간 목표',
+          parentSub: '오늘의 일간 목표를 참고해서 시간별 할일을 작성해요.',
+          writeTitle: '오늘 할일 작성',
         },
       };
 
@@ -16049,13 +16602,241 @@ ${postponedGoals.map((g) =>
         return acc;
       }, {});
 
+      // 인생 목표 마법사용 선택지 데이터
+      const lifeWizardOptions = {
+        reduceQuestions: {
+          health: '요즘 건강에서 나를 힘들게 하는 반복은 무엇인가요?',
+          finance: '요즘 돈과 관련해서 나를 힘들게 하는 반복은 무엇인가요?',
+          relationship: '요즘 관계에서 나를 힘들게 하는 반복은 무엇인가요?',
+          career: '요즘 일에서 나를 힘들게 하는 반복은 무엇인가요?',
+          growth: '요즘 성장에서 나를 힘들게 하는 반복은 무엇인가요?',
+          leisure: '요즘 여가에서 나를 힘들게 하는 반복은 무엇인가요?',
+          mind: '요즘 마음에서 나를 힘들게 하는 반복은 무엇인가요?',
+          other: '이 영역에서 줄이고 싶은 패턴은 무엇인가요?',
+        },
+        reduce: {
+          health: [
+            '몸이 자주 아프거나 무너지는 생활',
+            '무리해서 버티다가 탈진하는 패턴',
+            '수면이나 식사가 불규칙한 상태',
+            '운동을 미루고 몸을 방치하는 습관',
+            '스트레스를 몸으로 받아내는 방식',
+          ],
+          finance: [
+            '돈 때문에 계속 불안한 상태',
+            '충동적으로 소비하는 패턴',
+            '수입과 지출을 파악하지 못하는 상태',
+            '저축 없이 빠듯하게 사는 생활',
+            '돈 문제를 회피하고 미루는 습관',
+          ],
+          relationship: [
+            '사람 눈치를 너무 많이 보는 모습',
+            '관계에서 나를 잃어버리는 패턴',
+            '갈등을 피하느라 속마음을 숨기는 상태',
+            '외롭지만 먼저 연락하지 못하는 습관',
+            '상처받을까봐 관계를 피하는 모습',
+          ],
+          career: [
+            '남이 정한 기준에 끌려가는 느낌',
+            '하고 싶은 일을 모르는 상태',
+            '일에서 의미를 못 느끼는 상태',
+            '번아웃이 반복되는 패턴',
+            '성장 없이 제자리인 느낌',
+          ],
+          growth: [
+            '시작만 하고 끝내지 못하는 반복',
+            '계속 미루고 후회하는 패턴',
+            '배우고 싶은데 실행하지 못하는 상태',
+            '작심삼일로 끝나는 습관',
+            '변화하고 싶지만 그대로인 상태',
+          ],
+          leisure: [
+            '의미 없이 하루가 흘러가는 느낌',
+            '쉬어도 쉬는 것 같지 않은 상태',
+            '즐거운 일을 찾지 못하는 느낌',
+            '여유 없이 바쁘기만 한 생활',
+            '취미나 관심사가 없는 상태',
+          ],
+          mind: [
+            '감정에 휘둘리는 상태',
+            '불안이나 걱정이 계속되는 패턴',
+            '자책과 후회가 반복되는 상태',
+            '의욕이 없고 무기력한 느낌',
+            '마음이 자주 지치는 상태',
+          ],
+          other: [
+            '계속 미루고 후회하는 패턴',
+            '의미 없이 하루가 흘러가는 느낌',
+            '시작만 하고 끝내지 못하는 반복',
+            '변화하고 싶지만 그대로인 상태',
+            '내가 원하는 게 뭔지 모르는 상태',
+          ],
+        },
+        increaseQuestions: {
+          health: '건강을 위해 더 늘리고 싶은 것은 무엇인가요?',
+          finance: '경제적으로 더 늘리고 싶은 것은 무엇인가요?',
+          relationship: '관계에서 더 늘리고 싶은 것은 무엇인가요?',
+          career: '일에서 더 늘리고 싶은 것은 무엇인가요?',
+          growth: '성장을 위해 더 늘리고 싶은 것은 무엇인가요?',
+          leisure: '여가에서 더 늘리고 싶은 것은 무엇인가요?',
+          mind: '마음에서 더 늘리고 싶은 것은 무엇인가요?',
+          other: '이 영역에서 더 늘리고 싶은 것은 무엇인가요?',
+        },
+        increase: {
+          health: [
+            '건강한 생활 리듬',
+            '꾸준한 운동 습관',
+            '충분한 수면과 휴식',
+            '균형 잡힌 식사',
+            '몸의 신호에 귀 기울이는 습관',
+          ],
+          finance: [
+            '경제적 안정감',
+            '저축과 투자 습관',
+            '소비에 대한 통제력',
+            '수입원의 다양화',
+            '돈에 대한 명확한 계획',
+          ],
+          relationship: [
+            '솔직한 대화',
+            '건강한 경계',
+            '깊이 있는 관계',
+            '나를 지지해주는 사람들',
+            '관계에서의 편안함',
+          ],
+          career: [
+            '일에서의 의미와 보람',
+            '나만의 강점 활용',
+            '성장 기회',
+            '일과 삶의 균형',
+            '자율성과 주도권',
+          ],
+          growth: [
+            '실행력',
+            '꾸준함',
+            '새로운 배움',
+            '완료하는 습관',
+            '작은 성취의 축적',
+          ],
+          leisure: [
+            '나만의 시간',
+            '즐거운 취미',
+            '여유로운 마음',
+            '새로운 경험',
+            '재충전의 시간',
+          ],
+          mind: [
+            '감정 조절 능력',
+            '마음의 안정감',
+            '자기 긍정감',
+            '회복력',
+            '현재에 집중하는 힘',
+          ],
+          other: [
+            '안정감',
+            '실행력',
+            '자유',
+            '몰입',
+            '나다운 선택',
+          ],
+        },
+        identityQuestions: {
+          health: '건강과 관련해서 어떤 모습에 가까워지고 싶나요?',
+          finance: '돈과 관련해서 어떤 모습에 가까워지고 싶나요?',
+          relationship: '관계에서 어떤 모습에 가까워지고 싶나요?',
+          career: '일에서 어떤 모습에 가까워지고 싶나요?',
+          growth: '성장과 관련해서 어떤 모습에 가까워지고 싶나요?',
+          leisure: '여가와 관련해서 어떤 모습에 가까워지고 싶나요?',
+          mind: '마음과 관련해서 어떤 모습에 가까워지고 싶나요?',
+          other: '어떤 모습에 가까워지고 싶나요?',
+        },
+        identity: {
+          health: [
+            '몸을 꾸준히 돌보는 사람',
+            '지속 가능한 생활 습관을 가진 사람',
+            '무리하지 않고 오래가는 사람',
+            '건강을 우선순위에 두는 사람',
+            '몸의 신호를 잘 듣는 사람',
+          ],
+          finance: [
+            '돈을 안정적으로 관리하는 사람',
+            '경제적 자유를 향해 가는 사람',
+            '돈 걱정 없이 선택할 수 있는 사람',
+            '계획적으로 소비하는 사람',
+            '미래를 준비하는 사람',
+          ],
+          relationship: [
+            '진솔하게 소통하는 사람',
+            '건강한 관계를 만드는 사람',
+            '나를 잃지 않으면서 함께하는 사람',
+            '주변에 좋은 영향을 주는 사람',
+            '편안한 관계를 유지하는 사람',
+          ],
+          career: [
+            '나만의 방식으로 일하는 사람',
+            '일에서 의미를 찾는 사람',
+            '꾸준히 성장하는 전문가',
+            '일과 삶의 균형을 지키는 사람',
+            '자기 강점을 발휘하는 사람',
+          ],
+          growth: [
+            '꾸준히 성장하는 사람',
+            '시작한 일을 끝내는 사람',
+            '작은 행동을 매일 쌓는 사람',
+            '배움을 멈추지 않는 사람',
+            '어제보다 나은 오늘을 만드는 사람',
+          ],
+          leisure: [
+            '삶을 즐길 줄 아는 사람',
+            '여유를 만들 줄 아는 사람',
+            '나만의 즐거움을 아는 사람',
+            '쉴 때 제대로 쉬는 사람',
+            '일상에서 행복을 찾는 사람',
+          ],
+          mind: [
+            '감정에 휩쓸려도 다시 선택하는 사람',
+            '무너져도 다시 돌아오는 사람',
+            '마음을 돌볼 줄 아는 사람',
+            '불안 속에서도 중심을 잡는 사람',
+            '자신에게 너그러운 사람',
+          ],
+          other: [
+            '무너져도 다시 돌아오는 사람',
+            '내 삶을 스스로 돌보는 사람',
+            '꾸준히 성장하는 사람',
+            '작은 행동을 계속 쌓는 사람',
+            '나다운 선택을 하는 사람',
+          ],
+        },
+        examples: {
+          health: '무리해서 버티는 삶을 줄이고, 오래 지속 가능한 몸과 생활 리듬을 만드는 삶.',
+          finance: '돈 때문에 계속 불안한 상태를 줄이고, 선택지를 넓힐 수 있는 경제적 안정감을 만드는 삶.',
+          relationship: '눈치 보고 맞추기만 하는 관계를 줄이고, 편안하고 솔직한 관계를 만들어가는 삶.',
+          career: '남이 정한 기준에 끌려가는 일을 줄이고, 내가 가진 강점으로 의미 있는 일을 만들어가는 삶.',
+          growth: '시작만 하고 끝내지 못하는 반복을 줄이고, 꾸준히 배우고 성장하는 삶.',
+          leisure: '의미 없이 흘러가는 시간을 줄이고, 나만의 즐거움과 여백이 있는 삶.',
+          mind: '감정에 휩쓸려 하루 전체를 포기하는 패턴을 줄이고, 다시 돌아올 수 있는 마음의 구조를 만드는 삶.',
+          other: '내가 원하는 방향으로 삶을 만들어가는 삶.',
+        },
+        yearlyActionPlaceholders: {
+          health: '예: 주 2회 운동, 12시 전 취침',
+          finance: '예: 월 30만원 저축, 가계부 시작',
+          relationship: '예: 가족 주 1회 식사, 연락 먼저 하기',
+          career: '예: 새 기술 배우기, 포트폴리오 정리',
+          growth: '예: 하루 30분 독서, 강의 하나 완주',
+          leisure: '예: 취미 하나 시작, 주말 휴식',
+          mind: '예: 명상 시작, 감정 기록하기',
+          other: '예: 올해 시작할 작은 행동',
+        },
+      };
+
       function loadGoals() {
         try {
           const saved = JSON.parse(
             localStorage.getItem(FLOCA_GOALS_KEY) || 'null',
           );
           if (saved && typeof saved === 'object') {
-            return {
+            const result = {
               life: Array.isArray(saved.life) ? saved.life : [],
               year: Array.isArray(saved.year) ? saved.year : [],
               month:
@@ -16065,10 +16846,25 @@ ${postponedGoals.map((g) =>
               week:
                 saved.week && typeof saved.week === 'object' ? saved.week : {},
               day: saved.day && typeof saved.day === 'object' ? saved.day : {},
+              time: saved.time && typeof saved.time === 'object' ? saved.time : {},
             };
+
+            // 기존 day 데이터를 time으로 마이그레이션 (d-2024-01-15 형식 → t-2024-01-15)
+            if (!saved.time) {
+              const oldDayKeys = Object.keys(result.day).filter(k =>
+                k.startsWith('d-') && k.split('-').length === 4 // d-YYYY-MM-DD 형식
+              );
+              for (const oldKey of oldDayKeys) {
+                const newKey = 't' + oldKey.slice(1); // d- → t-
+                result.time[newKey] = result.day[oldKey];
+                delete result.day[oldKey];
+              }
+            }
+
+            return result;
           }
         } catch (e) {}
-        return { life: [], year: [], month: {}, week: {}, day: {} };
+        return { life: [], year: [], month: {}, week: {}, day: {}, time: {} };
       }
 
       function saveGoals() {
@@ -16080,10 +16876,20 @@ ${postponedGoals.map((g) =>
 
       const goals = loadGoals();
 
-      let currentGoalLevel = 'month';
+      // 요일 상수
+      const DOW_LIST = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
+      const DOW_LABELS = { mon: '월', tue: '화', wed: '수', thu: '목', fri: '금', sat: '토', sun: '일' };
+
+      function getDowFromDate(date) {
+        const day = date.getDay();
+        return DOW_LIST[(day + 6) % 7]; // 일요일(0)을 마지막으로
+      }
+
+      let currentGoalLevel = 'time';
       let selectedMonth = new Date().getMonth() + 1;
       let selectedWeek = 1;
       let selectedDate = getDateKeyFromDate(new Date());
+      let selectedDow = getDowFromDate(new Date());
 
       function getWeekOfDate(dateString) {
         const date = new Date(dateString + 'T00:00:00');
@@ -16103,8 +16909,12 @@ ${postponedGoals.map((g) =>
         return `m-${month}-w-${week}`;
       }
 
-      function dayKey(date = selectedDate) {
-        return `d-${date}`;
+      function dayKey(date = selectedDate, dow = selectedDow) {
+        return `d-${date}-${dow}`;
+      }
+
+      function timeKey(date = selectedDate) {
+        return `t-${date}`;
       }
 
       function getGoalBucket(level) {
@@ -16130,6 +16940,13 @@ ${postponedGoals.map((g) =>
           return goals.day[key];
         }
 
+        if (level === 'time') {
+          const todayKey = timeKey(getDateKeyFromDate(new Date()));
+          if (!goals.time) goals.time = {};
+          if (!goals.time[todayKey]) goals.time[todayKey] = [];
+          return goals.time[todayKey];
+        }
+
         return [];
       }
 
@@ -16151,7 +16968,14 @@ ${postponedGoals.map((g) =>
 
         if (level === 'day') {
           goals.day[dayKey()] = nextItems;
-          todos = goals.day[dayKey()];
+          return;
+        }
+
+        if (level === 'time') {
+          const todayKey = timeKey(getDateKeyFromDate(new Date()));
+          if (!goals.time) goals.time = {};
+          goals.time[todayKey] = nextItems;
+          todos = goals.time[todayKey];
           return;
         }
       }
@@ -16160,7 +16984,8 @@ ${postponedGoals.map((g) =>
         if (level === 'life' || level === 'year') return null;
         if (level === 'month') return monthKey(selectedMonth);
         if (level === 'week') return weekKey(selectedMonth, selectedWeek);
-        if (level === 'day') return dayKey(selectedDate);
+        if (level === 'day') return dayKey(selectedDate, selectedDow);
+        if (level === 'time') return timeKey(getDateKeyFromDate(new Date()));
         return null;
       }
 
@@ -16184,6 +17009,12 @@ ${postponedGoals.map((g) =>
           return goals.day[key];
         }
 
+        if (level === 'time') {
+          if (!goals.time) goals.time = {};
+          if (!goals.time[key]) goals.time[key] = [];
+          return goals.time[key];
+        }
+
         return [];
       }
 
@@ -16205,8 +17036,15 @@ ${postponedGoals.map((g) =>
 
         if (level === 'day') {
           goals.day[key] = nextItems;
-          if (key === dayKey(selectedDate)) {
-            todos = goals.day[key];
+          return;
+        }
+
+        if (level === 'time') {
+          if (!goals.time) goals.time = {};
+          goals.time[key] = nextItems;
+          const todayKey = timeKey(getDateKeyFromDate(new Date()));
+          if (key === todayKey) {
+            todos = goals.time[key];
           }
         }
       }
@@ -16354,7 +17192,10 @@ ${postponedGoals.map((g) =>
         }
 
         if (parentLevel === 'day') {
-          const key = dayKey(selectedDate);
+          // time 레벨의 상위 목표는 오늘의 요일 목표
+          const todayDate = getDateKeyFromDate(new Date());
+          const todayDow = getDowFromDate(new Date());
+          const key = dayKey(todayDate, todayDow);
           if (!goals.day[key]) goals.day[key] = [];
           return goals.day[key];
         }
@@ -16363,9 +17204,11 @@ ${postponedGoals.map((g) =>
       }
 
       function syncTodosToSelectedDay() {
-        const key = dayKey(selectedDate);
-        if (!goals.day[key]) goals.day[key] = [];
-        todos = goals.day[key];
+        const todayDate = getDateKeyFromDate(new Date());
+        const key = timeKey(todayDate);
+        if (!goals.time) goals.time = {};
+        if (!goals.time[key]) goals.time[key] = [];
+        todos = goals.time[key];
       }
 
       function getWeeksInMonth(year, month) {
@@ -16442,8 +17285,8 @@ ${postponedGoals.map((g) =>
         }
 
         if (currentGoalLevel === 'day') {
-          title.textContent = '날짜 선택';
-          sub.textContent = '오늘 목표를 작성할 날짜를 선택해요.';
+          title.textContent = '날짜 및 요일 선택';
+          sub.textContent = '날짜를 선택하고, 요일별 목표를 작성해요.';
           content.innerHTML = `
       <div class="date-row">
         <div class="date-btn-wrap">
@@ -16452,27 +17295,48 @@ ${postponedGoals.map((g) =>
         </div>
         <button class="today-btn" id="todayBtn">오늘</button>
       </div>
-      <div class="period-caption" id="periodCaption">${formatKoreanDate(selectedDate)}의 일간 목표를 작성하는 중이에요.</div>
+      <div class="dow-tabs" id="dowTabs">
+        ${DOW_LIST.map(dow => `
+          <button class="dow-tab ${dow === selectedDow ? 'active' : ''}" data-dow="${dow}">${DOW_LABELS[dow]}</button>
+        `).join('')}
+      </div>
+      <div class="period-caption" id="periodCaption">${formatKoreanDate(selectedDate)} ${DOW_LABELS[selectedDow]}요일 목표를 작성하는 중이에요.</div>
     `;
           document
             .getElementById('dayPicker')
             .addEventListener('change', (e) => {
               selectedDate = e.target.value;
-              const date = new Date(selectedDate);
+              const date = new Date(selectedDate + 'T00:00:00');
               selectedMonth = date.getMonth() + 1;
               selectedWeek = getWeekOfDate(selectedDate);
-              syncTodosToSelectedDay();
-              renderTodos();
+              selectedDow = getDowFromDate(date);
               renderGoalsSection();
             });
           document.getElementById('todayBtn').addEventListener('click', () => {
-            selectedDate = getDateKeyFromDate(new Date());
-            selectedMonth = new Date().getMonth() + 1;
+            const now = new Date();
+            selectedDate = getDateKeyFromDate(now);
+            selectedMonth = now.getMonth() + 1;
             selectedWeek = getWeekOfDate(selectedDate);
-            syncTodosToSelectedDay();
-            renderTodos();
+            selectedDow = getDowFromDate(now);
             renderGoalsSection();
           });
+          document.querySelectorAll('.dow-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+              selectedDow = tab.dataset.dow;
+              renderGoalsSection();
+            });
+          });
+          return;
+        }
+
+        if (currentGoalLevel === 'time') {
+          const today = new Date();
+          const todayStr = getDateKeyFromDate(today);
+          title.textContent = '오늘의 시간별 할일';
+          sub.textContent = '오늘 하루의 시간별 할일을 관리해요.';
+          content.innerHTML = `
+      <div class="period-caption">${formatKoreanDate(todayStr)} 시간별 할일을 작성하는 중이에요.</div>
+    `;
         }
       }
 
@@ -16486,7 +17350,8 @@ ${postponedGoals.map((g) =>
         if (currentGoalLevel === 'month') return `${selectedMonth}월`;
         if (currentGoalLevel === 'week')
           return `${selectedMonth}월 ${selectedWeek}주차`;
-        if (currentGoalLevel === 'day') return selectedDate;
+        if (currentGoalLevel === 'day') return `${selectedDate} (${DOW_LABELS[selectedDow]})`;
+        if (currentGoalLevel === 'time') return getDateKeyFromDate(new Date());
         return '';
       }
 
@@ -16494,7 +17359,8 @@ ${postponedGoals.map((g) =>
         if (level === 'year') return '올해 목표로';
         if (level === 'month') return '이번달 목표로';
         if (level === 'week') return '이번주 목표로';
-        if (level === 'day') return '오늘 목표로';
+        if (level === 'day') return '요일 목표로';
+        if (level === 'time') return '오늘 할일로';
         return '가져오기';
       }
 
@@ -16520,7 +17386,7 @@ ${postponedGoals.map((g) =>
           },
         };
 
-        if (currentGoalLevel === 'day') {
+        if (currentGoalLevel === 'time') {
           copied.startTime =
             document.getElementById('goalStartTime')?.value || '09:00';
           copied.endTime = document.getElementById('goalEndTime')?.value || '';
@@ -16530,7 +17396,7 @@ ${postponedGoals.map((g) =>
 
         getGoalBucket(currentGoalLevel).push(copied);
 
-        if (currentGoalLevel === 'day') {
+        if (currentGoalLevel === 'time') {
           syncTodosToSelectedDay();
           renderTodos();
         }
@@ -16555,7 +17421,10 @@ ${postponedGoals.map((g) =>
         } else if (parentLevel === 'week') {
           goals.week[weekKey(selectedMonth, selectedWeek)] = updatedBucket;
         } else if (parentLevel === 'day') {
-          goals.day[dayKey(selectedDate)] = updatedBucket;
+          // time 레벨의 상위 목표 토글 시 오늘의 요일 목표 업데이트
+          const todayDate = getDateKeyFromDate(new Date());
+          const todayDow = getDowFromDate(new Date());
+          goals.day[dayKey(todayDate, todayDow)] = updatedBucket;
         }
 
         const updatedGoal = updatedBucket.find((g) => g.id === goalId);
@@ -16589,7 +17458,19 @@ ${postponedGoals.map((g) =>
         content.innerHTML = '';
 
         if (!info.parent) {
-          content.innerHTML = `<div class="empty-context">인생 목표는 최상위 방향이에요. 지금 내가 오래 가져갈 방향, 삶에서 중요하게 만들고 싶은 것을 자유롭게 적어보세요.</div>`;
+          // 인생 탭: 마법사 트리거 표시
+          document.getElementById('parentTitle').textContent = '인생 목표 만들기';
+          document.getElementById('parentSub').textContent = '인생 목표는 완벽한 꿈을 쓰는 칸이 아니에요. 줄이고 싶은 것, 늘리고 싶은 것, 가까워지고 싶은 모습을 정리하는 칸이에요.';
+          content.innerHTML = `
+            <button class="life-wizard-trigger" id="parentWizardTrigger">
+              ✨ 인생 목표 만들기
+            </button>
+            <div class="wizard-example" style="margin-top: 16px;">
+              <div class="wizard-example-label">예시</div>
+              <div class="wizard-example-text">나는 계속 미루고 후회하는 패턴을 줄이고, 실행력과 안정감을 늘리며, 무너져도 다시 돌아오는 사람에 가까워지는 삶을 만들고 싶다.</div>
+            </div>
+          `;
+          document.getElementById('parentWizardTrigger').addEventListener('click', openLifeWizard);
           return;
         }
 
@@ -16712,7 +17593,7 @@ ${postponedGoals.map((g) =>
           goal.endTime || goal.startTime || goal.time || '10:00';
         document
           .getElementById('goalEditTimeGrid')
-          .classList.toggle('hidden', level !== 'day');
+          .classList.toggle('hidden', level !== 'time');
 
         // 인생 목표일 때 카테고리 선택, 그 외에는 우선순위 선택
         const prioritySelect = document.getElementById('editGoalPriority');
@@ -16766,7 +17647,7 @@ ${postponedGoals.map((g) =>
           } else {
             // 그 외 레벨은 우선순위 저장
             updated.priority = priority;
-            if (level === 'day') {
+            if (level === 'time') {
               updated.startTime = startTime;
               updated.endTime = endTime;
               updated.time = startTime;
@@ -16779,7 +17660,7 @@ ${postponedGoals.map((g) =>
 
         setBucketByRef(level, key, nextBucket);
 
-        if (level === 'day') {
+        if (level === 'time') {
           syncTodosToSelectedDay();
           renderTodos();
         }
@@ -16821,12 +17702,14 @@ ${postponedGoals.map((g) =>
         year: 'month',
         month: 'week',
         week: 'day',
+        day: 'time',
       };
       const nextLevelLabel = {
         year: '연간',
         month: '월간',
         week: '주간',
         day: '일간',
+        time: '시간',
       };
 
       function updateNextLevelBtn() {
@@ -16842,16 +17725,16 @@ ${postponedGoals.map((g) =>
       }
 
       function renderCurrentGoals() {
-        if (currentGoalLevel === 'day') syncTodosToSelectedDay();
+        if (currentGoalLevel === 'time') syncTodosToSelectedDay();
         updateNextLevelBtn();
         const routineBtns = document.getElementById('routineBtns');
         if (routineBtns)
-          routineBtns.classList.toggle('hidden', currentGoalLevel !== 'day');
+          routineBtns.classList.toggle('hidden', currentGoalLevel !== 'time');
         const info = levelInfo[currentGoalLevel];
         const goalTimeGrid = document.getElementById('goalTimeGrid');
         if (goalTimeGrid)
           goalTimeGrid.style.display =
-            currentGoalLevel === 'day' ? 'grid' : 'none';
+            currentGoalLevel === 'time' ? 'grid' : 'none';
         const label = periodLabel();
         document.getElementById('writeTitle').textContent = label
           ? `${label} · ${info.writeTitle}`
@@ -16866,8 +17749,8 @@ ${postponedGoals.map((g) =>
         }
 
         let displayGoals;
-        if (currentGoalLevel === 'day') {
-          // 일간 목표는 시작 시간순 정렬
+        if (currentGoalLevel === 'time') {
+          // 시간 목표는 시작 시간순 정렬
           displayGoals = [...currentGoals].sort((a, b) =>
             getStartTime(a).localeCompare(getStartTime(b)),
           );
@@ -16920,7 +17803,7 @@ ${postponedGoals.map((g) =>
         <button class="goal-check" ${goal.postponed ? 'disabled' : ''}></button>
         <div class="goal-main">
           <strong>${goal.title}</strong>
-          <span>${currentGoalLevel === 'day' ? `${timeRangeText(goal)} · ${goal.memo || '메모 없음'}` : goal.memo}</span>
+          <span>${currentGoalLevel === 'time' ? `${timeRangeText(goal)} · ${goal.memo || '메모 없음'}` : goal.memo}</span>
           ${postponedBadge}
         </div>
         ${goal.postponed ? '' : tagHtml}
@@ -16956,7 +17839,7 @@ ${postponedGoals.map((g) =>
             }
             syncParentCompletionFromChild(updatedGoal);
 
-            if (currentGoalLevel === 'day') {
+            if (currentGoalLevel === 'time') {
               syncTodosToSelectedDay();
               renderTodos();
             }
@@ -16969,7 +17852,7 @@ ${postponedGoals.map((g) =>
               currentGoalLevel,
               getGoalBucket(currentGoalLevel).filter((g) => g.id !== id),
             );
-            if (currentGoalLevel === 'day') {
+            if (currentGoalLevel === 'time') {
               syncTodosToSelectedDay();
               renderTodos();
             }
@@ -17102,9 +17985,9 @@ ${postponedGoals.map((g) =>
       }
 
       function openRoutineSaveModal() {
-        const bucket = getGoalBucket('day');
+        const bucket = getGoalBucket('time');
         if (!bucket.length) {
-          alert('저장할 목표가 없어요. 먼저 일간 목표를 추가해줘.');
+          alert('저장할 목표가 없어요. 먼저 시간별 할일을 추가해줘.');
           return;
         }
         document.getElementById('routineNameInput').value = '';
@@ -17122,7 +18005,7 @@ ${postponedGoals.map((g) =>
           alert('루틴 이름을 입력해줘.');
           return;
         }
-        const bucket = getGoalBucket('day');
+        const bucket = getGoalBucket('time');
         const goals_snapshot = bucket.map(
           ({ title, memo, startTime, endTime, time, priority, tag }) => ({
             title,
@@ -17157,7 +18040,7 @@ ${postponedGoals.map((g) =>
       function renderRoutineList() {
         const list = document.getElementById('routineList');
         if (!routines.length) {
-          list.innerHTML = `<div class="routine-empty">저장된 루틴이 없어요.<br>먼저 오늘 목표를 작성하고 루틴으로 저장해줘.</div>`;
+          list.innerHTML = `<div class="routine-empty">저장된 루틴이 없어요.<br>먼저 오늘 할일을 작성하고 루틴으로 저장해줘.</div>`;
           return;
         }
         list.innerHTML = '';
@@ -17182,11 +18065,11 @@ ${postponedGoals.map((g) =>
             const id = Number(btn.dataset.id);
             const r = routines.find((x) => x.id === id);
             if (!r) return;
-            const bucket = getGoalBucket('day');
+            const bucket = getGoalBucket('time');
             if (
               bucket.length &&
               !confirm(
-                `현재 오늘 목표 ${bucket.length}개가 삭제되고 "${r.name}" 루틴으로 교체돼요. 계속할까요?`,
+                `현재 오늘 할일 ${bucket.length}개가 삭제되고 "${r.name}" 루틴으로 교체돼요. 계속할까요?`,
               )
             )
               return;
@@ -17195,7 +18078,7 @@ ${postponedGoals.map((g) =>
               id: Date.now() + Math.random(),
               done: false,
             }));
-            setGoalBucket('day', newGoals);
+            setGoalBucket('time', newGoals);
             syncTodosToSelectedDay();
             renderTodos();
             renderGoalsSection();
@@ -17265,18 +18148,20 @@ ${postponedGoals.map((g) =>
         target.classList.add('active');
         currentGoalLevel = level;
 
-        // 인생 목표일 때 카테고리 선택, 그 외에는 우선순위 선택
+        // 인생 목표일 때 입력 패널 숨김 (상위 목표 영역에 마법사가 있음)
+        const goalAddPanel = document.querySelector('.goal-add-panel');
         const prioritySelect = document.getElementById('goalPriority');
         const categorySelect = document.getElementById('goalCategory');
+
         if (level === 'life') {
-          prioritySelect.classList.add('hidden');
-          categorySelect.classList.remove('hidden');
+          goalAddPanel.classList.add('hidden');
         } else {
+          goalAddPanel.classList.remove('hidden');
           prioritySelect.classList.remove('hidden');
           categorySelect.classList.add('hidden');
         }
 
-        if (currentGoalLevel === 'day') {
+        if (currentGoalLevel === 'time') {
           selectedWeek = getWeekOfDate(selectedDate);
           syncTodosToSelectedDay();
           renderTodos();
@@ -17295,6 +18180,546 @@ ${postponedGoals.map((g) =>
         const next = nextLevelMap[currentGoalLevel];
         if (next) switchGoalLevel(next);
       });
+
+      // ========== 인생 목표 마법사 ==========
+      let lifeWizardState = {
+        step: 1,
+        category: null,
+        reduce: [],
+        reduceCustom: '',
+        increase: [],
+        increaseCustom: '',
+        identity: null,
+        identityCustom: '',
+        editedTitle: '',
+        recommendMode: false,
+        selectedSentenceType: 'warm',
+      };
+
+      function resetWizardState() {
+        lifeWizardState = {
+          step: 1,
+          category: null,
+          reduce: [],
+          reduceCustom: '',
+          increase: [],
+          increaseCustom: '',
+          identity: null,
+          identityCustom: '',
+          editedTitle: '',
+          recommendMode: false,
+          selectedSentenceType: 'warm',
+        };
+      }
+
+      // 카테고리 추천 매핑
+      const categoryRecommendMap = {
+        'body': 'health',
+        'money': 'finance',
+        'people': 'relationship',
+        'work': 'career',
+        'emotion': 'mind',
+        'learn': 'growth',
+        'rest': 'leisure',
+      };
+
+      function openLifeWizard() {
+        resetWizardState();
+        document.getElementById('lifeWizardModal').classList.remove('hidden');
+        renderWizardStep();
+      }
+
+      function closeLifeWizard() {
+        document.getElementById('lifeWizardModal').classList.add('hidden');
+        resetWizardState();
+      }
+
+      function renderWizardStep() {
+        const content = document.getElementById('wizardContent');
+        const actions = document.getElementById('wizardActions');
+        const prevBtn = document.getElementById('wizardPrev');
+        const nextBtn = document.getElementById('wizardNext');
+        const step = lifeWizardState.step;
+
+        // 스텝 인디케이터 업데이트
+        document.querySelectorAll('.wizard-step').forEach((el, i) => {
+          el.classList.remove('active', 'done');
+          if (i + 1 < step) el.classList.add('done');
+          if (i + 1 === step) el.classList.add('active');
+        });
+
+        // 버튼 표시/숨김 초기화
+        prevBtn.classList.toggle('hidden', step === 1);
+        nextBtn.classList.remove('hidden'); // step 5에서만 숨김 처리
+
+        if (step === 1) {
+          // 카테고리 선택
+          document.getElementById('wizardTitle').textContent = '인생 목표 만들기 (1/4)';
+          nextBtn.textContent = '다음';
+          nextBtn.disabled = !lifeWizardState.category;
+
+          if (lifeWizardState.recommendMode) {
+            // 추천 모드
+            content.innerHTML = `
+              <p class="wizard-question">요즘 가장 자주 무너지는 부분은 어디인가요?</p>
+              <p class="wizard-hint">하나만 골라보세요. 그 영역부터 시작하면 돼요.</p>
+              <div class="wizard-options">
+                <div class="wizard-option" data-recommend="body">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">몸 / 수면 / 식사</span>
+                </div>
+                <div class="wizard-option" data-recommend="money">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">돈 / 소비 / 불안</span>
+                </div>
+                <div class="wizard-option" data-recommend="people">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">사람 / 외로움 / 갈등</span>
+                </div>
+                <div class="wizard-option" data-recommend="work">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">일 / 진로 / 미래</span>
+                </div>
+                <div class="wizard-option" data-recommend="emotion">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">감정 / 무기력 / 불안</span>
+                </div>
+                <div class="wizard-option" data-recommend="learn">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">배움 / 능력 / 성장</span>
+                </div>
+                <div class="wizard-option" data-recommend="rest">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">쉼 / 재미 / 여유</span>
+                </div>
+              </div>
+              <button class="wizard-btn secondary" style="margin-top: 16px;" id="backToCategory">← 직접 고르기</button>
+            `;
+
+            content.querySelectorAll('.wizard-option').forEach(opt => {
+              opt.addEventListener('click', () => {
+                const key = opt.dataset.recommend;
+                lifeWizardState.category = categoryRecommendMap[key];
+                lifeWizardState.recommendMode = false;
+                renderWizardStep();
+              });
+            });
+
+            document.getElementById('backToCategory')?.addEventListener('click', () => {
+              lifeWizardState.recommendMode = false;
+              renderWizardStep();
+            });
+
+          } else {
+            // 일반 카테고리 선택
+            content.innerHTML = `
+              <p class="wizard-question">삶에서 지금 가장 챙기고 싶은 영역을 골라보세요.</p>
+              <p class="wizard-hint">잘 모르겠다면 '추천받기'를 눌러도 괜찮아요.</p>
+              <div class="wizard-chips">
+                ${lifeCategoryList.filter(c => c.id !== 'other').map(cat => `
+                  <button class="wizard-chip ${lifeWizardState.category === cat.id ? 'selected' : ''}" data-cat="${cat.id}">
+                    ${cat.emoji} ${cat.label}
+                  </button>
+                `).join('')}
+              </div>
+              <button class="wizard-recommend-btn" id="recommendBtn">잘 모르겠어요. 추천받기</button>
+              ${lifeWizardState.category ? `
+                <div class="wizard-example">
+                  <div class="wizard-example-label">예시</div>
+                  <div class="wizard-example-text">${lifeWizardOptions.examples[lifeWizardState.category] || ''}</div>
+                </div>
+              ` : ''}
+            `;
+
+            content.querySelectorAll('.wizard-chip').forEach(btn => {
+              btn.addEventListener('click', () => {
+                lifeWizardState.category = btn.dataset.cat;
+                renderWizardStep();
+              });
+            });
+
+            document.getElementById('recommendBtn')?.addEventListener('click', () => {
+              lifeWizardState.recommendMode = true;
+              renderWizardStep();
+            });
+          }
+
+        } else if (step === 2) {
+          // 줄이고 싶은 것
+          document.getElementById('wizardTitle').textContent = '인생 목표 만들기 (2/4)';
+          nextBtn.textContent = '다음';
+          const hasSelection = lifeWizardState.reduce.length > 0 || lifeWizardState.reduceCustom.trim();
+          nextBtn.disabled = !hasSelection;
+
+          const reduceQuestion = lifeWizardOptions.reduceQuestions[lifeWizardState.category] || lifeWizardOptions.reduceQuestions.other;
+          const reduceOptions = lifeWizardOptions.reduce[lifeWizardState.category] || lifeWizardOptions.reduce.other;
+
+          const reduceCount = lifeWizardState.reduce.length + (lifeWizardState.reduceCustom.trim() ? 1 : 0);
+          content.innerHTML = `
+            <p class="wizard-question">${reduceQuestion}</p>
+            <p class="wizard-hint">가장 마음에 걸리는 것만 최대 2개 골라보세요. (${reduceCount}/2)</p>
+            <div class="wizard-chips">
+              ${reduceOptions.map((opt, i) => `
+                <button class="wizard-chip ${lifeWizardState.reduce.includes(i) ? 'selected' : ''} ${reduceCount >= 2 && !lifeWizardState.reduce.includes(i) ? 'disabled' : ''}" data-idx="${i}">
+                  ${opt}
+                </button>
+              `).join('')}
+            </div>
+            <div class="wizard-option ${reduceCount >= 2 && !lifeWizardState.reduceCustom.trim() ? 'disabled' : ''}" style="margin-top: 12px;" data-idx="custom">
+              <div class="wizard-option-check ${lifeWizardState.reduceCustom.trim() ? 'selected' : ''}"></div>
+              <input type="text" class="wizard-custom-input" placeholder="직접 입력..." value="${lifeWizardState.reduceCustom}" id="reduceCustomInput" ${reduceCount >= 2 && !lifeWizardState.reduceCustom.trim() ? 'disabled' : ''}>
+            </div>
+          `;
+
+          content.querySelectorAll('.wizard-chip:not(.disabled)').forEach(chip => {
+            chip.addEventListener('click', () => {
+              const idx = parseInt(chip.dataset.idx);
+              const pos = lifeWizardState.reduce.indexOf(idx);
+              if (pos >= 0) {
+                lifeWizardState.reduce.splice(pos, 1);
+              } else if (lifeWizardState.reduce.length < 2) {
+                lifeWizardState.reduce.push(idx);
+              }
+              renderWizardStep();
+            });
+          });
+
+          const customInput = document.getElementById('reduceCustomInput');
+          if (customInput) {
+            customInput.addEventListener('input', (e) => {
+              lifeWizardState.reduceCustom = e.target.value;
+              nextBtn.disabled = !(lifeWizardState.reduce.length > 0 || e.target.value.trim());
+            });
+          }
+
+        } else if (step === 3) {
+          // 늘리고 싶은 것 (다중 선택)
+          document.getElementById('wizardTitle').textContent = '인생 목표 만들기 (3/4)';
+          nextBtn.textContent = '다음';
+          const hasSelection = lifeWizardState.increase.length > 0 || lifeWizardState.increaseCustom.trim();
+          nextBtn.disabled = !hasSelection;
+
+          const increaseQuestion = lifeWizardOptions.increaseQuestions[lifeWizardState.category] || lifeWizardOptions.increaseQuestions.other;
+          const increaseOptions = lifeWizardOptions.increase[lifeWizardState.category] || lifeWizardOptions.increase.other;
+          const increaseCount = lifeWizardState.increase.length + (lifeWizardState.increaseCustom.trim() ? 1 : 0);
+          content.innerHTML = `
+            <p class="wizard-question">${increaseQuestion}</p>
+            <p class="wizard-hint">오래 가져가고 싶은 것을 최대 2개 골라보세요. (${increaseCount}/2)</p>
+            <div class="wizard-chips">
+              ${increaseOptions.map((opt, i) => `
+                <button class="wizard-chip ${lifeWizardState.increase.includes(i) ? 'selected' : ''} ${increaseCount >= 2 && !lifeWizardState.increase.includes(i) ? 'disabled' : ''}" data-idx="${i}">
+                  ${opt}
+                </button>
+              `).join('')}
+            </div>
+            <div class="wizard-option ${increaseCount >= 2 && !lifeWizardState.increaseCustom.trim() ? 'disabled' : ''}" style="margin-top: 12px;" data-idx="custom">
+              <div class="wizard-option-check ${lifeWizardState.increaseCustom.trim() ? 'selected' : ''}"></div>
+              <input type="text" class="wizard-custom-input" placeholder="직접 입력..." value="${lifeWizardState.increaseCustom}" id="increaseCustomInput" ${increaseCount >= 2 && !lifeWizardState.increaseCustom.trim() ? 'disabled' : ''}>
+            </div>
+          `;
+
+          content.querySelectorAll('.wizard-chip:not(.disabled)').forEach(chip => {
+            chip.addEventListener('click', () => {
+              const idx = parseInt(chip.dataset.idx);
+              const pos = lifeWizardState.increase.indexOf(idx);
+              if (pos >= 0) {
+                lifeWizardState.increase.splice(pos, 1);
+              } else if (lifeWizardState.increase.length < 2) {
+                lifeWizardState.increase.push(idx);
+              }
+              renderWizardStep();
+            });
+          });
+
+          const customInput = document.getElementById('increaseCustomInput');
+          if (customInput) {
+            customInput.addEventListener('input', (e) => {
+              lifeWizardState.increaseCustom = e.target.value;
+              nextBtn.disabled = !(lifeWizardState.increase.length > 0 || e.target.value.trim());
+            });
+          }
+
+        } else if (step === 4) {
+          // 되고 싶은 사람
+          document.getElementById('wizardTitle').textContent = '인생 목표 만들기 (4/4)';
+          nextBtn.textContent = '완성하기';
+          const hasSelection = lifeWizardState.identity !== null || lifeWizardState.identityCustom.trim();
+          nextBtn.disabled = !hasSelection;
+
+          const identityQuestion = lifeWizardOptions.identityQuestions[lifeWizardState.category] || lifeWizardOptions.identityQuestions.other;
+          const identityOptions = lifeWizardOptions.identity[lifeWizardState.category] || lifeWizardOptions.identity.other;
+          content.innerHTML = `
+            <p class="wizard-question">${identityQuestion}</p>
+            <p class="wizard-hint">완벽한 사람이 아니라, 조금씩 가까워지고 싶은 방향을 고르면 돼요.</p>
+            <div class="wizard-options">
+              ${identityOptions.map((opt, i) => `
+                <div class="wizard-option ${lifeWizardState.identity === i ? 'selected' : ''}" data-idx="${i}">
+                  <div class="wizard-option-radio"></div>
+                  <span class="wizard-option-text">${opt}</span>
+                </div>
+              `).join('')}
+              <div class="wizard-option ${lifeWizardState.identity === 'custom' ? 'selected' : ''}" data-idx="custom">
+                <div class="wizard-option-radio"></div>
+                <input type="text" class="wizard-custom-input" placeholder="직접 입력..." value="${lifeWizardState.identityCustom}" id="identityCustomInput">
+              </div>
+            </div>
+          `;
+
+          content.querySelectorAll('.wizard-option').forEach(opt => {
+            opt.addEventListener('click', (e) => {
+              if (e.target.classList.contains('wizard-custom-input')) return;
+              const idx = opt.dataset.idx;
+              if (idx === 'custom') {
+                lifeWizardState.identity = 'custom';
+                setTimeout(() => document.getElementById('identityCustomInput')?.focus(), 0);
+              } else {
+                lifeWizardState.identity = parseInt(idx);
+                lifeWizardState.identityCustom = '';
+              }
+              renderWizardStep();
+            });
+          });
+
+          const customInput = document.getElementById('identityCustomInput');
+          if (customInput) {
+            customInput.addEventListener('input', (e) => {
+              lifeWizardState.identityCustom = e.target.value;
+              lifeWizardState.identity = 'custom';
+              nextBtn.disabled = !e.target.value.trim();
+            });
+            customInput.addEventListener('focus', () => {
+              lifeWizardState.identity = 'custom';
+              renderWizardStep();
+            });
+          }
+
+        } else if (step === 5) {
+          // 완성 화면 - 3가지 문장 버전 선택
+          document.getElementById('wizardTitle').textContent = '인생 목표 완성';
+          prevBtn.classList.add('hidden');
+          nextBtn.classList.add('hidden'); // 기본 버튼 숨기고 커스텀 버튼 사용
+
+          const sentences = generateLifeGoalSentences();
+          const selectedType = lifeWizardState.selectedSentenceType || 'warm';
+
+          // 선택된 문장을 editedTitle에 반영 (수정하지 않았다면)
+          if (!lifeWizardState.editedTitle || lifeWizardState.editedTitle === sentences.simple || lifeWizardState.editedTitle === sentences.warm || lifeWizardState.editedTitle === sentences.detailed) {
+            lifeWizardState.editedTitle = sentences[selectedType];
+          }
+
+          const yearlyPlaceholder = lifeWizardOptions.yearlyActionPlaceholders[lifeWizardState.category] || lifeWizardOptions.yearlyActionPlaceholders.other;
+          content.innerHTML = `
+            <div class="wizard-sentence-options">
+              <p class="wizard-sentence-label">마음에 드는 문장을 선택하세요</p>
+              <div class="wizard-sentence-card ${selectedType === 'simple' ? 'selected' : ''}" data-type="simple">
+                <span class="wizard-sentence-type">담백한 문장</span>
+                <p class="wizard-sentence-text">${sentences.simple}</p>
+              </div>
+              <div class="wizard-sentence-card ${selectedType === 'warm' ? 'selected' : ''}" data-type="warm">
+                <span class="wizard-sentence-type">따뜻한 문장</span>
+                <p class="wizard-sentence-text">${sentences.warm}</p>
+              </div>
+              <div class="wizard-sentence-card ${selectedType === 'detailed' ? 'selected' : ''}" data-type="detailed">
+                <span class="wizard-sentence-type">구체적인 문장</span>
+                <p class="wizard-sentence-text">${sentences.detailed}</p>
+              </div>
+            </div>
+            <button class="wizard-btn secondary" style="margin: 16px 0;" id="wizardEditBtn">직접 수정하기</button>
+            <textarea class="wizard-edit-textarea hidden" id="wizardEditArea">${lifeWizardState.editedTitle}</textarea>
+            <div class="wizard-reflection">
+              <label class="wizard-reflection-question" style="font-size: 14px;">이 방향으로 가기 위해 올해 시작할 수 있는 일은?</label>
+              <textarea class="wizard-reflection-input" id="wizardYearlyAction" placeholder="${yearlyPlaceholder}" style="min-height: 60px;"></textarea>
+              <p class="wizard-reflection-hint">작성하면 연간 목표로 자동 추가돼요.</p>
+            </div>
+            <div class="wizard-save-actions">
+              <button class="wizard-btn secondary" id="wizardSaveLifeOnly">인생 목표만 저장</button>
+              <button class="wizard-btn primary" id="wizardSaveWithYearly">올해 목표까지 이어서 만들기</button>
+            </div>
+          `;
+
+          // 문장 카드 클릭 이벤트
+          document.querySelectorAll('.wizard-sentence-card').forEach(card => {
+            card.addEventListener('click', () => {
+              const type = card.dataset.type;
+              lifeWizardState.selectedSentenceType = type;
+              lifeWizardState.editedTitle = sentences[type];
+
+              // 선택 상태 업데이트
+              document.querySelectorAll('.wizard-sentence-card').forEach(c => c.classList.remove('selected'));
+              card.classList.add('selected');
+
+              // 수정 영역도 업데이트
+              const editArea = document.getElementById('wizardEditArea');
+              if (editArea) editArea.value = sentences[type];
+            });
+          });
+
+          const editBtn = document.getElementById('wizardEditBtn');
+          const editArea = document.getElementById('wizardEditArea');
+
+          editBtn.addEventListener('click', () => {
+            editArea.classList.toggle('hidden');
+            if (!editArea.classList.contains('hidden')) {
+              editBtn.textContent = '수정 완료';
+              editArea.focus();
+            } else {
+              editBtn.textContent = '직접 수정하기';
+            }
+          });
+
+          editArea.addEventListener('input', (e) => {
+            lifeWizardState.editedTitle = e.target.value;
+            // 직접 수정 시 선택 해제
+            document.querySelectorAll('.wizard-sentence-card').forEach(c => c.classList.remove('selected'));
+          });
+
+          // 저장 버튼 이벤트
+          document.getElementById('wizardSaveLifeOnly').addEventListener('click', () => {
+            saveLifeGoalFromWizard(false);
+          });
+          document.getElementById('wizardSaveWithYearly').addEventListener('click', () => {
+            saveLifeGoalFromWizard(true);
+          });
+        }
+      }
+
+      function generateLifeGoalSentences() {
+        const st = lifeWizardState;
+
+        // 줄이고 싶은 것
+        const reduceOpts = lifeWizardOptions.reduce[st.category] || lifeWizardOptions.reduce.other;
+        let reduceTexts = st.reduce.map(i => reduceOpts[i]);
+        if (st.reduceCustom.trim()) {
+          reduceTexts.push(st.reduceCustom.trim());
+        }
+        const reduceText = reduceTexts.length > 1
+          ? reduceTexts.slice(0, -1).join(', ') + '과 ' + reduceTexts[reduceTexts.length - 1]
+          : reduceTexts[0] || '';
+        const reduceFirst = reduceTexts[0] || '';
+
+        // 늘리고 싶은 것
+        const increaseOpts = lifeWizardOptions.increase[st.category] || lifeWizardOptions.increase.other;
+        let increaseTexts = st.increase.map(i => increaseOpts[i]);
+        if (st.increaseCustom.trim()) {
+          increaseTexts.push(st.increaseCustom.trim());
+        }
+        const increaseText = increaseTexts.length > 1
+          ? increaseTexts.slice(0, -1).join(', ') + '과 ' + increaseTexts[increaseTexts.length - 1]
+          : increaseTexts[0] || '';
+        const increaseFirst = increaseTexts[0] || '';
+
+        // 되고 싶은 사람
+        const identityOpts = lifeWizardOptions.identity[st.category] || lifeWizardOptions.identity.other;
+        let identityText = '';
+        if (st.identity === 'custom') {
+          identityText = st.identityCustom.trim();
+        } else if (st.identity !== null) {
+          identityText = identityOpts[st.identity];
+        }
+
+        return {
+          simple: `${reduceFirst}을 줄이고, ${increaseFirst}을 만들어가는 삶.`,
+          warm: `나는 ${reduceText}을 줄이고, ${identityText}에 가까워지고 싶다.`,
+          detailed: `나는 ${reduceText}을 줄이고, ${increaseText}을 늘리며, ${identityText}에 가까워지는 삶을 만들고 싶다.`,
+        };
+      }
+
+      function generateLifeGoalSentence() {
+        const sentences = generateLifeGoalSentences();
+        return sentences[lifeWizardState.selectedSentenceType] || sentences.warm;
+      }
+
+      function saveLifeGoalFromWizard(includeYearly = true) {
+        const st = lifeWizardState;
+        const title = st.editedTitle || generateLifeGoalSentence();
+        const yearlyAction = includeYearly ? (document.getElementById('wizardYearlyAction')?.value.trim() || '') : '';
+
+        // 줄이고 싶은 것
+        const reduceOptsSave = lifeWizardOptions.reduce[st.category] || lifeWizardOptions.reduce.other;
+        let reduceVals = st.reduce.map(i => reduceOptsSave[i]);
+        if (st.reduceCustom.trim()) {
+          reduceVals.push(st.reduceCustom.trim());
+        }
+
+        // 늘리고 싶은 것
+        const increaseOptsSave = lifeWizardOptions.increase[st.category] || lifeWizardOptions.increase.other;
+        let increaseVals = st.increase.map(i => increaseOptsSave[i]);
+        if (st.increaseCustom.trim()) {
+          increaseVals.push(st.increaseCustom.trim());
+        }
+
+        // 되고 싶은 사람
+        const identityOptsSave = lifeWizardOptions.identity[st.category] || lifeWizardOptions.identity.other;
+        let identityVal = '';
+        if (st.identity === 'custom') {
+          identityVal = st.identityCustom.trim();
+        } else if (st.identity !== null) {
+          identityVal = identityOptsSave[st.identity];
+        }
+
+        const lifeGoalId = Date.now();
+        const goalData = {
+          id: lifeGoalId,
+          title,
+          memo: yearlyAction ? `올해 목표: ${yearlyAction}` : '메모 없음',
+          category: st.category,
+          reduce: reduceVals,
+          increase: increaseVals,
+          identity: identityVal,
+          yearlyAction,
+          done: false,
+        };
+
+        goals.life.push(goalData);
+
+        // 연간 목표 자동 추가
+        if (yearlyAction) {
+          const yearGoalData = {
+            id: Date.now() + 1,
+            title: yearlyAction,
+            memo: `인생 목표에서 추가됨`,
+            priority: 'p2',
+            done: false,
+            parentRef: {
+              level: 'life',
+              key: 'life',
+              id: lifeGoalId,
+            },
+          };
+          goals.year.push(yearGoalData);
+        }
+
+        saveGoals();
+        closeLifeWizard();
+        renderGoalsSection();
+      }
+
+      // 마법사 이벤트 핸들러
+      document.getElementById('lifeWizardTrigger').addEventListener('click', openLifeWizard);
+      document.getElementById('closeLifeWizard').addEventListener('click', closeLifeWizard);
+
+      document.getElementById('wizardPrev').addEventListener('click', () => {
+        if (lifeWizardState.step > 1) {
+          lifeWizardState.step--;
+          renderWizardStep();
+        }
+      });
+
+      document.getElementById('wizardNext').addEventListener('click', () => {
+        if (lifeWizardState.step < 5) {
+          lifeWizardState.step++;
+          renderWizardStep();
+        } else {
+          saveLifeGoalFromWizard();
+        }
+      });
+
+      document.getElementById('lifeWizardModal').addEventListener('click', (e) => {
+        if (e.target.id === 'lifeWizardModal') {
+          closeLifeWizard();
+        }
+      });
+      // ========== 인생 목표 마법사 끝 ==========
 
       document.getElementById('saveGoal').addEventListener('click', () => {
         const title = document.getElementById('goalTitle').value.trim();
@@ -17319,7 +18744,7 @@ ${postponedGoals.map((g) =>
         } else {
           // 그 외 레벨은 우선순위 사용
           goalData.priority = priority;
-          if (currentGoalLevel === 'day') {
+          if (currentGoalLevel === 'time') {
             goalData.startTime = document.getElementById('goalStartTime').value || '09:00';
             goalData.endTime = document.getElementById('goalEndTime').value || '';
             goalData.time = goalData.startTime;
@@ -17328,7 +18753,7 @@ ${postponedGoals.map((g) =>
         }
 
         getGoalBucket(currentGoalLevel).push(goalData);
-        if (currentGoalLevel === 'day') {
+        if (currentGoalLevel === 'time') {
           syncTodosToSelectedDay();
           renderTodos();
         }
