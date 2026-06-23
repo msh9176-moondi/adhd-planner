@@ -11521,17 +11521,26 @@
       }
 
       // Supabase 인증 상태 리스너
+      let _hasRestoredOnce = false; // 세션당 한 번만 복원
+
       supabaseClient.auth.onAuthStateChange(async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.email);
         supabaseUser = session?.user || null;
         if (typeof updateAuthUI === 'function') updateAuthUI();
 
-        if (event === 'SIGNED_IN' && supabaseUser) {
-          showToast('로그인 성공! 클라우드 데이터를 확인하는 중...');
+        // SIGNED_IN은 실제 로그인 시에만, INITIAL_SESSION은 페이지 로드 시 기존 세션 확인
+        // 둘 다 발생할 수 있으므로 한 번만 복원하도록 플래그 사용
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && supabaseUser && !_hasRestoredOnce) {
+          _hasRestoredOnce = true;
+          console.log('[Auth] 첫 번째 인증 이벤트, 데이터 복원 시도');
+          showToast('클라우드 데이터를 확인하는 중...');
           autoRestoreOnLogin();
         } else if (event === 'SIGNED_OUT') {
+          _hasRestoredOnce = false; // 로그아웃 시 플래그 리셋
           updateSyncIndicator('idle');
           if (typeof showToast === 'function') showToast('로그아웃되었어요.');
+        } else {
+          console.log('[Auth] 추가 인증 이벤트 무시:', event, '_hasRestoredOnce:', _hasRestoredOnce);
         }
       });
 
@@ -11717,6 +11726,9 @@
 
       // 모든 앱 데이터를 localStorage에 복원
       function restoreAllAppData(appData) {
+        console.log('[restoreAllAppData] ⚠️ 데이터 복원 시작!');
+        console.log('[restoreAllAppData] 현재 goals.day keys:', Object.keys(goals.day || {}));
+        console.log('[restoreAllAppData] 복원될 goals.day keys:', Object.keys(appData?.goals?.day || {}));
         console.log('restoreAllAppData 시작:', appData);
         if (!appData) {
           console.log('appData가 없음');
@@ -11734,7 +11746,26 @@
           console.log('goals 복원:', appData.goals);
           console.log('goals.time 키들:', Object.keys(appData.goals.time || {}));
           console.log('goals.day 키들:', Object.keys(appData.goals.day || {}));
-          localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(appData.goals));
+
+          // Supabase에서 복원된 데이터 마이그레이션 (기존 d-YYYY-MM-DD → t-YYYY-MM-DD)
+          const restoredGoals = appData.goals;
+          if (!restoredGoals.time) restoredGoals.time = {};
+          if (!restoredGoals.day) restoredGoals.day = {};
+
+          // 기존 day 데이터 중 d-YYYY-MM-DD 형식(4개 파트)을 time으로 이동
+          const oldDayKeys = Object.keys(restoredGoals.day).filter(k =>
+            k.startsWith('d-') && k.split('-').length === 4
+          );
+          if (oldDayKeys.length > 0) {
+            console.log('[마이그레이션] 기존 day 데이터를 time으로 이동:', oldDayKeys);
+            for (const oldKey of oldDayKeys) {
+              const newKey = 't' + oldKey.slice(1);
+              restoredGoals.time[newKey] = restoredGoals.day[oldKey];
+              delete restoredGoals.day[oldKey];
+            }
+          }
+
+          localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(restoredGoals));
 
           // localStorage에 저장됐는지 확인
           const saved = localStorage.getItem(FLOCA_GOALS_KEY);
@@ -11743,7 +11774,7 @@
           if (typeof goals !== 'undefined') {
             // 기존 키 모두 삭제 후 새 데이터로 교체 (중첩 객체 완전 교체)
             Object.keys(goals).forEach(k => delete goals[k]);
-            Object.assign(goals, appData.goals);
+            Object.assign(goals, restoredGoals);
             console.log('메모리 goals 업데이트 완료');
 
             // 중요: 오늘 날짜에 맞는 todos 배열로 동기화 (time 레벨)
@@ -11762,6 +11793,14 @@
               }
             } else {
               console.log('오늘 할일 데이터 없음');
+            }
+
+            // 마이그레이션된 데이터를 Supabase에 다시 저장 (다음 복원 시 올바른 구조 사용)
+            if (oldDayKeys.length > 0) {
+              console.log('[마이그레이션] 변경된 데이터를 Supabase에 저장');
+              setTimeout(() => {
+                if (typeof syncToSupabase === 'function') syncToSupabase();
+              }, 1000);
             }
           }
         }
@@ -16869,9 +16908,13 @@ ${postponedGoals.map((g) =>
 
       function saveGoals() {
         try {
+          console.log('[saveGoals] goals.day keys:', Object.keys(goals.day || {}));
+          console.log('[saveGoals] goals.time keys:', Object.keys(goals.time || {}));
           localStorage.setItem(FLOCA_GOALS_KEY, JSON.stringify(goals));
+          // 로컬 저장 시간 업데이트 (Supabase 복원 비교용)
+          localStorage.setItem('floca_last_local_save', new Date().toISOString());
           syncToSupabase();
-        } catch (e) {}
+        } catch (e) { console.error('[saveGoals] error:', e); }
       }
 
       const goals = loadGoals();
@@ -16936,7 +16979,11 @@ ${postponedGoals.map((g) =>
 
         if (level === 'day') {
           const key = dayKey();
+          console.log('[getGoalBucket] day level - key:', key, 'selectedDate:', selectedDate, 'selectedDow:', selectedDow);
+          console.log('[getGoalBucket] goals.day keys:', Object.keys(goals.day || {}));
+          if (!goals.day) goals.day = {};
           if (!goals.day[key]) goals.day[key] = [];
+          console.log('[getGoalBucket] returning:', goals.day[key].length, 'items');
           return goals.day[key];
         }
 
@@ -16967,7 +17014,10 @@ ${postponedGoals.map((g) =>
         }
 
         if (level === 'day') {
-          goals.day[dayKey()] = nextItems;
+          const key = dayKey();
+          console.log('[setGoalBucket] day level - key:', key, 'items:', nextItems.length);
+          if (!goals.day) goals.day = {};
+          goals.day[key] = nextItems;
           return;
         }
 
@@ -17725,6 +17775,7 @@ ${postponedGoals.map((g) =>
       }
 
       function renderCurrentGoals() {
+        console.log('[renderCurrentGoals] currentGoalLevel:', currentGoalLevel);
         if (currentGoalLevel === 'time') syncTodosToSelectedDay();
         updateNextLevelBtn();
         const routineBtns = document.getElementById('routineBtns');
@@ -17743,6 +17794,7 @@ ${postponedGoals.map((g) =>
         list.innerHTML = '';
 
         const currentGoals = getGoalBucket(currentGoalLevel);
+        console.log('[renderCurrentGoals] currentGoals:', currentGoals.length, 'items');
         if (!currentGoals.length) {
           list.innerHTML = `<div class="empty-context">이 기간에 작성된 목표가 아직 없어요.</div>`;
           return;
