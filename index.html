@@ -12093,6 +12093,7 @@
         );
       }
       let todos = [];
+      let goals = { life: [], year: [], month: {}, week: {}, day: {}, time: {} }; // 초기화, 나중에 loadGoals()로 덮어씀
       let currentFilter = 'time';
 
       const priorityOrder = { p1: 1, p2: 2, p3: 3, p4: 4 };
@@ -16925,7 +16926,7 @@ ${postponedGoals.map((g) =>
         } catch (e) { console.error('[saveGoals] error:', e); }
       }
 
-      const goals = loadGoals();
+      goals = loadGoals(); // 위에서 let으로 선언됨
 
       // 요일 상수
       const DOW_LIST = ['mon', 'tue', 'wed', 'thu', 'fri', 'sat', 'sun'];
