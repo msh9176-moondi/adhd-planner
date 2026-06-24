@@ -17313,6 +17313,12 @@ ${postponedGoals.map((g) =>
 
         let parentGoals = getParentGoalBucket(info.parent);
 
+        // 월간 목표 작성 시: 현재 월에 해당하는 상반기/하반기 연간 목표만 표시
+        if (currentGoalLevel === 'month' && info.parent === 'year') {
+          const currentHalf = selectedMonth <= 6 ? 1 : 2;
+          parentGoals = parentGoals.filter(g => g.half === currentHalf);
+        }
+
         // 주간 목표 작성 시: 현재 선택된 주차의 월간 목표만 표시
         if (currentGoalLevel === 'week' && info.parent === 'month') {
           parentGoals = parentGoals.filter(g => g.weekNum === selectedWeek);
@@ -17320,10 +17326,14 @@ ${postponedGoals.map((g) =>
 
         if (!parentGoals.length) {
           _weekParentFallbackKey = null;
-          const weekFilterMsg = (currentGoalLevel === 'week' && info.parent === 'month')
-            ? `${selectedWeek}주차에 해당하는 월간 목표가 아직 없어요.`
-            : '이 기간에 작성된 상위 목표가 아직 없어요.';
-          content.innerHTML = `<div class="empty-context">${weekFilterMsg}</div>`;
+          let emptyMsg = '이 기간에 작성된 상위 목표가 아직 없어요.';
+          if (currentGoalLevel === 'month' && info.parent === 'year') {
+            const currentHalf = selectedMonth <= 6 ? 1 : 2;
+            emptyMsg = `${halfLabels[currentHalf]}에 해당하는 연간 목표가 아직 없어요.`;
+          } else if (currentGoalLevel === 'week' && info.parent === 'month') {
+            emptyMsg = `${selectedWeek}주차에 해당하는 월간 목표가 아직 없어요.`;
+          }
+          content.innerHTML = `<div class="empty-context">${emptyMsg}</div>`;
           return;
         }
 
