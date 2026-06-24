@@ -17312,9 +17312,18 @@ ${postponedGoals.map((g) =>
         }
 
         let parentGoals = getParentGoalBucket(info.parent);
+
+        // 주간 목표 작성 시: 현재 선택된 주차의 월간 목표만 표시
+        if (currentGoalLevel === 'week' && info.parent === 'month') {
+          parentGoals = parentGoals.filter(g => g.weekNum === selectedWeek);
+        }
+
         if (!parentGoals.length) {
           _weekParentFallbackKey = null;
-          content.innerHTML = `<div class="empty-context">이 기간에 작성된 상위 목표가 아직 없어요.</div>`;
+          const weekFilterMsg = (currentGoalLevel === 'week' && info.parent === 'month')
+            ? `${selectedWeek}주차에 해당하는 월간 목표가 아직 없어요.`
+            : '이 기간에 작성된 상위 목표가 아직 없어요.';
+          content.innerHTML = `<div class="empty-context">${weekFilterMsg}</div>`;
           return;
         }
 
