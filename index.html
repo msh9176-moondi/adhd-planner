@@ -17324,6 +17324,13 @@ ${postponedGoals.map((g) =>
           parentGoals = parentGoals.filter(g => g.weekNum === selectedWeek);
         }
 
+        // 일간 목표 작성 시: 현재 선택된 요일의 주간 목표만 표시
+        if (currentGoalLevel === 'day' && info.parent === 'week') {
+          const dayOfWeekKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+          const currentDayOfWeek = dayOfWeekKeys[new Date(selectedDate + 'T00:00:00').getDay()];
+          parentGoals = parentGoals.filter(g => g.dayOfWeek === currentDayOfWeek);
+        }
+
         if (!parentGoals.length) {
           _weekParentFallbackKey = null;
           let emptyMsg = '이 기간에 작성된 상위 목표가 아직 없어요.';
@@ -17332,6 +17339,10 @@ ${postponedGoals.map((g) =>
             emptyMsg = `${halfLabels[currentHalf]}에 해당하는 연간 목표가 아직 없어요.`;
           } else if (currentGoalLevel === 'week' && info.parent === 'month') {
             emptyMsg = `${selectedWeek}주차에 해당하는 월간 목표가 아직 없어요.`;
+          } else if (currentGoalLevel === 'day' && info.parent === 'week') {
+            const dayOfWeekKeys = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat'];
+            const currentDayOfWeek = dayOfWeekKeys[new Date(selectedDate + 'T00:00:00').getDay()];
+            emptyMsg = `${weekDayLabels[currentDayOfWeek]}에 해당하는 주간 목표가 아직 없어요.`;
           }
           content.innerHTML = `<div class="empty-context">${emptyMsg}</div>`;
           return;
