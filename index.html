@@ -16114,19 +16114,156 @@ async function migrateToSupabase(supabaseClient, userId) {
           },
         };
 
+        // 추가 분석 지표 계산
+        // A. 실행 지속성 분석
+        const totalDaysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+        const recordDays = records.length;
+        const recordGaps = [];
+        const sortedRecordDates = records.map(r => r.date).sort();
+        for (let i = 1; i < sortedRecordDates.length; i++) {
+          const prev = new Date(sortedRecordDates[i - 1]);
+          const curr = new Date(sortedRecordDates[i]);
+          const gap = Math.floor((curr - prev) / (1000 * 60 * 60 * 24)) - 1;
+          if (gap > 0) recordGaps.push({ after: sortedRecordDates[i - 1], days: gap });
+        }
+        const maxGap = recordGaps.length > 0 ? Math.max(...recordGaps.map(g => g.days)) : 0;
+        const recoveredAfterGap = recordGaps.filter(g => g.days >= 2).length; // 2일 이상 공백 후 복귀 횟수
+
+        // B. 목표 과부하 분석
+        const dailyGoalCounts = monthTodosByDay.map(d => d.total);
+        const avgDailyGoals = dailyGoalCounts.length > 0
+          ? (dailyGoalCounts.reduce((a, b) => a + b, 0) / dailyGoalCounts.length).toFixed(1)
+          : 0;
+        const maxDailyGoals = dailyGoalCounts.length > 0 ? Math.max(...dailyGoalCounts) : 0;
+        const daysOver5Goals = dailyGoalCounts.filter(c => c > 5).length;
+        const perfectDays = monthTodosByDay.filter(d => d.total > 0 && d.done === d.total).length;
+        const lowAchievementDays = monthTodosByDay.filter(d => d.total > 0 && (d.done / d.total) < 0.3).length;
+
+        // C. 우선순위별 분석
+        const priorityStats = { p1: { total: 0, done: 0 }, p2: { total: 0, done: 0 }, p3: { total: 0, done: 0 }, p4: { total: 0, done: 0 } };
+        allMonthTodos.forEach(t => {
+          const p = t.priority || 'p3';
+          if (priorityStats[p]) {
+            priorityStats[p].total++;
+            if (t.done) priorityStats[p].done++;
+          }
+        });
+        const p1p2Total = priorityStats.p1.total + priorityStats.p2.total;
+        const p1p2Done = priorityStats.p1.done + priorityStats.p2.done;
+        const p1p2Rate = p1p2Total > 0 ? Math.round((p1p2Done / p1p2Total) * 100) : 0;
+        const p3p4Total = priorityStats.p3.total + priorityStats.p4.total;
+        const p3p4Done = priorityStats.p3.done + priorityStats.p4.done;
+        const p3p4Rate = p3p4Total > 0 ? Math.round((p3p4Done / p3p4Total) * 100) : 0;
+
+        // D. 감정별 달성률 분석
+        const emotionRates = {};
+        records.forEach(r => {
+          if (r.emotion && r.rate !== undefined) {
+            if (!emotionRates[r.emotion]) emotionRates[r.emotion] = [];
+            emotionRates[r.emotion].push(r.rate);
+          }
+        });
+        const emotionAvgRates = Object.entries(emotionRates).map(([emotion, rates]) => ({
+          emotion,
+          avgRate: Math.round(rates.reduce((a, b) => a + b, 0) / rates.length),
+          count: rates.length
+        })).sort((a, b) => b.avgRate - a.avgRate);
+
+        // E. 에너지별 달성률 분석
+        const energyRates = { high: [], low: [] };
+        records.forEach(r => {
+          if (r.energy >= 4) energyRates.high.push(r.rate || 0);
+          else if (r.energy <= 2) energyRates.low.push(r.rate || 0);
+        });
+        const highEnergyAvgRate = energyRates.high.length > 0
+          ? Math.round(energyRates.high.reduce((a, b) => a + b, 0) / energyRates.high.length) : null;
+        const lowEnergyAvgRate = energyRates.low.length > 0
+          ? Math.round(energyRates.low.reduce((a, b) => a + b, 0) / energyRates.low.length) : null;
+
+        // F. 미루기 대처 패턴 분석
+        const thoughtPatterns = {};
+        monthlyProc.forEach(r => {
+          if (r.thought) {
+            const thought = r.thought.trim();
+            thoughtPatterns[thought] = (thoughtPatterns[thought] || 0) + 1;
+          }
+        });
+        const topThoughts = Object.entries(thoughtPatterns).sort((a, b) => b[1] - a[1]).slice(0, 3);
+
+        // G. 기록 일수에 따른 분석 수준 결정
+        let analysisLevel = 'insufficient'; // 1-2일
+        let analysisNote = '';
+        if (recordDays <= 2) {
+          analysisLevel = 'insufficient';
+          analysisNote = '⚠️ 기록이 2일 이하로, 패턴 분석이 어렵습니다. 관찰 시작 단계입니다.';
+        } else if (recordDays <= 6) {
+          analysisLevel = 'early';
+          analysisNote = '📝 기록이 3~6일로, 약한 경향만 파악 가능합니다.';
+        } else if (recordDays <= 13) {
+          analysisLevel = 'developing';
+          analysisNote = '📊 기록이 7~13일로, 반복 패턴 후보를 제시할 수 있습니다.';
+        } else if (recordDays <= 29) {
+          analysisLevel = 'moderate';
+          analysisNote = '📈 기록이 14일 이상으로, 감정/수면/운동/달성률 관계 분석이 가능합니다.';
+        } else {
+          analysisLevel = 'full';
+          analysisNote = '✅ 기록이 30일 이상으로, 월간 종합 리포트가 가능합니다.';
+        }
+
         // 프롬프트 생성
-        const prompt = `당신은 ADHD 전문 심리상담사입니다. 아래 사용자의 ${yearMonth} 한 달간 종합 기록을 분석하여 ADHD 특성을 고려한 맞춤형 피드백을 제공해주세요.
+        const prompt = `당신은 ADHD 실행기능 전문 코치입니다.
+
+⚠️ 중요 원칙:
+- "성공/실패 평가"가 아닌 "어떤 조건에서 실행이 쉬워지고, 어떤 조건에서 막히는가"를 분석합니다.
+- "더 열심히 하세요"가 아닌 "다음 주에는 이 조건을 복제해보세요"를 제안합니다.
+- 의지 부족이 아닌 실행기능, 감정조절, 시간감각, 보상 민감성, 과제 크기 문제로 해석합니다.
+- 사용자가 상담사/코치에게 "저는 이런 조건에서 무너지고, 이런 조건에서 실행됩니다"라고 말할 수 있게 돕습니다.
 
 ═══════════════════════════════════════
-📊 기본 통계
+📋 분석 수준
 ═══════════════════════════════════════
-• 기록 일수: ${records.length}일 (연속 ${streak}일째)
+${analysisNote}
+분석 수준: ${analysisLevel}
+
+═══════════════════════════════════════
+📊 기본 통계 (${yearMonth})
+═══════════════════════════════════════
+• 기록 일수: ${records.length}일 / ${totalDaysInMonth}일 (연속 ${streak}일째)
+• 최대 기록 공백: ${maxGap}일 | 공백 후 복귀: ${recoveredAfterGap}회
 • 평균 달성률: ${avgRate}%
 • 평균 에너지: ${avgEnergy}/5
 • 감정 분포: 긍정 ${positiveCount}일 / 부정 ${negativeCount}일
 • 주요 감정: ${topEmotions}
 • 주요 수면: ${topSleep ? topSleep[0] : '기록 없음'} (${topSleep ? topSleep[1] : 0}회)
 • 주요 운동: ${topExercise ? topExercise[0] : '기록 없음'} (${topExercise ? topExercise[1] : 0}회)
+
+═══════════════════════════════════════
+🎯 목표 과부하 분석 (ADHD 핵심)
+═══════════════════════════════════════
+• 하루 평균 목표 수: ${avgDailyGoals}개 (최대 ${maxDailyGoals}개)
+• 5개 초과 목표일: ${daysOver5Goals}일
+• 100% 달성일: ${perfectDays}일 (적정 목표량의 단서)
+• 30% 미만 달성일: ${lowAchievementDays}일 (압도/회피/컨디션 저하 가능성)
+
+═══════════════════════════════════════
+⭐ 우선순위별 완료율
+═══════════════════════════════════════
+• p1 (긴급+중요): ${priorityStats.p1.done}/${priorityStats.p1.total}개 (${priorityStats.p1.total > 0 ? Math.round(priorityStats.p1.done/priorityStats.p1.total*100) : 0}%)
+• p2 (중요): ${priorityStats.p2.done}/${priorityStats.p2.total}개 (${priorityStats.p2.total > 0 ? Math.round(priorityStats.p2.done/priorityStats.p2.total*100) : 0}%)
+• p3 (해야 할 일): ${priorityStats.p3.done}/${priorityStats.p3.total}개 (${priorityStats.p3.total > 0 ? Math.round(priorityStats.p3.done/priorityStats.p3.total*100) : 0}%)
+• p4 (하면 좋은 일): ${priorityStats.p4.done}/${priorityStats.p4.total}개 (${priorityStats.p4.total > 0 ? Math.round(priorityStats.p4.done/priorityStats.p4.total*100) : 0}%)
+• p1+p2 완료율: ${p1p2Rate}% vs p3+p4 완료율: ${p3p4Rate}%
+${p3p4Rate > p1p2Rate + 15 ? '⚠️ 쉬운 일로 회피 보상 패턴 가능성' : ''}
+${p1p2Rate > 70 && priorityStats.p2.total > 3 ? '✅ 장기 목표 실행력 양호' : ''}
+
+═══════════════════════════════════════
+💜 감정별 평균 달성률
+═══════════════════════════════════════
+${emotionAvgRates.length > 0 ? emotionAvgRates.map(e => `• ${e.emotion}: ${e.avgRate}% (${e.count}일)`).join('\n') : '• 데이터 부족'}
+${highEnergyAvgRate !== null && lowEnergyAvgRate !== null ? `
+에너지 4-5일 평균: ${highEnergyAvgRate}% (${energyRates.high.length}일)
+에너지 1-2일 평균: ${lowEnergyAvgRate}% (${energyRates.low.length}일)
+차이: ${highEnergyAvgRate - lowEnergyAvgRate}%p` : ''}
 
 ═══════════════════════════════════════
 📈 상관관계 분석 결과
@@ -16172,6 +16309,8 @@ ${
   monthlyProc.length > 0
     ? `• 수용률: ${procAcceptRate}%
 • 평균 불편감: ${avgDiscomfort}%
+${topThoughts.length > 0 ? `• 반복되는 회피 생각: ${topThoughts.map(([t, c]) => `"${t}"(${c}회)`).join(', ')}` : ''}
+${avgDiscomfort >= 70 ? '⚠️ 평균 불편감 70 이상: 과제 크기가 너무 클 가능성' : ''}
 
 최근 세션:
 ${monthlyProc
@@ -16242,34 +16381,79 @@ ${postponedGoals.map((g) =>
 }
 
 ═══════════════════════════════════════
-🎯 분석 요청
+🎯 분석 요청 (ADHD 조건 분석 관점)
 ═══════════════════════════════════════
-위 데이터를 종합하여 ADHD 특성을 고려한 분석을 해주세요.
-따뜻하고 공감적인 톤으로, 각 항목 2-3문장씩 작성해주세요.
 
-1. **감정-실행 연결 패턴**
-   감정 상태가 달성률에 어떤 영향을 미치는지, 특히 부정적 감정 후 회복 패턴
+⚠️ 기록 일수에 따른 분석 범위:
+- 1~2일: 패턴 분석 금지, "관찰 시작"으로만 안내
+- 3~6일: 약한 경향만 언급
+- 7~13일: 반복 패턴 후보 제시
+- 14일+: 감정/수면/운동/달성률 관계 분석
+- 30일+: 월간 종합 리포트
 
-2. **컨디션 최적화 인사이트**
-   수면, 운동, 에너지와 실행력의 관계에서 발견되는 패턴
+❌ 피해야 할 피드백:
+- "의지가 약해졌네요", "더 열심히 하세요", "참고 하세요"
+- 평균 달성률로 평가하기 ("40%니까 부족합니다")
 
-3. **인지치료 효과 분석**
-   감정인지치료와 미루기 대처의 활용 패턴, 효과적인 부분과 개선점
+✅ 해야 할 피드백:
+- "어떤 조건에서 실행이 살아났는지"를 찾기
+- "다음 주에는 이 조건을 작게 복제해보세요"로 제안하기
 
-4. **할일 패턴 분석**
-   자주 미완료되는 과제 유형, 완료율이 높은 날의 특징, 할일 구성 패턴
+아래 구조로 마크다운 형식 응답해주세요:
 
-4-1. **미루기 패턴 분석**
-   미룬 목표의 우선순위·종류 패턴, 미룬 후 실제로 완료된 비율, ADHD 관점에서 이 미루기가 회피인지 현실적 재조정인지
+## 이번 기록 요약
+- 기록 일수:
+- 평균 달성률:
+- 평균 에너지:
+- 주요 감정:
+- 주요 수면/운동:
 
-5. **핵심 강점 3가지**
-   데이터에서 발견되는 사용자의 강점, 잘 유지하고 있는 것
+## 잘 되고 있는 점 3가지
+1.
+2.
+3.
 
-6. **ADHD 맞춤 개선 제안 1가지**
-   작고 구체적이며 즉시 실행 가능한 제안 (ADHD 특성 고려)
+## ADHD 관점에서 보이는 패턴
 
-7. **다음 주 실행 전략**
-   데이터 기반의 구체적인 If-Then 형식 액션 플랜 1개`;
+### 실행이 잘 되는 조건
+- (감정, 에너지, 수면, 운동, 목표 수 등에서 패턴 찾기)
+
+### 막히는 조건
+- (같은 기준으로 패턴 찾기)
+
+### 반복되는 회피 생각
+- (미루기 대처 기록에서 추출)
+
+### 목표 과부하 분석
+- 하루 목표 수가 적절한지, 우선순위별 완료율 차이, p1/p2가 밀리는지
+
+### 감정-실행 연결
+- 어떤 감정일 때 달성률이 높고/낮은지, 부정 감정 후 회복 패턴
+
+### 컨디션-실행 연결
+- 수면/운동/에너지가 실행에 미치는 영향 (판단이 아닌 관찰)
+
+## 이번 주 핵심 해석
+사용자는 의지가 부족한 것이 아니라,
+[조건/감정/과제 크기/수면/운동/보상 구조]에 따라 실행력이 달라지는 패턴을 보입니다.
+(구체적으로 어떤 조건인지 명시)
+
+## 다음 주 조정 1가지
+- 목표:
+- 가장 작은 첫 행동:
+- 언제:
+- 어디서:
+- 몇 분:
+- If-Then: "만약 ___하면, ___한다"
+- 보상:
+
+## 상담사/코치에게 가져갈 문장
+"최근 기록을 보면 저는 ___한 조건에서는 실행이 잘 되고,
+___한 상황에서는 미루기/회피가 반복됩니다.
+특히 '___'라는 생각이 자주 올라오고,
+이때 필요한 도움은 ___입니다."
+
+(위 빈칸을 사용자 데이터 기반으로 채워주세요)`;
 
         return { error: null, prompt, data: analysisData };
       }
