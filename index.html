@@ -10287,6 +10287,7 @@
           <div class="wizard-dot" data-step="3"></div>
           <div class="wizard-dot" data-step="4"></div>
           <div class="wizard-dot" data-step="5"></div>
+          <div class="wizard-dot" data-step="6"></div>
         </div>
 
         <!-- Step 1: 카테고리 선택 -->
@@ -10345,6 +10346,15 @@
           <p class="wizard-hint">마음에 들지 않으면 직접 수정할 수 있어요.</p>
           <textarea id="wizardResultEdit" class="wizard-result-edit" rows="3"></textarea>
           <p class="wizard-note">이 목표는 확정된 정답이 아니라, 앞으로 수정해도 되는 임시 방향이에요.</p>
+        </div>
+
+        <!-- Step 6: 동기 (왜 이 목표를 이루고 싶은지) -->
+        <div class="wizard-step" data-step="6">
+          <p class="wizard-question">이 목표를 이루고 싶은 이유가 뭔가요?</p>
+          <p class="wizard-hint">구체적인 이유를 적으면 목표가 더 명확해져요.</p>
+          <div class="wizard-motivation-prompts" id="wizardMotivationPrompts"></div>
+          <textarea id="wizardMotivationEdit" class="wizard-result-edit" rows="4" placeholder="예: 아이들에게 건강한 모습을 보여주고 싶어서..."></textarea>
+          <p class="wizard-note">동기는 힘들 때 나를 다시 움직이게 하는 원동력이에요.</p>
         </div>
 
         <div class="wizard-nav">
@@ -17929,6 +17939,7 @@ ${postponedGoals.map((g) =>
         wizardData.reduce = [];
         wizardData.increase = [];
         wizardData.identity = null;
+        wizardData.motivation = '';
 
         updateWizardStep();
         document.getElementById('lifeGoalWizardModal').classList.remove('hidden');
@@ -17956,7 +17967,7 @@ ${postponedGoals.map((g) =>
 
         prevBtn.style.display = wizardStep === 1 ? 'none' : 'block';
 
-        if (wizardStep === 5) {
+        if (wizardStep === 6) {
           nextBtn.textContent = '인생 목표로 저장';
         } else {
           nextBtn.textContent = '다음';
@@ -17973,6 +17984,8 @@ ${postponedGoals.map((g) =>
           renderIdentityOptions();
         } else if (wizardStep === 5) {
           renderWizardResult();
+        } else if (wizardStep === 6) {
+          renderWizardMotivation();
         }
 
         updateNextBtnState();
@@ -17987,6 +18000,7 @@ ${postponedGoals.map((g) =>
         else if (wizardStep === 3) canProceed = wizardData.increase.length > 0;
         else if (wizardStep === 4) canProceed = wizardData.identity !== null;
         else if (wizardStep === 5) canProceed = true;
+        else if (wizardStep === 6) canProceed = wizardData.motivation.trim().length > 0;
 
         nextBtn.disabled = !canProceed;
       }
@@ -18087,19 +18101,94 @@ ${postponedGoals.map((g) =>
         document.getElementById('wizardResultEdit').value = resultText;
       }
 
+      const motivationPrompts = {
+        health: [
+          '오래 건강하게 살고 싶어서',
+          '가족에게 건강한 모습을 보여주고 싶어서',
+          '몸이 아프면 아무것도 할 수 없으니까',
+          '에너지 넘치는 하루를 보내고 싶어서'
+        ],
+        finance: [
+          '경제적 자유를 얻고 싶어서',
+          '가족에게 안정적인 환경을 주고 싶어서',
+          '돈 걱정 없이 살고 싶어서',
+          '하고 싶은 일을 마음껏 하고 싶어서'
+        ],
+        relationship: [
+          '사랑하는 사람들과 더 깊이 연결되고 싶어서',
+          '외로움에서 벗어나고 싶어서',
+          '진정한 관계를 만들고 싶어서',
+          '함께하는 시간이 행복하니까'
+        ],
+        career: [
+          '내 능력을 증명하고 싶어서',
+          '사회에 기여하고 싶어서',
+          '성장하는 나를 느끼고 싶어서',
+          '경제적 안정을 위해서'
+        ],
+        growth: [
+          '더 나은 사람이 되고 싶어서',
+          '가능성을 넓히고 싶어서',
+          '배움 자체가 즐거워서',
+          '후회 없는 삶을 살고 싶어서'
+        ],
+        leisure: [
+          '삶의 여유를 느끼고 싶어서',
+          '스트레스에서 벗어나고 싶어서',
+          '진짜 나를 만나는 시간이 필요해서',
+          '행복한 순간을 더 만들고 싶어서'
+        ],
+        mind: [
+          '마음의 평화를 찾고 싶어서',
+          '불안에서 벗어나고 싶어서',
+          '나를 더 잘 이해하고 싶어서',
+          '흔들리지 않는 내면을 갖고 싶어서'
+        ]
+      };
+
+      function renderWizardMotivation() {
+        const cat = wizardData.category;
+        const prompts = motivationPrompts[cat] || [];
+        const container = document.getElementById('wizardMotivationPrompts');
+        const textarea = document.getElementById('wizardMotivationEdit');
+
+        container.innerHTML = prompts.map(prompt =>
+          `<button class="wizard-option motivation-prompt ${wizardData.motivation === prompt ? 'selected' : ''}" data-value="${prompt}">${prompt}</button>`
+        ).join('');
+
+        textarea.value = wizardData.motivation;
+
+        container.querySelectorAll('.motivation-prompt').forEach((btn) => {
+          btn.onclick = () => {
+            wizardData.motivation = btn.dataset.value;
+            textarea.value = wizardData.motivation;
+            renderWizardMotivation();
+            updateNextBtnState();
+          };
+        });
+
+        textarea.oninput = () => {
+          wizardData.motivation = textarea.value;
+          container.querySelectorAll('.motivation-prompt').forEach(btn => btn.classList.remove('selected'));
+          updateNextBtnState();
+        };
+      }
+
       function saveWizardGoal() {
         const title = document.getElementById('wizardResultEdit').value.trim();
+        const motivation = wizardData.motivation.trim();
         if (!title) return;
 
         const goalData = {
           id: Date.now(),
           title: title,
-          memo: `줄이기: ${wizardData.reduce.join(', ')} / 늘리기: ${wizardData.increase.join(', ')}`,
+          memo: `이유: ${motivation}`,
           category: wizardData.category,
           done: false,
           reduce: wizardData.reduce,
           increase: wizardData.increase,
-          identity: wizardData.identity
+          identity: wizardData.identity,
+          motivation: motivation
         };
 
         getGoalBucket('life').push(goalData);
@@ -18121,7 +18210,7 @@ ${postponedGoals.map((g) =>
       });
 
       document.getElementById('wizardNextBtn')?.addEventListener('click', () => {
-        if (wizardStep < 5) {
+        if (wizardStep < 6) {
           wizardStep++;
           updateWizardStep();
         } else {
