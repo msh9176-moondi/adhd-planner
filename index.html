@@ -620,6 +620,476 @@
         color: #fff;
         box-shadow: 0 6px 14px rgba(147, 113, 237, 0.14);
       }
+      /* 요일 탭 스타일 */
+      .weekday-tabs-wrap {
+        margin-bottom: 14px;
+      }
+      .weekday-tabs {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 2px;
+        background: var(--semi);
+        padding: 3px;
+        border-radius: 14px;
+      }
+      .weekday-tab {
+        border: 0;
+        background: transparent;
+        color: #8f819c;
+        border-radius: 10px;
+        padding: 8px 0;
+        font-size: 11px;
+        font-weight: 800;
+        white-space: nowrap;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .weekday-tab:hover {
+        background: rgba(147, 113, 237, 0.1);
+      }
+      .weekday-tab.active {
+        background: var(--point);
+        color: #fff;
+        box-shadow: 0 4px 10px rgba(147, 113, 237, 0.18);
+      }
+      .weekday-tab.has-goals::after {
+        content: '';
+        display: block;
+        width: 4px;
+        height: 4px;
+        background: var(--point);
+        border-radius: 50%;
+        margin: 3px auto 0;
+      }
+      .weekday-tab.active.has-goals::after {
+        background: #fff;
+      }
+      .month-week-tabs {
+        grid-template-columns: repeat(5, 1fr);
+      }
+      .year-half-tabs {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      /* 인생 목표 마법사 스타일 */
+      .life-wizard-modal {
+        max-width: 420px;
+        max-height: 85vh;
+        overflow-y: auto;
+      }
+      .wizard-progress {
+        display: flex;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .wizard-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #e4daf3;
+        transition: all 0.2s;
+      }
+      .wizard-dot.active {
+        background: var(--point);
+        transform: scale(1.2);
+      }
+      .wizard-dot.done {
+        background: var(--point);
+      }
+      .wizard-step {
+        display: none;
+      }
+      .wizard-step.active {
+        display: block;
+      }
+      .survey-step {
+        display: none;
+      }
+      .survey-step.active {
+        display: block;
+      }
+      .wizard-question {
+        font-size: 16px;
+        font-weight: 700;
+        color: #3d3550;
+        margin-bottom: 8px;
+        line-height: 1.5;
+      }
+      .wizard-hint {
+        font-size: 13px;
+        color: #8f819c;
+        margin-bottom: 14px;
+      }
+      .wizard-options {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
+      .wizard-option {
+        padding: 10px 16px;
+        border: 2px solid #e4daf3;
+        border-radius: 12px;
+        background: #fff;
+        color: #5c4d6b;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .wizard-option:hover {
+        border-color: var(--point);
+        background: #fcfaff;
+      }
+      .wizard-option.selected {
+        border-color: var(--point);
+        background: var(--point);
+        color: #fff;
+      }
+      .category-options {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+      }
+      .category-options .wizard-option {
+        justify-content: center;
+        text-align: center;
+      }
+      .wizard-custom-input {
+        display: flex;
+        gap: 8px;
+        margin-top: 10px;
+      }
+      .wizard-custom-input input {
+        flex: 1;
+        padding: 10px 14px;
+        border: 1px solid #e4daf3;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+      .wizard-custom-input button {
+        padding: 10px 16px;
+        background: var(--semi);
+        border: none;
+        border-radius: 10px;
+        color: var(--point);
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .wizard-nav {
+        display: flex;
+        gap: 10px;
+        margin-top: 20px;
+      }
+      .wizard-btn {
+        flex: 1;
+        padding: 14px;
+        border: none;
+        border-radius: 14px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .wizard-btn.primary {
+        background: var(--point);
+        color: #fff;
+      }
+      .wizard-btn.secondary {
+        background: var(--semi);
+        color: #5c4d6b;
+      }
+      .wizard-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      .wizard-result-card {
+        background: linear-gradient(135deg, #f8f5ff 0%, #fff 100%);
+        border: 2px solid var(--point);
+        border-radius: 16px;
+        padding: 20px;
+        margin: 16px 0;
+      }
+      .wizard-result-text {
+        font-size: 16px;
+        font-weight: 700;
+        color: #3d3550;
+        line-height: 1.6;
+        text-align: center;
+      }
+      .wizard-result-edit {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #e4daf3;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.5;
+        resize: none;
+        font-family: inherit;
+      }
+      .wizard-note {
+        font-size: 12px;
+        color: #8f819c;
+        text-align: center;
+        margin-top: 12px;
+        padding: 10px;
+        background: #fcfaff;
+        border-radius: 10px;
+      }
+
+      /* 인생 목표 도움 카드 */
+      .life-help-card {
+        background: linear-gradient(135deg, #f8f5ff 0%, #fff 100%);
+        border: 1px dashed #c9b8e8;
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+      }
+      .life-help-card h3 {
+        font-size: 15px;
+        color: #3d3550;
+        margin-bottom: 8px;
+      }
+      .life-help-card p {
+        font-size: 13px;
+        color: #8f819c;
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+      .life-help-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .life-help-btn {
+        padding: 14px 16px;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: left;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .life-help-btn strong {
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .life-help-btn span {
+        font-size: 12px;
+        opacity: 0.85;
+        font-weight: 500;
+      }
+      .life-help-btn.primary {
+        background: var(--point);
+        color: #fff;
+      }
+      .life-help-btn.secondary {
+        background: var(--semi);
+        color: #5c4d6b;
+      }
+
+      /* 인생 목표 설문 스타일 */
+      .life-survey-modal {
+        max-width: 440px;
+        max-height: 90vh;
+        overflow-y: auto;
+      }
+      .survey-intro {
+        text-align: center;
+        padding: 20px 0;
+      }
+      .survey-intro h3 {
+        font-size: 18px;
+        color: #3d3550;
+        margin-bottom: 16px;
+      }
+      .survey-intro p {
+        font-size: 14px;
+        color: #5c4d6b;
+        line-height: 1.6;
+        margin-bottom: 8px;
+      }
+      .survey-intro .highlight {
+        background: #f8f5ff;
+        padding: 16px;
+        border-radius: 12px;
+        margin: 16px 0;
+        font-size: 13px;
+        color: #8f819c;
+      }
+      .survey-progress {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 20px;
+        padding: 12px 16px;
+        background: var(--semi);
+        border-radius: 12px;
+      }
+      .survey-progress-bar {
+        flex: 1;
+        height: 6px;
+        background: #e4daf3;
+        border-radius: 3px;
+        overflow: hidden;
+      }
+      .survey-progress-fill {
+        height: 100%;
+        background: var(--point);
+        border-radius: 3px;
+        transition: width 0.3s;
+      }
+      .survey-progress-text {
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--point);
+        min-width: 45px;
+      }
+      .survey-question {
+        font-size: 16px;
+        font-weight: 700;
+        color: #3d3550;
+        margin-bottom: 16px;
+        line-height: 1.5;
+      }
+      .survey-options {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+      .survey-option {
+        padding: 14px 16px;
+        border: 2px solid #e4daf3;
+        border-radius: 12px;
+        background: #fff;
+        color: #5c4d6b;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: left;
+      }
+      .survey-option:hover {
+        border-color: var(--point);
+        background: #fcfaff;
+      }
+      .survey-option.selected {
+        border-color: var(--point);
+        background: var(--point);
+        color: #fff;
+      }
+      .survey-custom {
+        display: flex;
+        gap: 8px;
+        margin-top: 8px;
+      }
+      .survey-custom input {
+        flex: 1;
+        padding: 12px 14px;
+        border: 1px solid #e4daf3;
+        border-radius: 10px;
+        font-size: 14px;
+      }
+      .survey-custom button {
+        padding: 12px 16px;
+        background: var(--semi);
+        border: none;
+        border-radius: 10px;
+        color: var(--point);
+        font-weight: 700;
+        cursor: pointer;
+      }
+      .survey-result-section {
+        margin-bottom: 20px;
+      }
+      .survey-result-section h4 {
+        font-size: 13px;
+        color: #8f819c;
+        margin-bottom: 8px;
+        font-weight: 600;
+      }
+      .survey-result-goal {
+        background: linear-gradient(135deg, #f8f5ff 0%, #fff 100%);
+        border: 2px solid var(--point);
+        border-radius: 16px;
+        padding: 20px;
+        margin-bottom: 16px;
+      }
+      .survey-result-goal p {
+        font-size: 15px;
+        font-weight: 700;
+        color: #3d3550;
+        line-height: 1.6;
+        text-align: center;
+        white-space: pre-line;
+      }
+      .survey-result-values {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .survey-value-tag {
+        padding: 8px 14px;
+        background: var(--semi);
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--point);
+      }
+      .survey-result-edit {
+        width: 100%;
+        padding: 14px;
+        border: 1px solid #e4daf3;
+        border-radius: 12px;
+        font-size: 14px;
+        line-height: 1.6;
+        resize: none;
+        font-family: inherit;
+        min-height: 100px;
+      }
+      .survey-tone-btns {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .survey-tone-btn {
+        flex: 1;
+        padding: 10px;
+        border: 2px solid #e4daf3;
+        border-radius: 10px;
+        background: #fff;
+        font-size: 12px;
+        font-weight: 600;
+        color: #5c4d6b;
+        cursor: pointer;
+      }
+      .survey-tone-btn.active {
+        border-color: var(--point);
+        background: var(--point);
+        color: #fff;
+      }
+      .survey-action-item {
+        background: #f8f5ff;
+        padding: 14px 16px;
+        border-radius: 12px;
+        font-size: 14px;
+        color: #3d3550;
+        line-height: 1.5;
+      }
+      .survey-note {
+        font-size: 12px;
+        color: #8f819c;
+        text-align: center;
+        margin-top: 16px;
+        padding: 12px;
+        background: #fcfaff;
+        border-radius: 10px;
+        line-height: 1.5;
+      }
       .goal-card-head {
         display: flex;
         justify-content: space-between;
@@ -9008,6 +9478,35 @@
             </div>
           </div>
 
+          <div class="weekday-tabs-wrap hidden" id="yearHalfTabsWrap">
+            <div class="weekday-tabs year-half-tabs" id="yearHalfTabs">
+              <button class="weekday-tab active" data-half="1">상반기 (1~6월)</button>
+              <button class="weekday-tab" data-half="2">하반기 (7~12월)</button>
+            </div>
+          </div>
+
+          <div class="weekday-tabs-wrap hidden" id="monthWeekTabsWrap">
+            <div class="weekday-tabs month-week-tabs" id="monthWeekTabs">
+              <button class="weekday-tab active" data-week="1">1주차</button>
+              <button class="weekday-tab" data-week="2">2주차</button>
+              <button class="weekday-tab" data-week="3">3주차</button>
+              <button class="weekday-tab" data-week="4">4주차</button>
+              <button class="weekday-tab" data-week="5">5주차</button>
+            </div>
+          </div>
+
+          <div class="weekday-tabs-wrap hidden" id="weekdayTabsWrap">
+            <div class="weekday-tabs" id="weekdayTabs">
+              <button class="weekday-tab active" data-day="mon">월</button>
+              <button class="weekday-tab" data-day="tue">화</button>
+              <button class="weekday-tab" data-day="wed">수</button>
+              <button class="weekday-tab" data-day="thu">목</button>
+              <button class="weekday-tab" data-day="fri">금</button>
+              <button class="weekday-tab" data-day="sat">토</button>
+              <button class="weekday-tab" data-day="sun">일</button>
+            </div>
+          </div>
+
           <div class="goal-list" id="goalList"></div>
           <div class="swipe-hint">← 좌측으로 밀어 수정 · 삭제</div>
 
@@ -9768,6 +10267,171 @@
           <button class="modal-close" id="closeRoutineLoad">×</button>
         </div>
         <div id="routineList" class="routine-list"></div>
+      </div>
+    </div>
+
+    <!-- 인생 목표 마법사 모달 -->
+    <div class="modal-backdrop hidden" id="lifeGoalWizardModal">
+      <div class="edit-modal life-wizard-modal">
+        <div class="edit-modal-head">
+          <div>
+            <h2 id="wizardTitle">인생 목표 찾기</h2>
+            <p class="sub" id="wizardSub">정답을 찾는 게 아니에요. 지금 기준의 임시 방향을 찾아봐요.</p>
+          </div>
+          <button class="modal-close" id="closeLifeWizard">×</button>
+        </div>
+
+        <div class="wizard-progress">
+          <div class="wizard-dot active" data-step="1"></div>
+          <div class="wizard-dot" data-step="2"></div>
+          <div class="wizard-dot" data-step="3"></div>
+          <div class="wizard-dot" data-step="4"></div>
+          <div class="wizard-dot" data-step="5"></div>
+        </div>
+
+        <!-- Step 1: 카테고리 선택 -->
+        <div class="wizard-step active" data-step="1">
+          <p class="wizard-question">삶에서 지금 가장 챙기고 싶은 영역을 골라보세요.</p>
+          <div class="wizard-options category-options" id="wizardCategoryOptions">
+            <button class="wizard-option" data-value="health">💪 건강</button>
+            <button class="wizard-option" data-value="finance">💰 재정</button>
+            <button class="wizard-option" data-value="relationship">❤️ 관계</button>
+            <button class="wizard-option" data-value="career">💼 커리어</button>
+            <button class="wizard-option" data-value="growth">📚 자기계발</button>
+            <button class="wizard-option" data-value="leisure">🎨 여가</button>
+            <button class="wizard-option" data-value="mind">🧘 마음</button>
+          </div>
+        </div>
+
+        <!-- Step 2: 줄이고 싶은 것 -->
+        <div class="wizard-step" data-step="2">
+          <p class="wizard-question" id="wizardReduceQuestion">이 영역에서 줄이고 싶은 패턴은?</p>
+          <p class="wizard-hint">최대 2개까지 선택할 수 있어요.</p>
+          <div class="wizard-options multi-select" id="wizardReduceOptions"></div>
+          <div class="wizard-custom-input">
+            <input type="text" id="wizardReduceCustom" placeholder="직접 입력하기...">
+            <button id="wizardReduceAddBtn">추가</button>
+          </div>
+        </div>
+
+        <!-- Step 3: 늘리고 싶은 것 -->
+        <div class="wizard-step" data-step="3">
+          <p class="wizard-question" id="wizardIncreaseQuestion">앞으로 더 늘리고 싶은 것은?</p>
+          <p class="wizard-hint">최대 2개까지 선택할 수 있어요.</p>
+          <div class="wizard-options multi-select" id="wizardIncreaseOptions"></div>
+          <div class="wizard-custom-input">
+            <input type="text" id="wizardIncreaseCustom" placeholder="직접 입력하기...">
+            <button id="wizardIncreaseAddBtn">추가</button>
+          </div>
+        </div>
+
+        <!-- Step 4: 가까워지고 싶은 모습 -->
+        <div class="wizard-step" data-step="4">
+          <p class="wizard-question" id="wizardIdentityQuestion">어떤 모습에 가까워지고 싶나요?</p>
+          <p class="wizard-hint">1개만 선택해주세요.</p>
+          <div class="wizard-options single-select" id="wizardIdentityOptions"></div>
+          <div class="wizard-custom-input">
+            <input type="text" id="wizardIdentityCustom" placeholder="직접 입력하기...">
+            <button id="wizardIdentityAddBtn">추가</button>
+          </div>
+        </div>
+
+        <!-- Step 5: 결과 -->
+        <div class="wizard-step" data-step="5">
+          <p class="wizard-question">인생 목표 문장이 만들어졌어요!</p>
+          <div class="wizard-result-card" id="wizardResultCard">
+            <p class="wizard-result-text" id="wizardResultText"></p>
+          </div>
+          <p class="wizard-hint">마음에 들지 않으면 직접 수정할 수 있어요.</p>
+          <textarea id="wizardResultEdit" class="wizard-result-edit" rows="3"></textarea>
+          <p class="wizard-note">이 목표는 확정된 정답이 아니라, 앞으로 수정해도 되는 임시 방향이에요.</p>
+        </div>
+
+        <div class="wizard-nav">
+          <button class="wizard-btn secondary" id="wizardPrevBtn">이전</button>
+          <button class="wizard-btn primary" id="wizardNextBtn">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 인생 목표 설문 모달 -->
+    <div class="modal-backdrop hidden" id="lifeGoalSurveyModal">
+      <div class="edit-modal life-survey-modal">
+        <div class="edit-modal-head">
+          <div>
+            <h2 id="surveyTitle">상위 목표 찾기</h2>
+            <p class="sub" id="surveySub">나의 흥미, 강점, 욕망을 탐색해요</p>
+          </div>
+          <button class="modal-close" id="closeLifeSurvey">×</button>
+        </div>
+
+        <!-- 인트로 화면 -->
+        <div class="survey-step active" data-step="intro">
+          <div class="survey-intro">
+            <h3>인생 목표는 한 번에 완벽하게 정하는 게 아니에요</h3>
+            <p>이 설문은 정답을 찾는 검사가 아니라,<br>지금 내 삶에서 반복되는 단서를 모아보는 과정이에요.</p>
+            <div class="highlight">
+              거창한 꿈이 없어도 괜찮아요.<br>
+              오늘 기준의 임시 방향만 찾아도 충분합니다.
+            </div>
+          </div>
+        </div>
+
+        <!-- 질문 화면 -->
+        <div class="survey-step" data-step="questions">
+          <div class="survey-progress">
+            <div class="survey-progress-bar">
+              <div class="survey-progress-fill" id="surveyProgressFill" style="width: 0%"></div>
+            </div>
+            <span class="survey-progress-text" id="surveyProgressText">1/15</span>
+          </div>
+          <p class="survey-question" id="surveyQuestion"></p>
+          <div class="survey-options" id="surveyOptions"></div>
+          <div class="survey-custom">
+            <input type="text" id="surveyCustomInput" placeholder="직접 입력하기...">
+            <button id="surveyCustomAddBtn">선택</button>
+          </div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div class="survey-step" data-step="result">
+          <div class="survey-result-section">
+            <h4>나의 상위 목표</h4>
+            <div class="survey-tone-btns">
+              <button class="survey-tone-btn active" data-tone="warm">따뜻하게</button>
+              <button class="survey-tone-btn" data-tone="simple">담백하게</button>
+              <button class="survey-tone-btn" data-tone="concrete">구체적으로</button>
+            </div>
+            <div class="survey-result-goal">
+              <p id="surveyResultGoal"></p>
+            </div>
+            <textarea id="surveyResultEdit" class="survey-result-edit" placeholder="마음에 들지 않으면 직접 수정해보세요..."></textarea>
+          </div>
+
+          <div class="survey-result-section">
+            <h4>내가 중요하게 여기는 가치</h4>
+            <div class="survey-result-values" id="surveyResultValues"></div>
+          </div>
+
+          <div class="survey-result-section">
+            <h4>내가 돕고 싶은 대상</h4>
+            <p id="surveyResultTarget" style="font-size:14px;color:#3d3550;"></p>
+          </div>
+
+          <div class="survey-result-section">
+            <h4>지금 시작할 수 있는 작은 행동</h4>
+            <div class="survey-action-item" id="surveyResultAction"></div>
+          </div>
+
+          <div class="survey-note">
+            이 목표는 확정된 정답이 아니라,<br>앞으로 수정해도 되는 임시 방향입니다.
+          </div>
+        </div>
+
+        <div class="wizard-nav">
+          <button class="wizard-btn secondary" id="surveyPrevBtn">이전</button>
+          <button class="wizard-btn primary" id="surveyNextBtn">시작하기</button>
+        </div>
       </div>
     </div>
 
@@ -16084,6 +16748,24 @@ ${postponedGoals.map((g) =>
       let selectedMonth = new Date().getMonth() + 1;
       let selectedWeek = 1;
       let selectedDate = getDateKeyFromDate(new Date());
+      let selectedWeekDay = 'mon'; // 주간 목표 요일 선택 (mon, tue, wed, thu, fri, sat, sun)
+      let selectedMonthWeek = 1; // 월간 목표 주차 선택 (1, 2, 3, 4, 5)
+      let selectedHalf = 1; // 연간 목표 상반기/하반기 선택 (1: 상반기, 2: 하반기)
+
+      const halfLabels = {
+        1: '상반기',
+        2: '하반기',
+      };
+
+      const weekDayLabels = {
+        mon: '월요일',
+        tue: '화요일',
+        wed: '수요일',
+        thu: '목요일',
+        fri: '금요일',
+        sat: '토요일',
+        sun: '일요일',
+      };
 
       function getWeekOfDate(dateString) {
         const date = new Date(dateString + 'T00:00:00');
@@ -16589,7 +17271,24 @@ ${postponedGoals.map((g) =>
         content.innerHTML = '';
 
         if (!info.parent) {
-          content.innerHTML = `<div class="empty-context">인생 목표는 최상위 방향이에요. 지금 내가 오래 가져갈 방향, 삶에서 중요하게 만들고 싶은 것을 자유롭게 적어보세요.</div>`;
+          content.innerHTML = `
+            <div class="life-help-card">
+              <h3>인생 목표가 잘 떠오르지 않나요?</h3>
+              <p>거창한 꿈이 없어도 괜찮아요.<br>질문에 답하면서 나만의 방향을 찾아봐요.</p>
+              <div class="life-help-btns">
+                <button class="life-help-btn primary" id="openLifeSurveyBtn">
+                  <strong>설문으로 찾아보기</strong>
+                  <span>15개 질문으로 나의 흥미, 강점, 욕망을 탐색해요</span>
+                </button>
+                <button class="life-help-btn secondary" id="openLifeWizardBtn">
+                  <strong>빠르게 만들기</strong>
+                  <span>선택지만 골라 1분 안에 만들어요</span>
+                </button>
+              </div>
+            </div>
+          `;
+          document.getElementById('openLifeWizardBtn')?.addEventListener('click', openLifeGoalWizard);
+          document.getElementById('openLifeSurveyBtn')?.addEventListener('click', openLifeGoalSurvey);
           return;
         }
 
@@ -16852,16 +17551,77 @@ ${postponedGoals.map((g) =>
         if (goalTimeGrid)
           goalTimeGrid.style.display =
             currentGoalLevel === 'day' ? 'grid' : 'none';
+
+        // 연간 상반기/하반기 탭 표시/숨김
+        const yearHalfTabsWrap = document.getElementById('yearHalfTabsWrap');
+        if (yearHalfTabsWrap) {
+          yearHalfTabsWrap.classList.toggle('hidden', currentGoalLevel !== 'year');
+          if (currentGoalLevel === 'year') {
+            updateYearHalfTabs();
+          }
+        }
+
+        // 월간 주차 탭 표시/숨김
+        const monthWeekTabsWrap = document.getElementById('monthWeekTabsWrap');
+        if (monthWeekTabsWrap) {
+          monthWeekTabsWrap.classList.toggle('hidden', currentGoalLevel !== 'month');
+          if (currentGoalLevel === 'month') {
+            updateMonthWeekTabs();
+          }
+        }
+
+        // 요일 탭 표시/숨김
+        const weekdayTabsWrap = document.getElementById('weekdayTabsWrap');
+        if (weekdayTabsWrap) {
+          weekdayTabsWrap.classList.toggle('hidden', currentGoalLevel !== 'week');
+          if (currentGoalLevel === 'week') {
+            updateWeekdayTabs();
+          }
+        }
+
         const label = periodLabel();
+        // 연간/월간/주간 목표일 때 세부 정보 추가
+        let subLabel = '';
+        if (currentGoalLevel === 'year') {
+          subLabel = ` · ${halfLabels[selectedHalf]}`;
+        } else if (currentGoalLevel === 'month') {
+          subLabel = ` · ${selectedMonthWeek}주차`;
+        } else if (currentGoalLevel === 'week') {
+          subLabel = ` · ${weekDayLabels[selectedWeekDay]}`;
+        }
         document.getElementById('writeTitle').textContent = label
-          ? `${label} · ${info.writeTitle}`
+          ? `${label}${subLabel} · ${info.writeTitle}`
           : info.writeTitle;
         const list = document.getElementById('goalList');
         list.innerHTML = '';
 
-        const currentGoals = getGoalBucket(currentGoalLevel);
+        let currentGoals = getGoalBucket(currentGoalLevel);
+
+        // 연간 목표일 때 선택된 상반기/하반기로 필터링
+        if (currentGoalLevel === 'year') {
+          currentGoals = currentGoals.filter(g => g.half === selectedHalf);
+        }
+
+        // 월간 목표일 때 선택된 주차로 필터링
+        if (currentGoalLevel === 'month') {
+          currentGoals = currentGoals.filter(g => g.weekNum === selectedMonthWeek);
+        }
+
+        // 주간 목표일 때 선택된 요일로 필터링
+        if (currentGoalLevel === 'week') {
+          currentGoals = currentGoals.filter(g => g.dayOfWeek === selectedWeekDay);
+        }
+
         if (!currentGoals.length) {
-          list.innerHTML = `<div class="empty-context">이 기간에 작성된 목표가 아직 없어요.</div>`;
+          let emptyMsg = '이 기간에 작성된 목표가 아직 없어요.';
+          if (currentGoalLevel === 'year') {
+            emptyMsg = `${halfLabels[selectedHalf]}에 작성된 목표가 아직 없어요.`;
+          } else if (currentGoalLevel === 'month') {
+            emptyMsg = `${selectedMonthWeek}주차에 작성된 목표가 아직 없어요.`;
+          } else if (currentGoalLevel === 'week') {
+            emptyMsg = `${weekDayLabels[selectedWeekDay]}에 작성된 목표가 아직 없어요.`;
+          }
+          list.innerHTML = `<div class="empty-context">${emptyMsg}</div>`;
           return;
         }
 
@@ -17077,6 +17837,621 @@ ${postponedGoals.map((g) =>
           });
         });
       }
+
+      /* ── 인생 목표 마법사 ── */
+      const wizardData = {
+        category: null,
+        reduce: [],
+        increase: [],
+        identity: null
+      };
+
+      const wizardOptions = {
+        health: {
+          label: '건강',
+          reduce: ['몸이 무너지는 생활', '무리해서 버티는 패턴', '수면이 불규칙한 상태', '운동 부족', '식습관이 무너지는 상태', '스트레스로 몸이 망가지는 패턴'],
+          increase: ['건강한 생활 리듬', '꾸준한 운동 습관', '충분한 수면', '균형 잡힌 식사', '몸의 안정감', '지속 가능한 체력'],
+          identity: ['몸을 꾸준히 돌보는 사람', '건강한 루틴을 유지하는 사람', '무너져도 다시 회복하는 사람', '내 몸의 신호를 듣는 사람']
+        },
+        finance: {
+          label: '재정',
+          reduce: ['돈 때문에 불안한 상태', '충동적인 소비 패턴', '수입보다 지출이 많은 상태', '재정 계획 없이 사는 패턴', '돈 문제를 회피하는 습관'],
+          increase: ['경제적 안정감', '저축하는 습관', '계획적인 소비', '수입을 늘릴 능력', '돈에 대한 통제감', '재정적 여유'],
+          identity: ['돈을 계획적으로 관리하는 사람', '경제적으로 안정된 사람', '재정 걱정에서 자유로운 사람', '현명하게 소비하는 사람']
+        },
+        relationship: {
+          label: '관계',
+          reduce: ['눈치 보며 맞추기만 하는 관계', '외로움', '갈등을 회피하는 패턴', '에너지를 빼앗기는 관계', '솔직하지 못한 소통'],
+          increase: ['편안하고 솔직한 관계', '나를 지지해주는 사람들', '건강한 경계선', '깊이 있는 대화', '함께하는 시간의 질'],
+          identity: ['좋은 관계를 유지하는 사람', '솔직하게 소통하는 사람', '사람들에게 좋은 영향을 주는 사람', '건강한 경계를 지키는 사람']
+        },
+        career: {
+          label: '커리어',
+          reduce: ['의미 없이 시간만 보내는 일', '내 강점을 못 쓰는 상태', '성장 없이 반복되는 패턴', '번아웃', '남이 정한 기준에 끌려가는 느낌'],
+          increase: ['내 강점을 살리는 일', '성장하는 느낌', '일에서 의미 찾기', '전문성', '자율성', '영향력'],
+          identity: ['꾸준히 성장하는 사람', '내 분야에서 전문가가 되는 사람', '의미 있는 일을 하는 사람', '나다운 방식으로 일하는 사람']
+        },
+        growth: {
+          label: '자기계발',
+          reduce: ['시작만 하고 끝내지 못하는 패턴', '배움 없이 정체되는 느낌', '목표 없이 흘러가는 시간', '자기계발에 투자하지 않는 상태'],
+          increase: ['꾸준히 배우는 습관', '새로운 능력', '지식과 경험', '자기 이해', '성장하는 느낌'],
+          identity: ['평생 배우는 사람', '꾸준히 성장하는 사람', '호기심을 잃지 않는 사람', '자기 자신을 잘 아는 사람']
+        },
+        leisure: {
+          label: '여가',
+          reduce: ['쉼 없이 달리기만 하는 패턴', '재미없이 의무만 하는 삶', '여유 없는 생활', '번아웃', '놀이를 잊은 상태'],
+          increase: ['삶의 여유', '즐거움', '취미 생활', '리프레시 시간', '놀이하는 마음', '창작 활동'],
+          identity: ['삶을 즐길 줄 아는 사람', '여유를 만들 줄 아는 사람', '재미있게 사는 사람', '창작하는 사람']
+        },
+        mind: {
+          label: '마음',
+          reduce: ['감정에 휩쓸리는 상태', '불안과 걱정', '자기비난', '무기력함', '감정을 억누르는 패턴', '마음이 불안정한 상태'],
+          increase: ['마음의 안정감', '자기 수용', '감정 조절 능력', '회복력', '평온함', '자기 긍정감'],
+          identity: ['감정을 잘 다루는 사람', '무너져도 다시 돌아오는 사람', '자기 자신을 받아들이는 사람', '마음이 단단한 사람']
+        }
+      };
+
+      let wizardStep = 1;
+
+      function openLifeGoalWizard() {
+        wizardStep = 1;
+        wizardData.category = null;
+        wizardData.reduce = [];
+        wizardData.increase = [];
+        wizardData.identity = null;
+
+        updateWizardStep();
+        document.getElementById('lifeGoalWizardModal').classList.remove('hidden');
+      }
+
+      function closeLifeGoalWizard() {
+        document.getElementById('lifeGoalWizardModal').classList.add('hidden');
+      }
+
+      function updateWizardStep() {
+        // 프로그레스 업데이트
+        document.querySelectorAll('.wizard-dot').forEach((dot, i) => {
+          dot.classList.toggle('active', i + 1 === wizardStep);
+          dot.classList.toggle('done', i + 1 < wizardStep);
+        });
+
+        // 스텝 표시
+        document.querySelectorAll('.wizard-step').forEach((step) => {
+          step.classList.toggle('active', Number(step.dataset.step) === wizardStep);
+        });
+
+        // 버튼 상태
+        const prevBtn = document.getElementById('wizardPrevBtn');
+        const nextBtn = document.getElementById('wizardNextBtn');
+
+        prevBtn.style.display = wizardStep === 1 ? 'none' : 'block';
+
+        if (wizardStep === 5) {
+          nextBtn.textContent = '인생 목표로 저장';
+        } else {
+          nextBtn.textContent = '다음';
+        }
+
+        // 각 스텝별 옵션 렌더링
+        if (wizardStep === 1) {
+          renderCategoryOptions();
+        } else if (wizardStep === 2) {
+          renderReduceOptions();
+        } else if (wizardStep === 3) {
+          renderIncreaseOptions();
+        } else if (wizardStep === 4) {
+          renderIdentityOptions();
+        } else if (wizardStep === 5) {
+          renderWizardResult();
+        }
+
+        updateNextBtnState();
+      }
+
+      function updateNextBtnState() {
+        const nextBtn = document.getElementById('wizardNextBtn');
+        let canProceed = false;
+
+        if (wizardStep === 1) canProceed = wizardData.category !== null;
+        else if (wizardStep === 2) canProceed = wizardData.reduce.length > 0;
+        else if (wizardStep === 3) canProceed = wizardData.increase.length > 0;
+        else if (wizardStep === 4) canProceed = wizardData.identity !== null;
+        else if (wizardStep === 5) canProceed = true;
+
+        nextBtn.disabled = !canProceed;
+      }
+
+      function renderCategoryOptions() {
+        const container = document.getElementById('wizardCategoryOptions');
+        container.querySelectorAll('.wizard-option').forEach((btn) => {
+          btn.classList.toggle('selected', btn.dataset.value === wizardData.category);
+          btn.onclick = () => {
+            wizardData.category = btn.dataset.value;
+            wizardData.reduce = [];
+            wizardData.increase = [];
+            wizardData.identity = null;
+            renderCategoryOptions();
+            updateNextBtnState();
+          };
+        });
+      }
+
+      function renderReduceOptions() {
+        const cat = wizardData.category;
+        const options = wizardOptions[cat]?.reduce || [];
+        const container = document.getElementById('wizardReduceOptions');
+        document.getElementById('wizardReduceQuestion').textContent =
+          `${wizardOptions[cat]?.label || ''} 영역에서 줄이고 싶은 패턴은?`;
+
+        container.innerHTML = options.map(opt =>
+          `<button class="wizard-option ${wizardData.reduce.includes(opt) ? 'selected' : ''}" data-value="${opt}">${opt}</button>`
+        ).join('');
+
+        container.querySelectorAll('.wizard-option').forEach((btn) => {
+          btn.onclick = () => {
+            const val = btn.dataset.value;
+            if (wizardData.reduce.includes(val)) {
+              wizardData.reduce = wizardData.reduce.filter(v => v !== val);
+            } else if (wizardData.reduce.length < 2) {
+              wizardData.reduce.push(val);
+            }
+            renderReduceOptions();
+            updateNextBtnState();
+          };
+        });
+      }
+
+      function renderIncreaseOptions() {
+        const cat = wizardData.category;
+        const options = wizardOptions[cat]?.increase || [];
+        const container = document.getElementById('wizardIncreaseOptions');
+        document.getElementById('wizardIncreaseQuestion').textContent =
+          `${wizardOptions[cat]?.label || ''} 영역에서 더 늘리고 싶은 것은?`;
+
+        container.innerHTML = options.map(opt =>
+          `<button class="wizard-option ${wizardData.increase.includes(opt) ? 'selected' : ''}" data-value="${opt}">${opt}</button>`
+        ).join('');
+
+        container.querySelectorAll('.wizard-option').forEach((btn) => {
+          btn.onclick = () => {
+            const val = btn.dataset.value;
+            if (wizardData.increase.includes(val)) {
+              wizardData.increase = wizardData.increase.filter(v => v !== val);
+            } else if (wizardData.increase.length < 2) {
+              wizardData.increase.push(val);
+            }
+            renderIncreaseOptions();
+            updateNextBtnState();
+          };
+        });
+      }
+
+      function renderIdentityOptions() {
+        const cat = wizardData.category;
+        const options = wizardOptions[cat]?.identity || [];
+        const container = document.getElementById('wizardIdentityOptions');
+        document.getElementById('wizardIdentityQuestion').textContent =
+          `${wizardOptions[cat]?.label || ''} 영역에서 어떤 모습에 가까워지고 싶나요?`;
+
+        container.innerHTML = options.map(opt =>
+          `<button class="wizard-option ${wizardData.identity === opt ? 'selected' : ''}" data-value="${opt}">${opt}</button>`
+        ).join('');
+
+        container.querySelectorAll('.wizard-option').forEach((btn) => {
+          btn.onclick = () => {
+            wizardData.identity = btn.dataset.value;
+            renderIdentityOptions();
+            updateNextBtnState();
+          };
+        });
+      }
+
+      function renderWizardResult() {
+        const reduceText = wizardData.reduce.join('과 ');
+        const increaseText = wizardData.increase.join('과 ');
+        const identityText = wizardData.identity;
+
+        const resultText = `나는 ${reduceText}을 줄이고,\n${increaseText}을 늘리며,\n${identityText}에 가까워지는 삶을 만들고 싶다.`;
+
+        document.getElementById('wizardResultText').textContent = resultText;
+        document.getElementById('wizardResultEdit').value = resultText;
+      }
+
+      function saveWizardGoal() {
+        const title = document.getElementById('wizardResultEdit').value.trim();
+        if (!title) return;
+
+        const goalData = {
+          id: Date.now(),
+          title: title,
+          memo: `줄이기: ${wizardData.reduce.join(', ')} / 늘리기: ${wizardData.increase.join(', ')}`,
+          category: wizardData.category,
+          done: false,
+          reduce: wizardData.reduce,
+          increase: wizardData.increase,
+          identity: wizardData.identity
+        };
+
+        getGoalBucket('life').push(goalData);
+        closeLifeGoalWizard();
+        renderGoalsSection();
+      }
+
+      // 마법사 이벤트 핸들러
+      document.getElementById('closeLifeWizard')?.addEventListener('click', closeLifeGoalWizard);
+      document.getElementById('lifeGoalWizardModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'lifeGoalWizardModal') closeLifeGoalWizard();
+      });
+
+      document.getElementById('wizardPrevBtn')?.addEventListener('click', () => {
+        if (wizardStep > 1) {
+          wizardStep--;
+          updateWizardStep();
+        }
+      });
+
+      document.getElementById('wizardNextBtn')?.addEventListener('click', () => {
+        if (wizardStep < 5) {
+          wizardStep++;
+          updateWizardStep();
+        } else {
+          saveWizardGoal();
+        }
+      });
+
+      // 직접 입력 추가 버튼
+      document.getElementById('wizardReduceAddBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('wizardReduceCustom');
+        const val = input.value.trim();
+        if (val && wizardData.reduce.length < 2 && !wizardData.reduce.includes(val)) {
+          wizardData.reduce.push(val);
+          input.value = '';
+          renderReduceOptions();
+          updateNextBtnState();
+        }
+      });
+
+      document.getElementById('wizardIncreaseAddBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('wizardIncreaseCustom');
+        const val = input.value.trim();
+        if (val && wizardData.increase.length < 2 && !wizardData.increase.includes(val)) {
+          wizardData.increase.push(val);
+          input.value = '';
+          renderIncreaseOptions();
+          updateNextBtnState();
+        }
+      });
+
+      document.getElementById('wizardIdentityAddBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('wizardIdentityCustom');
+        const val = input.value.trim();
+        if (val) {
+          wizardData.identity = val;
+          input.value = '';
+          renderIdentityOptions();
+          updateNextBtnState();
+        }
+      });
+
+      /* ── 인생 목표 설문 (15문항) ── */
+      const surveyQuestions = [
+        { key: 'interest', question: '나는 어떤 활동에 가장 자주 끌리나요?', options: ['만들기 / 고치기', '분석 / 탐구', '표현 / 창작', '돕기 / 상담', '설득 / 리드', '정리 / 관리'] },
+        { key: 'flow', question: '시간 가는 줄 모르고 하게 되는 일은?', options: ['무언가를 직접 만드는 일', '복잡한 문제를 파고드는 일', '글, 이미지, 콘텐츠로 표현하는 일', '사람의 고민을 듣고 정리해주는 일', '사람들을 설득하거나 이끄는 일', '자료나 정보를 구조화하는 일'] },
+        { key: 'topic', question: '남들이 시키지 않아도 관심이 가는 주제는?', options: ['몸과 건강', '돈과 자립', '관계와 소통', '일과 커리어', '배움과 성장', '마음과 감정', '창작과 표현'] },
+        { key: 'aptitude', question: '나는 남들보다 비교적 쉽게 하는 일은?', options: ['설명하기', '정리하기', '공감하기', '아이디어 내기', '실행하기', '연결하기', '관찰하기'] },
+        { key: 'strength', question: '사람들이 나에게 자주 부탁하는 것은?', options: ['이야기를 들어주기', '정보를 찾아주기', '계획을 세워주기', '분위기를 풀어주기', '문제를 해결해주기', '조언을 구하기'] },
+        { key: 'impact', question: '내가 좋은 영향을 만든다면 어떤 방식?', options: ['사람을 위로한다', '문제를 정리한다', '새로운 관점을 제안한다', '실행할 수 있게 돕는다', '관계를 연결한다', '실용적인 도구를 만든다'] },
+        { key: 'desire', question: '나는 어떤 순간에 가장 살아있다고 느끼나요?', options: ['자유롭게 선택할 때', '실력이 늘고 있다고 느낄 때', '사람과 연결될 때', '안정감을 느낄 때', '무언가를 만들 때', '누군가에게 도움이 될 때'] },
+        { key: 'value', question: '지금 내 삶에서 가장 늘리고 싶은 감각은?', options: ['안정감', '자유', '성장', '인정', '영향력', '창작', '관계', '회복'] },
+        { key: 'problem', question: '내가 반복해서 답답함을 느끼는 문제는?', options: ['자기 가능성을 못 쓰는 것', '무너질 때까지 버티는 것', '돈 때문에 선택지가 좁아지는 것', '해야 할 일을 시작 못하는 것', '좋은 아이디어가 실행 안 되는 것'] },
+        { key: 'avoidance', question: '내가 가장 피하고 싶은 삶은?', options: ['의미 없이 반복되는 삶', '남 눈치만 보는 삶', '몸과 마음이 무너지는 삶', '돈 때문에 불안한 삶', '내 가능성을 못 쓰는 삶', '하고 싶은 것을 미루는 삶'] },
+        { key: 'collapse', question: '나는 어떤 조건에서 쉽게 무너지나요?', options: ['생활 리듬이 무너질 때', '혼자 감당해야 할 때', '해야 할 일이 막연할 때', '비교와 평가를 받을 때', '돈 불안이 커질 때', '관계 갈등이 심할 때'] },
+        { key: 'target', question: '내가 돕고 싶은 대상은 누구인가요?', options: ['과거의 나 같은 사람', '가족이나 가까운 사람', '같은 어려움을 겪는 사람', '커뮤니티 구성원', '지금은 나 자신', '아직 잘 모르겠다'] },
+        { key: 'scope', question: '내가 만들고 싶은 변화의 범위는?', options: ['나 자신', '가족', '가까운 사람들', '커뮤니티', '사회/산업', '아직 잘 모르겠다'] },
+        { key: 'lifestyle', question: '나는 어떤 방식으로 살아가고 싶나요?', options: ['작게 실험하며 성장하는 삶', '안정적인 루틴을 쌓는 삶', '자유롭게 선택하는 삶', '사람들과 연결되는 삶', '의미 있는 것을 만드는 삶', '내 속도에 맞게 오래가는 삶'] },
+        { key: 'direction', question: '10년 동안 붙잡아도 후회 적을 방향은?', options: ['건강한 삶 만들기', '경제적 자립 만들기', '좋은 관계 만들기', '의미 있는 일 만들기', '나의 강점 키우기', '사람을 돕는 구조 만들기'] }
+      ];
+
+      const surveyAnswers = {};
+      let surveyCurrentStep = 'intro'; // 'intro', 'questions', 'result'
+      let surveyCurrentQuestion = 0;
+
+      function openLifeGoalSurvey() {
+        surveyCurrentStep = 'intro';
+        surveyCurrentQuestion = 0;
+        Object.keys(surveyAnswers).forEach(k => delete surveyAnswers[k]);
+        updateSurveyStep();
+        document.getElementById('lifeGoalSurveyModal').classList.remove('hidden');
+      }
+
+      function closeLifeGoalSurvey() {
+        document.getElementById('lifeGoalSurveyModal').classList.add('hidden');
+      }
+
+      function updateSurveyStep() {
+        document.querySelectorAll('.survey-step').forEach(step => {
+          step.classList.toggle('active', step.dataset.step === surveyCurrentStep);
+        });
+
+        const prevBtn = document.getElementById('surveyPrevBtn');
+        const nextBtn = document.getElementById('surveyNextBtn');
+
+        if (surveyCurrentStep === 'intro') {
+          prevBtn.style.display = 'none';
+          nextBtn.textContent = '시작하기';
+          nextBtn.disabled = false;
+        } else if (surveyCurrentStep === 'questions') {
+          prevBtn.style.display = 'block';
+          nextBtn.textContent = surveyCurrentQuestion === surveyQuestions.length - 1 ? '결과 보기' : '다음';
+          renderSurveyQuestion();
+          updateSurveyNextState();
+        } else if (surveyCurrentStep === 'result') {
+          prevBtn.style.display = 'none';
+          nextBtn.textContent = '인생 목표로 저장';
+          nextBtn.disabled = false;
+          renderSurveyResult();
+        }
+      }
+
+      function renderSurveyQuestion() {
+        const q = surveyQuestions[surveyCurrentQuestion];
+        const progress = ((surveyCurrentQuestion + 1) / surveyQuestions.length) * 100;
+
+        document.getElementById('surveyProgressFill').style.width = progress + '%';
+        document.getElementById('surveyProgressText').textContent = `${surveyCurrentQuestion + 1}/${surveyQuestions.length}`;
+        document.getElementById('surveyQuestion').textContent = q.question;
+
+        const container = document.getElementById('surveyOptions');
+        container.innerHTML = q.options.map(opt =>
+          `<button class="survey-option ${surveyAnswers[q.key] === opt ? 'selected' : ''}" data-value="${opt}">${opt}</button>`
+        ).join('');
+
+        container.querySelectorAll('.survey-option').forEach(btn => {
+          btn.onclick = () => {
+            surveyAnswers[q.key] = btn.dataset.value;
+            renderSurveyQuestion();
+            updateSurveyNextState();
+          };
+        });
+
+        document.getElementById('surveyCustomInput').value = '';
+      }
+
+      function updateSurveyNextState() {
+        const q = surveyQuestions[surveyCurrentQuestion];
+        document.getElementById('surveyNextBtn').disabled = !surveyAnswers[q.key];
+      }
+
+      function generateSurveyGoal(tone = 'warm') {
+        const isSelfish = surveyAnswers.target === '지금은 나 자신' || surveyAnswers.target === '아직 잘 모르겠다';
+        const avoidance = surveyAnswers.avoidance || '반복되는 패턴';
+        const value = surveyAnswers.value || '성장';
+        const lifestyle = surveyAnswers.lifestyle || '내 속도에 맞게 오래가는 삶';
+        const target = surveyAnswers.target || '';
+        const impact = surveyAnswers.impact || '돕는다';
+        const direction = surveyAnswers.direction || '나의 강점 키우기';
+
+        let goal = '';
+
+        if (isSelfish) {
+          // 자기회복형
+          if (tone === 'warm') {
+            goal = `나는 ${avoidance}을 줄이고,\n${value}을 쌓으며,\n${lifestyle.replace('삶', '사람')}에 가까워지고 싶다.`;
+          } else if (tone === 'simple') {
+            goal = `${avoidance}을 줄이고, ${value}을 늘리는 삶.`;
+          } else {
+            goal = `${direction}을 통해 ${value}을 쌓고,\n${lifestyle}을 만들어간다.`;
+          }
+        } else {
+          // 기여형
+          if (tone === 'warm') {
+            goal = `나는 ${target}을 위해\n${impact.replace('한다', '는 사람')}이 되고 싶다.\n${lifestyle}을 살아가면서.`;
+          } else if (tone === 'simple') {
+            goal = `${target}을 ${impact.replace('한다', '는')} 삶.`;
+          } else {
+            goal = `${target}이 ${direction}할 수 있도록\n${impact}며, ${lifestyle}을 만들어간다.`;
+          }
+        }
+
+        return goal;
+      }
+
+      function extractValues() {
+        const vals = [];
+        if (surveyAnswers.value) vals.push(surveyAnswers.value);
+        if (surveyAnswers.desire) {
+          const desireMap = { '자유롭게 선택할 때': '자유', '실력이 늘고 있다고 느낄 때': '성장', '사람과 연결될 때': '관계', '안정감을 느낄 때': '안정', '무언가를 만들 때': '창작', '누군가에게 도움이 될 때': '기여' };
+          vals.push(desireMap[surveyAnswers.desire] || '');
+        }
+        if (surveyAnswers.direction) {
+          const dirMap = { '건강한 삶 만들기': '건강', '경제적 자립 만들기': '자립', '좋은 관계 만들기': '관계', '의미 있는 일 만들기': '의미', '나의 강점 키우기': '강점', '사람을 돕는 구조 만들기': '기여' };
+          vals.push(dirMap[surveyAnswers.direction] || '');
+        }
+        return [...new Set(vals.filter(v => v))].slice(0, 3);
+      }
+
+      function generateSmallAction() {
+        const actions = [
+          '오늘 10분 동안 내가 자주 미루는 일 하나를 적고, 가장 작은 첫 행동만 정한다.',
+          '오늘 5분 동안 내가 좋아하는 활동을 하나 떠올리고 메모한다.',
+          '오늘 내가 잘한 일 하나를 적어본다.',
+          '오늘 나에게 필요한 작은 휴식을 10분 가진다.',
+          '오늘 감사한 것 3가지를 적어본다.'
+        ];
+        return actions[Math.floor(Math.random() * actions.length)];
+      }
+
+      let currentSurveyTone = 'warm';
+
+      function renderSurveyResult() {
+        const goal = generateSurveyGoal(currentSurveyTone);
+        document.getElementById('surveyResultGoal').textContent = goal;
+        document.getElementById('surveyResultEdit').value = goal;
+
+        const values = extractValues();
+        document.getElementById('surveyResultValues').innerHTML = values.map(v =>
+          `<span class="survey-value-tag">${v}</span>`
+        ).join('');
+
+        const target = surveyAnswers.target || '지금은 나 자신';
+        document.getElementById('surveyResultTarget').textContent =
+          (target === '지금은 나 자신' || target === '아직 잘 모르겠다') ? '지금은 나 자신' : target;
+
+        document.getElementById('surveyResultAction').textContent = generateSmallAction();
+
+        // 톤 버튼 이벤트
+        document.querySelectorAll('.survey-tone-btn').forEach(btn => {
+          btn.classList.toggle('active', btn.dataset.tone === currentSurveyTone);
+          btn.onclick = () => {
+            currentSurveyTone = btn.dataset.tone;
+            renderSurveyResult();
+          };
+        });
+      }
+
+      function saveSurveyGoal() {
+        const title = document.getElementById('surveyResultEdit').value.trim();
+        if (!title) return;
+
+        const values = extractValues();
+        const target = surveyAnswers.target || '지금은 나 자신';
+
+        const goalData = {
+          id: Date.now(),
+          title: title,
+          memo: `가치: ${values.join(', ')} / 대상: ${target}`,
+          category: 'growth',
+          done: false,
+          source: 'survey',
+          values: values,
+          target: target,
+          answers: { ...surveyAnswers }
+        };
+
+        getGoalBucket('life').push(goalData);
+        closeLifeGoalSurvey();
+        renderGoalsSection();
+      }
+
+      // 설문 이벤트 핸들러
+      document.getElementById('closeLifeSurvey')?.addEventListener('click', closeLifeGoalSurvey);
+      document.getElementById('lifeGoalSurveyModal')?.addEventListener('click', (e) => {
+        if (e.target.id === 'lifeGoalSurveyModal') closeLifeGoalSurvey();
+      });
+
+      document.getElementById('surveyPrevBtn')?.addEventListener('click', () => {
+        if (surveyCurrentStep === 'questions' && surveyCurrentQuestion > 0) {
+          surveyCurrentQuestion--;
+          updateSurveyStep();
+        } else if (surveyCurrentStep === 'questions' && surveyCurrentQuestion === 0) {
+          surveyCurrentStep = 'intro';
+          updateSurveyStep();
+        }
+      });
+
+      document.getElementById('surveyNextBtn')?.addEventListener('click', () => {
+        if (surveyCurrentStep === 'intro') {
+          surveyCurrentStep = 'questions';
+          updateSurveyStep();
+        } else if (surveyCurrentStep === 'questions') {
+          if (surveyCurrentQuestion < surveyQuestions.length - 1) {
+            surveyCurrentQuestion++;
+            updateSurveyStep();
+          } else {
+            surveyCurrentStep = 'result';
+            updateSurveyStep();
+          }
+        } else if (surveyCurrentStep === 'result') {
+          saveSurveyGoal();
+        }
+      });
+
+      document.getElementById('surveyCustomAddBtn')?.addEventListener('click', () => {
+        const input = document.getElementById('surveyCustomInput');
+        const val = input.value.trim();
+        if (val) {
+          const q = surveyQuestions[surveyCurrentQuestion];
+          surveyAnswers[q.key] = val;
+          input.value = '';
+          renderSurveyQuestion();
+          updateSurveyNextState();
+        }
+      });
+
+      /* ── 상반기/하반기 탭 (연간 목표) ── */
+      function updateYearHalfTabs() {
+        const allGoals = getGoalBucket('year');
+
+        document.querySelectorAll('#yearHalfTabs .weekday-tab').forEach((tab) => {
+          const half = Number(tab.dataset.half);
+          const hasGoals = allGoals.some(g => g.half === half);
+          tab.classList.toggle('has-goals', hasGoals);
+          tab.classList.toggle('active', half === selectedHalf);
+        });
+      }
+
+      function switchYearHalf(half) {
+        selectedHalf = half;
+        updateYearHalfTabs();
+        renderCurrentGoals();
+      }
+
+      // 상반기/하반기 탭 클릭 이벤트
+      document.querySelectorAll('#yearHalfTabs .weekday-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          switchYearHalf(Number(tab.dataset.half));
+        });
+      });
+
+      /* ── 주차 탭 (월간 목표) ── */
+      function updateMonthWeekTabs() {
+        const allGoals = getGoalBucket('month');
+
+        document.querySelectorAll('#monthWeekTabs .weekday-tab').forEach((tab) => {
+          const week = Number(tab.dataset.week);
+          const hasGoals = allGoals.some(g => g.weekNum === week);
+          tab.classList.toggle('has-goals', hasGoals);
+          tab.classList.toggle('active', week === selectedMonthWeek);
+        });
+      }
+
+      function switchMonthWeek(week) {
+        selectedMonthWeek = week;
+        updateMonthWeekTabs();
+        renderCurrentGoals();
+      }
+
+      // 주차 탭 클릭 이벤트
+      document.querySelectorAll('#monthWeekTabs .weekday-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          switchMonthWeek(Number(tab.dataset.week));
+        });
+      });
+
+      /* ── 요일 탭 (주간 목표) ── */
+      function updateWeekdayTabs() {
+        const allGoals = getGoalBucket('week');
+
+        document.querySelectorAll('#weekdayTabs .weekday-tab').forEach((tab) => {
+          const day = tab.dataset.day;
+          const hasGoals = allGoals.some(g => g.dayOfWeek === day);
+          tab.classList.toggle('has-goals', hasGoals);
+          tab.classList.toggle('active', day === selectedWeekDay);
+        });
+      }
+
+      function switchWeekDay(day) {
+        selectedWeekDay = day;
+        updateWeekdayTabs();
+        renderCurrentGoals();
+      }
+
+      // 요일 탭 클릭 이벤트
+      document.querySelectorAll('#weekdayTabs .weekday-tab').forEach((tab) => {
+        tab.addEventListener('click', () => {
+          switchWeekDay(tab.dataset.day);
+        });
+      });
 
       function renderGoalsSection() {
         saveGoals();
@@ -17324,6 +18699,18 @@ ${postponedGoals.map((g) =>
             goalData.endTime = document.getElementById('goalEndTime').value || '';
             goalData.time = goalData.startTime;
             goalData.tag = priorityGoalText[priority];
+          }
+          if (currentGoalLevel === 'week') {
+            // 주간 목표는 선택된 요일 저장
+            goalData.dayOfWeek = selectedWeekDay;
+          }
+          if (currentGoalLevel === 'month') {
+            // 월간 목표는 선택된 주차 저장
+            goalData.weekNum = selectedMonthWeek;
+          }
+          if (currentGoalLevel === 'year') {
+            // 연간 목표는 선택된 상반기/하반기 저장
+            goalData.half = selectedHalf;
           }
         }
 
