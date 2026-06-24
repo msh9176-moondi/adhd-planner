@@ -10438,6 +10438,15 @@
           </div>
         </div>
 
+        <!-- 동기 입력 화면 -->
+        <div class="survey-step" data-step="motivation">
+          <p class="wizard-question">이 목표를 이루고 싶은 이유가 뭔가요?</p>
+          <p class="wizard-hint">구체적인 이유를 적으면 목표가 더 명확해져요.</p>
+          <div class="wizard-options" id="surveyMotivationPrompts"></div>
+          <textarea id="surveyMotivationEdit" class="wizard-result-edit" rows="4" placeholder="예: 내가 진짜 원하는 삶을 살고 싶어서..."></textarea>
+          <p class="wizard-note">동기는 힘들 때 나를 다시 움직이게 하는 원동력이에요.</p>
+        </div>
+
         <div class="wizard-nav">
           <button class="wizard-btn secondary" id="surveyPrevBtn">이전</button>
           <button class="wizard-btn primary" id="surveyNextBtn">시작하기</button>
@@ -18306,10 +18315,52 @@ ${postponedGoals.map((g) =>
           updateSurveyNextState();
         } else if (surveyCurrentStep === 'result') {
           prevBtn.style.display = 'none';
-          nextBtn.textContent = '인생 목표로 저장';
+          nextBtn.textContent = '다음';
           nextBtn.disabled = false;
           renderSurveyResult();
+        } else if (surveyCurrentStep === 'motivation') {
+          prevBtn.style.display = 'block';
+          nextBtn.textContent = '인생 목표로 저장';
+          renderSurveyMotivation();
+          updateSurveyMotivationState();
         }
+      }
+
+      function renderSurveyMotivation() {
+        const prompts = [
+          '내가 진짜 원하는 삶을 살고 싶어서',
+          '후회 없는 인생을 만들고 싶어서',
+          '더 나은 사람이 되고 싶어서',
+          '소중한 사람들에게 좋은 영향을 주고 싶어서'
+        ];
+        const container = document.getElementById('surveyMotivationPrompts');
+        const textarea = document.getElementById('surveyMotivationEdit');
+
+        container.innerHTML = prompts.map(prompt =>
+          `<button class="wizard-option ${surveyAnswers.motivation === prompt ? 'selected' : ''}" data-value="${prompt}">${prompt}</button>`
+        ).join('');
+
+        textarea.value = surveyAnswers.motivation || '';
+
+        container.querySelectorAll('.wizard-option').forEach((btn) => {
+          btn.onclick = () => {
+            surveyAnswers.motivation = btn.dataset.value;
+            textarea.value = surveyAnswers.motivation;
+            renderSurveyMotivation();
+            updateSurveyMotivationState();
+          };
+        });
+
+        textarea.oninput = () => {
+          surveyAnswers.motivation = textarea.value;
+          container.querySelectorAll('.wizard-option').forEach(btn => btn.classList.remove('selected'));
+          updateSurveyMotivationState();
+        };
+      }
+
+      function updateSurveyMotivationState() {
+        const motivation = surveyAnswers.motivation?.trim() || '';
+        document.getElementById('surveyNextBtn').disabled = motivation.length === 0;
       }
 
       function renderSurveyQuestion() {
@@ -18430,6 +18481,7 @@ ${postponedGoals.map((g) =>
 
       function saveSurveyGoal() {
         const title = document.getElementById('surveyResultEdit').value.trim();
+        const motivation = surveyAnswers.motivation?.trim() || '';
         if (!title) return;
 
         const values = extractValues();
@@ -18438,12 +18490,13 @@ ${postponedGoals.map((g) =>
         const goalData = {
           id: Date.now(),
           title: title,
-          memo: `가치: ${values.join(', ')} / 대상: ${target}`,
+          memo: `이유: ${motivation}`,
           category: 'growth',
           done: false,
           source: 'survey',
           values: values,
           target: target,
+          motivation: motivation,
           answers: { ...surveyAnswers }
         };
 
@@ -18459,7 +18512,10 @@ ${postponedGoals.map((g) =>
       });
 
       document.getElementById('surveyPrevBtn')?.addEventListener('click', () => {
-        if (surveyCurrentStep === 'questions' && surveyCurrentQuestion > 0) {
+        if (surveyCurrentStep === 'motivation') {
+          surveyCurrentStep = 'result';
+          updateSurveyStep();
+        } else if (surveyCurrentStep === 'questions' && surveyCurrentQuestion > 0) {
           surveyCurrentQuestion--;
           updateSurveyStep();
         } else if (surveyCurrentStep === 'questions' && surveyCurrentQuestion === 0) {
@@ -18481,6 +18537,9 @@ ${postponedGoals.map((g) =>
             updateSurveyStep();
           }
         } else if (surveyCurrentStep === 'result') {
+          surveyCurrentStep = 'motivation';
+          updateSurveyStep();
+        } else if (surveyCurrentStep === 'motivation') {
           saveSurveyGoal();
         }
       });
